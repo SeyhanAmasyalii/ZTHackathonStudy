@@ -23,6 +23,7 @@ Bu doküman, hackathon hazırlığında üretilen tüm dokümanları (hepsi bu r
 | 8 | [`.github/copilot-instructions.md`](.github/copilot-instructions.md) | Copilot'un her istekte otomatik okuduğu kısa kural dosyası (güvenlik, CodeQL yasağı, test, maliyet) | Copilot | Repo |
 | 9 | [`presentation/Mercek_AI_Overflow_Sunum.pptx`](presentation/Mercek_AI_Overflow_Sunum.pptx) | 11 slaytlık sunum taslağı, konuşmacı notları ve taslak ekran görüntüleriyle | Sunum sorumlusu, herkes | Repo |
 | 10 | [`presentation/build-deck.js`](presentation/build-deck.js), [`presentation/mockups/`](presentation/mockups) | Sunumu ve taslak ekranları yeniden üreten betik ve HTML kaynağı | Sunum sorumlusu | Repo |
+| 11 | [`docs/mercek-takim-anlatim-cumleleri.md`](docs/mercek-takim-anlatim-cumleleri.md) | Her dokümanın ana fikrini tek cümleyle veren takım anlatım özeti ve akılda kalacak rakamlar | Toplantıyı yöneten, herkes | Repo, Claude projesi |
 
 **Dokümanlar arası ilişki**
 

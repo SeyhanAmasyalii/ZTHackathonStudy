@@ -5,6 +5,8 @@
 
 Bu doküman, hackathon hazırlığında üretilen tüm dokümanları (hepsi bu repoda, `docs/` ve `presentation/` altında) **hangi sırayla, ne zaman ve ne için** kullanacağımızı anlatır. Hepsini baştan sona okumak gerekmiyor; aşağıdaki sırayı izleyin.
 
+![Mercek doküman haritası](docs/img/mercek-dokuman-haritasi.png)
+
 ---
 
 ## 1. Dokümanlar bir bakışta

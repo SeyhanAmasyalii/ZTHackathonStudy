@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<style>
+  :root{--ink:#17202A;--muted:#5B6673;--line:#DDE2E8;--bg:#F4F6F8;--amber:#E8A33D;--teal:#2A9D8F;--coral:#E76F51;--indigo:#2B3A67;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI",Arial,Helvetica,sans-serif;color:var(--ink);background:#fff}
+  #map{width:1600px;padding:44px 52px 40px;background:#fff;display:flex;flex-direction:column;gap:26px}
+  header{display:flex;align-items:center;gap:20px}
+  .lens{width:58px;height:58px;border-radius:50%;border:6px solid var(--amber);display:flex;align-items:center;justify-content:center;flex:none}
+  .lens i{width:30px;height:30px;border-radius:50%;border:3px solid var(--teal);display:flex;align-items:center;justify-content:center}
+  .lens i:after{content:"";width:10px;height:10px;border-radius:50%;background:var(--amber)}
+  h1{font-size:40px;letter-spacing:-.01em}
+  .sub{font-size:18px;color:var(--muted);margin-top:4px}
+  .right{margin-left:auto;text-align:right;font-size:15px;color:var(--muted);line-height:1.5}
+  .right b{color:var(--ink)}
+  .flow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;position:relative}
+  .lane-title{font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .col{display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--bg);border-radius:16px;padding:16px 18px;display:flex;gap:14px;align-items:flex-start;position:relative}
+  .num{width:38px;height:38px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;color:#fff}
+  .c-coral .num{background:var(--coral)} .c-indigo .num{background:var(--indigo)} .c-teal .num{background:var(--teal)} .c-amber .num{background:var(--amber);color:var(--ink)}
+  .card h3{font-size:19px;line-height:1.2}
+  .file{font-family:Consolas,"Courier New",monospace;font-size:12.5px;color:var(--muted);margin-top:3px}
+  .card p{font-size:14.5px;line-height:1.4;margin-top:6px;color:#2E3A46}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+  .chip{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .chip.t{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .arrow{font-size:13px;color:var(--muted);font-weight:700;text-align:center;margin:-6px 0}
+  .timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-radius:16px;overflow:hidden}
+  .phase{padding:16px 18px;color:#fff}
+  .phase h4{font-size:18px}
+  .phase .when{font-size:13px;opacity:.85;margin-top:2px}
+  .phase ul{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:5px;font-size:14px;line-height:1.35}
+  .phase li:before{content:"→ ";opacity:.7}
+  .p1{background:var(--indigo)} .p2{background:var(--teal)} .p3{background:#1F7A70} .p4{background:var(--ink)}
+  footer{display:flex;justify-content:space-between;font-size:14px;color:var(--muted)}
+  footer b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div id="map">
+  <header>
+    <div class="lens"><i></i></div>
+    <div>
+      <h1>Mercek · Doküman Haritası</h1>
+      <div class="sub">Hackathon hazırlığında ne var, ne işe yarar, ne zaman açılır — tek bakışta</div>
+    </div>
+    <div class="right"><b>AI Overflow</b> · Ziraat Teknoloji YZ Hackathonu<br>16–17 Ekim 2026 · Tema 2<br>Başlangıç noktası: <b>README.md</b></div>
+  </header>
+
+  <div class="flow">
+    <!-- Sütun 1: Ne ve neden -->
+    <div class="col">
+      <div class="lane-title">1 · Ne yapıyoruz, hangi kurallarla</div>
+      <div class="card c-coral"><div class="num">1</div><div>
+        <h3>Teknik Kılavuz Özeti</h3><div class="file">docs/hackathon-teknik-kilavuz.md</div>
+        <p>Puanlama (%30 AstreAI + %70 jüri), GHAS ve CodeQL kuralları, 20 $ Copilot hedefi, sunum kuralları, teslim listesi.</p>
+        <div class="chips"><span class="chip t">Bugün</span><span class="chip">Herkes</span></div></div></div>
+      <div class="arrow">↓</div>
+      <div class="card c-indigo"><div class="num">2</div><div>
+        <h3>Kapsam</h3><div class="file">docs/mercek-kapsam.md</div>
+        <p>Mercek nedir, iki modül (çağrı + talep), MoSCoW öncelikleri, kapsam dışı, resmi takvime göre zaman planı.</p>
+        <div class="chips"><span class="chip t">Bugün</span><span class="chip">Herkes</span></div></div></div>
+      <div class="arrow">↓</div>
+      <div class="card c-indigo"><div class="num">3</div><div>
+        <h3>İş Planı</h3><div class="file">docs/mercek-is-plani.md</div>
+        <p>19 maddelik sorumluluk listesi (herkes kendi seçer), görevler ve kabul kriterleri, demo senaryosu: Ayşe, Mert, Zeynep.</p>
+        <div class="chips"><span class="chip t">Bugün</span><span class="chip t">Her iki gün</span><span class="chip">Herkes</span></div></div></div>
+    </div>
+
+    <!-- Sütun 2: Nasıl -->
+    <div class="col">
+      <div class="lane-title">2 · Nasıl yapıyoruz</div>
+      <div class="card c-teal"><div class="num">4</div><div>
+        <h3>Uygulama Rehberi</h3><div class="file">docs/mercek-uygulama-rehberi.md</div>
+        <p>Her görevin teknik adımları; Azure servisleri ve puan bağlantısı; yetki yoksa yedek yollar.</p>
+        <div class="chips"><span class="chip t">1. ve 2. gün</span><span class="chip">Geliştiriciler</span></div></div></div>
+      <div class="arrow">↓ aynı görev kodu (A1, M1.2-b …)</div>
+      <div class="card c-teal"><div class="num">5</div><div>
+        <h3>Copilot Prompt Kütüphanesi</h3><div class="file">docs/mercek-copilot-promptlari.md</div>
+        <p>Her görev için kopyala-yapıştır prompt, önerilen ucuz/orta model, ortak API sözleşmeleri.</p>
+        <div class="chips"><span class="chip t">1. ve 2. gün</span><span class="chip">Geliştiriciler</span></div></div></div>
+      <div class="card c-teal"><div class="num">6</div><div>
+        <h3>Copilot Talimat Dosyası</h3><div class="file">.github/copilot-instructions.md</div>
+        <p>Copilot'un her istekte otomatik okuduğu kısa kurallar: güvenlik, test, maliyet.</p>
+        <div class="chips"><span class="chip t">Takım reposuna kopyala</span><span class="chip">Copilot</span></div></div></div>
+    </div>
+
+    <!-- Sütun 3: Veri ve sunum -->
+    <div class="col">
+      <div class="lane-title">3 · Demo verisi ve sunum</div>
+      <div class="card c-amber"><div class="num">7</div><div>
+        <h3>Sentetik Veri Planı</h3><div class="file">docs/mercek-sentetik-veri-plani.md</div>
+        <p>Hangi veriler, ne kadar ve neden: senaryoyu taşıyan veri ilkesi.</p>
+        <div class="chips"><span class="chip t">Bugün</span><span class="chip">Veri, analist</span></div></div></div>
+      <div class="arrow">↓</div>
+      <div class="card c-amber"><div class="num">8</div><div>
+        <h3>Sentetik Veri Üretim Rehberi</h3><div class="file">docs/mercek-sentetik-veri-uretimi.md</div>
+        <p>Kataloglar, senaryo rakamları (312 çağrı, 15–22 adam-gün), Foundry metin prompt'ları, doğrulama sorguları.</p>
+        <div class="chips"><span class="chip t">1. gün sabah</span><span class="chip">Veri, analist</span></div></div></div>
+      <div class="card c-amber"><div class="num">9</div><div>
+        <h3>Sunum Taslağı</h3><div class="file">presentation/Mercek_AI_Overflow_Sunum.pptx</div>
+        <p>11 slayt, konuşmacı notları, taslak ekranlar — 2. gün gerçek görüntülerle değişecek.</p>
+        <div class="chips"><span class="chip t">2. gün</span><span class="chip">Sunum, herkes</span></div></div></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+    <div class="phase p1"><h4>Bugün · 15 Ekim</h4><div class="when">Okuma, karar, pratik (kod yok)</div>
+      <ul><li>1, 2, 3'ü oku</li><li>Sorumluluğunu seç (İş Planı §2)</li><li>Kendi görevlerini 4'te oku</li><li>Analist: 8'deki tabloları gözden geçir</li></ul></div>
+    <div class="phase p2"><h4>1. gün · 16 Ekim</h4><div class="when">10:30'da kodlama başlar</div>
+      <ul><li>Altyapı: 4 + 5 (A görevleri)</li><li>Veri: 8 ile üret ve doğrula</li><li>Must özellikler: 4 → 5 döngüsü</li></ul></div>
+    <div class="phase p3"><h4>2. gün · 17 Ekim</h4><div class="when">12:00 kod dondurma · 13:00 teknik değerlendirme</div>
+      <ul><li>Should özellikler, entegrasyon</li><li>9'u gerçek ekranlarla tamamla</li><li>15:00 sunum (5 dakika)</li></ul></div>
+    <div class="phase p4"><h4>Sonrası</h4><div class="when">Kapanış</div>
+      <ul><li>Retrospektif</li><li>Jüri ve AstreAI geri bildirimleri</li><li>Azure kaynaklarını kapat</li></ul></div>
+  </div>
+
+  <footer><span>Görev kodları (A1, M1.2-b, Q6…) ve sorumluluk numaraları [1]–[19] tüm dokümanlarda aynı.</span><span><b>Soruna odaklanır, çözümü netleştirir.</b></span></footer>
+</div>
+</body>
+</html>

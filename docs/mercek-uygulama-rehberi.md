@@ -176,9 +176,9 @@ Tüm kaynaklar **takımın resource group'unda**, aynı bölgede, anlamlı adlar
 
 ### A5 — Sentetik veri üretimi ve yükleme [5] [6]
 
-> 🤖 Copilot prompt'u: `mercek-copilot-promptlari.md` → **A5-a, A5-b, A5-c, A5-d**
+> 🤖 Copilot prompt'u: `mercek-copilot-promptlari.md` → **A5-0, A5-a, A5-b, A5-c, A5-d**
 
-**Amaç:** Senaryoları taşıyan, tutarlı, tekrar üretilebilir veri. Ayrıntılı varlık listesi: `mercek-sentetik-veri-plani.md`.
+**Amaç:** Senaryoları taşıyan, tutarlı, tekrar üretilebilir veri. Varlık listesi: `mercek-sentetik-veri-plani.md`. **Katalog değerleri, senaryo rakamları, Foundry metin prompt'ları ve doğrulama sorguları: `mercek-sentetik-veri-uretimi.md`.**
 
 **1. SQL şeması (`data/schema.sql`)**
 

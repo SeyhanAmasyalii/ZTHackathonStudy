@@ -203,6 +203,20 @@ Bölümler:
 Gerçek URL, anahtar veya e-posta yazma.
 ```
 
+### A5-0 — Katalog ve senaryo dosyaları · 🟢 Ucuz · Edit
+
+```
+Görev A5-0: docs/mercek-sentetik-veri-uretimi.md'deki tabloları iki JSON dosyasına dönüştür.
+Bağlam: #file:docs/mercek-sentetik-veri-uretimi.md
+
+1. data/seed/catalog.json: §3'teki teams, services, service_dependencies, screens (flow_definition dahil),
+   screen_services, screen_elements, error_codes, categories, priorities. Değerleri AYNEN kullan, ekleme yapma.
+2. data/seed/scenarios.json: §4'teki S1 (SOL-014 ve 6 çağrı), S3 (çağrı dağılımı, 4 talep, ODEME takvimi),
+   S2 ve S4 yasak kuralları (forbidden_error_codes, forbidden_keywords listeleri).
+3. data/generator/tests/test_seed_files.py: JSON'ların yüklenebildiğini, S3 dağılım toplamının 312 olduğunu,
+   4 talebin efor medyanının 18 olduğunu ve screens içinde döviz ekranı olmadığını doğrulayan testler.
+```
+
 ### A5-a — SQL şeması · 🟢 Ucuz · Edit
 
 ```
@@ -234,16 +248,19 @@ Türkçe metin alanları nvarchar. Gerçek kişisel veri alanı (TCKN, ad soyad)
 
 ```
 Görev A5-b: data/generator/generate.py — senaryo güdümlü sentetik veri üreticisi.
-Bağlam: #file:data/schema.sql #file:data/seed/scenarios.json
+Bağlam: #file:data/schema.sql #file:data/seed/catalog.json #file:data/seed/scenarios.json
+Kurallar: docs/mercek-sentetik-veri-uretimi.md §5 (dağılımlar ve yasak kurallar).
 
 Gereksinimler:
 - Faker('tr_TR'), random.seed(42) ve Faker.seed(42): her çalıştırmada aynı çıktı.
-- Referans veriler betikte sabit: 4 ekran (LOGIN, ACCOUNTS, TRANSFER, BILL) + 5 katalog ekranı (CARDS, LOANS, INVEST, PROFILE, FX),
-  10-12 servis, 5 ekip, 15-20 hata kodu (IBN-504 dahil), ekran-servis ve servis-bağımlılık ilişkileri.
+- Referans veriler catalog.json'dan okunur; betikte ayrıca tanımlanmaz.
+- --today parametresi (varsayılan 2026-10-17); tüm tarih aralıkları buna göre.
 - Üretilecek hacimler: logs ~3000 (son 45 gün, %80 INFO), incidents ~400 (son 90 gün), solutions ~60, requests ~100,
   team_calendar 3 aylık.
 - scenarios.json'daki sabit kayıtları aynen ekle ve rastgele üretimin bunlarla çelişmemesini sağla
-  (ör. TRANSFER son 30 günde tam 312 çağrı, bunların %41'i IBN-504).
+  (TRANSFER son 30 günde tam 312 çağrı: IBN-504 128, TRF-422 72, TRF-409 44, EFT-503 34, kodsuz 34).
+- Yasak kurallar: BIL-221 kodlu log/çağrı/çözüm yok; forbidden_keywords içeren metin kullanılmaz;
+  incident_id sayacı 1042'nin altında biter.
 - Metin alanlarını data/seed/texts.json'dan al (yoksa basit şablon metin kullan).
 - Kişisel veri üretme; IBAN'lar maskeli (TR** **** ****).
 - Çıktı: data/out/<tablo>.csv (UTF-8). Saf fonksiyonlar + main(); her tablo için ayrı fonksiyon.
@@ -254,11 +271,15 @@ Gereksinimler:
 
 ```
 Görev A5-c: data/generator/generate_texts.py — Foundry'deki chat deploy'u ile Türkçe metin üretimi.
+Bağlam: #file:data/seed/catalog.json · Prompt metinleri: docs/mercek-sentetik-veri-uretimi.md §6
+(önce §6.1–6.3'ü prompts/gen-cagri-metni.md, gen-cozum-metni.md, gen-talep-metni.md olarak kaydet).
 
 - backend/app/clients/llm.py'deki LLMClient'ı kullan (yoksa openai Azure istemcisini doğrudan, ortam değişkenleriyle).
 - Üç tür metin: incident_user_texts (kullanıcı ağzından kısa şikâyet, kategori ve ekran verilir),
   solution_texts (belirti, kök neden, adımlar), request_texts (iş birimi talebi).
-- 20'şerli partiler; her parti için JSON şemalı çıktı iste; toplam sayıları argümanla al.
+- 20'şerli partiler; her parti için JSON şemalı çıktı iste; temperature 0.8; toplam sayıları argümanla al.
+- §6'daki çağırma planını uygula (BIL-221 için metin üretme).
+- §6.4 kontrolleri: yasak kelime, kişisel veri regex'i (10+ hane rakam, @, +90), tekrar; atılan > %20 ise partiyi yeniden üret.
 - Kişi adı, telefon, TCKN, gerçek kurum adı üretmemesini prompt'ta açıkça yaz.
 - Sonucu data/seed/texts.json'a yaz; dosya varsa üzerine ekle, tekrar çağrıda hazır olanları atla.
 - Anahtar veya endpoint koda yazılmaz; ortam değişkeni.

@@ -1,6 +1,6 @@
 # Copilot Talimatları — Ziraat Teknoloji YZ Hackathonu
 
-Bu repo Ziraat Teknoloji Yapay Zeka Hackathonu projesidir. Çözüm AstreAI (otomatik, %30) ve jüri (%70) tarafından puanlanır. Ayrıntılı kurallar: `hackathon-teknik-kilavuz.md`. Yanıtlar Türkçe, kod ve kod yorumları İngilizce olsun.
+Bu repo Ziraat Teknoloji Yapay Zeka Hackathonu projesidir. Çözüm AstreAI (otomatik, %30) ve jüri (%70) tarafından puanlanır. Ayrıntılı kurallar: `docs/hackathon-teknik-kilavuz.md`. Yanıtlar Türkçe, kod ve kod yorumları İngilizce olsun.
 
 ## Kesin yasaklar
 - `.github/workflows/` altındaki organizasyon **CodeQL workflow dosyasını** asla düzenleme, silme, taşıma, yeniden adlandırma veya kopyalama; ikinci bir CodeQL taraması tanımlama; `.gitignore` ile `.github/` klasörünü dışlama.

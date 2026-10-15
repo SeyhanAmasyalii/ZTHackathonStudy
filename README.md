@@ -3,7 +3,7 @@
 **Takım:** AI Overflow · **Proje:** Mercek · **Slogan:** "Soruna odaklanır, çözümü netleştirir."
 **Hackathon:** Ziraat Teknoloji Yapay Zeka Hackathonu, 16–17 Ekim 2026, Tema 2
 
-Bu doküman, hackathon hazırlığında üretilen tüm dokümanları **hangi sırayla, ne zaman ve ne için** kullanacağımızı anlatır. Hepsini baştan sona okumak gerekmiyor; aşağıdaki sırayı izleyin.
+Bu doküman, hackathon hazırlığında üretilen tüm dokümanları (hepsi bu repoda, `docs/` ve `presentation/` altında) **hangi sırayla, ne zaman ve ne için** kullanacağımızı anlatır. Hepsini baştan sona okumak gerekmiyor; aşağıdaki sırayı izleyin.
 
 ---
 
@@ -11,9 +11,9 @@ Bu doküman, hackathon hazırlığında üretilen tüm dokümanları **hangi sı
 
 | # | Doküman | Ne anlatır | Kim için | Nerede |
 |---|---|---|---|---|
-| 1 | `hackathon-teknik-kilavuz.md` | Resmi kılavuzun özeti: ortam ve hesaplar, AstreAI puanlaması (%30), jüri kriterleri (%70), sunum kuralları, teslim kontrol listesi | Herkes | Repo kökü, Claude projesi |
-| 2 | `mercek-kapsam.md` | Mercek nedir, iki modül (M1 çağrı, M2 talep), MoSCoW öncelikleri, kapsam dışı, resmi takvime göre zaman planı | Herkes | Claude projesi |
-| 3 | `mercek-is-plani.md` | Mimari, **19 maddelik sorumluluk listesi** (herkes kendi seçer), görev dökümü ve kabul kriterleri, zaman × odak tablosu, **demo senaryosu** (Ayşe, Mert, Zeynep), iş değeri, soru-cevap | Herkes | Claude projesi |
+| 1 | `docs/hackathon-teknik-kilavuz.md` | Resmi kılavuzun özeti: ortam ve hesaplar, AstreAI puanlaması (%30), jüri kriterleri (%70), sunum kuralları, teslim kontrol listesi | Herkes | Repo, Claude projesi |
+| 2 | `docs/mercek-kapsam.md` | Mercek nedir, iki modül (M1 çağrı, M2 talep), MoSCoW öncelikleri, kapsam dışı, resmi takvime göre zaman planı | Herkes | Repo, Claude projesi |
+| 3 | `docs/mercek-is-plani.md` | Mimari, **19 maddelik sorumluluk listesi** (herkes kendi seçer), görev dökümü ve kabul kriterleri, zaman × odak tablosu, **demo senaryosu** (Ayşe, Mert, Zeynep), iş değeri, soru-cevap | Herkes | Repo, Claude projesi |
 | 4 | `docs/mercek-sentetik-veri-plani.md` | Hangi veriler, ne kadar, neden (senaryo güdümlü veri ilkesi) | Veri sorumluları, analist | Repo, Claude projesi |
 | 5 | `docs/mercek-sentetik-veri-uretimi.md` | Verinin **nasıl ve hangi değerlerle** üretileceği: kataloglar, senaryo rakamları, Faker kuralları, Foundry metin prompt'ları, doğrulama sorguları | Veri sorumluları | Repo, Claude projesi |
 | 6 | `docs/mercek-uygulama-rehberi.md` | Her görevin **nasıl** yapılacağı: Azure servisleri ve puan bağlantısı, teknoloji seçimi, kimlik doğrulama yedek yolları, görev görev teknik adımlar | Geliştiriciler | Repo, Claude projesi |
@@ -122,7 +122,7 @@ Hackathon günü takıma ayrılan repoya:
 
 | Dosya | Hedef konum |
 |---|---|
-| `hackathon-teknik-kilavuz.md` | `docs/` |
+| `docs/hackathon-teknik-kilavuz.md` | `docs/` |
 | `.github/copilot-instructions.md` | `.github/` (dosya adı değişmeden) |
 | Prompt kütüphanesi §1 "Ortak sözleşmeler" | `docs/contracts.md` |
 | Veri üretim rehberi §3–4 tabloları | `data/seed/catalog.json`, `scenarios.json` (A5-0 prompt'uyla) |

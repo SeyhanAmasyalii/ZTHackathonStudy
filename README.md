@@ -11,16 +11,16 @@ Bu doküman, hackathon hazırlığında üretilen tüm dokümanları (hepsi bu r
 
 | # | Doküman | Ne anlatır | Kim için | Nerede |
 |---|---|---|---|---|
-| 1 | `docs/hackathon-teknik-kilavuz.md` | Resmi kılavuzun özeti: ortam ve hesaplar, AstreAI puanlaması (%30), jüri kriterleri (%70), sunum kuralları, teslim kontrol listesi | Herkes | Repo, Claude projesi |
-| 2 | `docs/mercek-kapsam.md` | Mercek nedir, iki modül (M1 çağrı, M2 talep), MoSCoW öncelikleri, kapsam dışı, resmi takvime göre zaman planı | Herkes | Repo, Claude projesi |
-| 3 | `docs/mercek-is-plani.md` | Mimari, **19 maddelik sorumluluk listesi** (herkes kendi seçer), görev dökümü ve kabul kriterleri, zaman × odak tablosu, **demo senaryosu** (Ayşe, Mert, Zeynep), iş değeri, soru-cevap | Herkes | Repo, Claude projesi |
-| 4 | `docs/mercek-sentetik-veri-plani.md` | Hangi veriler, ne kadar, neden (senaryo güdümlü veri ilkesi) | Veri sorumluları, analist | Repo, Claude projesi |
-| 5 | `docs/mercek-sentetik-veri-uretimi.md` | Verinin **nasıl ve hangi değerlerle** üretileceği: kataloglar, senaryo rakamları, Faker kuralları, Foundry metin prompt'ları, doğrulama sorguları | Veri sorumluları | Repo, Claude projesi |
-| 6 | `docs/mercek-uygulama-rehberi.md` | Her görevin **nasıl** yapılacağı: Azure servisleri ve puan bağlantısı, teknoloji seçimi, kimlik doğrulama yedek yolları, görev görev teknik adımlar | Geliştiriciler | Repo, Claude projesi |
-| 7 | `docs/mercek-copilot-promptlari.md` | Her görev için Copilot'a yapıştırılacak hazır prompt, model sınıfı (ucuz/orta), ortak sözleşmeler (`contracts.md`) | Geliştiriciler | Repo, Claude projesi |
-| 8 | `.github/copilot-instructions.md` | Copilot'un her istekte otomatik okuduğu kısa kural dosyası (güvenlik, CodeQL yasağı, test, maliyet) | Copilot | Repo |
-| 9 | `presentation/Mercek_AI_Overflow_Sunum.pptx` | 11 slaytlık sunum taslağı, konuşmacı notları ve taslak ekran görüntüleriyle | Sunum sorumlusu, herkes | Repo |
-| 10 | `presentation/build-deck.js`, `presentation/mockups/` | Sunumu ve taslak ekranları yeniden üreten betik ve HTML kaynağı | Sunum sorumlusu | Repo |
+| 1 | [`docs/hackathon-teknik-kilavuz.md`](docs/hackathon-teknik-kilavuz.md) | Resmi kılavuzun özeti: ortam ve hesaplar, AstreAI puanlaması (%30), jüri kriterleri (%70), sunum kuralları, teslim kontrol listesi | Herkes | Repo, Claude projesi |
+| 2 | [`docs/mercek-kapsam.md`](docs/mercek-kapsam.md) | Mercek nedir, iki modül (M1 çağrı, M2 talep), MoSCoW öncelikleri, kapsam dışı, resmi takvime göre zaman planı | Herkes | Repo, Claude projesi |
+| 3 | [`docs/mercek-is-plani.md`](docs/mercek-is-plani.md) | Mimari, **19 maddelik sorumluluk listesi** (herkes kendi seçer), görev dökümü ve kabul kriterleri, zaman × odak tablosu, **demo senaryosu** (Ayşe, Mert, Zeynep), iş değeri, soru-cevap | Herkes | Repo, Claude projesi |
+| 4 | [`docs/mercek-sentetik-veri-plani.md`](docs/mercek-sentetik-veri-plani.md) | Hangi veriler, ne kadar, neden (senaryo güdümlü veri ilkesi) | Veri sorumluları, analist | Repo, Claude projesi |
+| 5 | [`docs/mercek-sentetik-veri-uretimi.md`](docs/mercek-sentetik-veri-uretimi.md) | Verinin **nasıl ve hangi değerlerle** üretileceği: kataloglar, senaryo rakamları, Faker kuralları, Foundry metin prompt'ları, doğrulama sorguları | Veri sorumluları | Repo, Claude projesi |
+| 6 | [`docs/mercek-uygulama-rehberi.md`](docs/mercek-uygulama-rehberi.md) | Her görevin **nasıl** yapılacağı: Azure servisleri ve puan bağlantısı, teknoloji seçimi, kimlik doğrulama yedek yolları, görev görev teknik adımlar | Geliştiriciler | Repo, Claude projesi |
+| 7 | [`docs/mercek-copilot-promptlari.md`](docs/mercek-copilot-promptlari.md) | Her görev için Copilot'a yapıştırılacak hazır prompt, model sınıfı (ucuz/orta), ortak sözleşmeler (`contracts.md`) | Geliştiriciler | Repo, Claude projesi |
+| 8 | [`.github/copilot-instructions.md`](.github/copilot-instructions.md) | Copilot'un her istekte otomatik okuduğu kısa kural dosyası (güvenlik, CodeQL yasağı, test, maliyet) | Copilot | Repo |
+| 9 | [`presentation/Mercek_AI_Overflow_Sunum.pptx`](presentation/Mercek_AI_Overflow_Sunum.pptx) | 11 slaytlık sunum taslağı, konuşmacı notları ve taslak ekran görüntüleriyle | Sunum sorumlusu, herkes | Repo |
+| 10 | [`presentation/build-deck.js`](presentation/build-deck.js), [`presentation/mockups/`](presentation/mockups) | Sunumu ve taslak ekranları yeniden üreten betik ve HTML kaynağı | Sunum sorumlusu | Repo |
 
 **Dokümanlar arası ilişki**
 
@@ -122,8 +122,8 @@ Hackathon günü takıma ayrılan repoya:
 
 | Dosya | Hedef konum |
 |---|---|
-| `docs/hackathon-teknik-kilavuz.md` | `docs/` |
-| `.github/copilot-instructions.md` | `.github/` (dosya adı değişmeden) |
+| [`docs/hackathon-teknik-kilavuz.md`](docs/hackathon-teknik-kilavuz.md) | `docs/` |
+| [`.github/copilot-instructions.md`](.github/copilot-instructions.md) | `.github/` (dosya adı değişmeden) |
 | Prompt kütüphanesi §1 "Ortak sözleşmeler" | `docs/contracts.md` |
 | Veri üretim rehberi §3–4 tabloları | `data/seed/catalog.json`, `scenarios.json` (A5-0 prompt'uyla) |
 | Veri üretim rehberi §6 prompt'ları | `prompts/gen-*.md` |

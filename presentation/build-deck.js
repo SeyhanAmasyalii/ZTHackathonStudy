@@ -146,7 +146,8 @@ async function icon(Comp, color, size = 256) {
     s.addText(String(i + 1), { x: x + 0.15, y: y + 0.15, w: 0.45, h: 0.45, fontSize: 14, bold: true, color: C.background1, align: "center", valign: "middle", margin: 0, isTextBox: true });
     s.addText(t, { x: x + 0.15, y: y + 0.7, w: w - 0.3, h: 1.1, fontSize: 14, color: C.text1, valign: "top", margin: 0, isTextBox: true });
   });
-  s.addText("Toplam: saatler — bu sürede müşteri ödemesini yapamıyor", { x: 4.45, y: 3.6, w: 8.2, h: 0.4, fontSize: 16, bold: true, color: C.accent3, margin: 0, isTextBox: true });
+  s.addText([{ text: "Bedeli: ", options: { bold: true } }, { text: "saatlerce işlem yapamayan müşteri · her çağrıda çağrı merkezi, L1 ve L2 eforu · daha önce çözülmüş sorunun yeniden çözülmesi" }],
+    { x: 4.45, y: 3.58, w: 8.2, h: 0.6, fontSize: 14, color: C.accent3, margin: 0, valign: "top", isTextBox: true });
 
   const pains = [
     [ic.eye, "Bağlam kaybolur", "Ekran, log ve kullanıcı adımları kayda girmiyor."],
@@ -193,6 +194,8 @@ async function icon(Comp, color, size = 256) {
   // ---------- 5. Yenilikçilik ----------
   s = pres.addSlide({ masterName: "CONTENT", sectionTitle: "Problem ve çözüm" });
   s.addText("Dört farkımız", { placeholder: "title" });
+  s.addText("Bugünkü çağrı araçları sorunu kaydeder; Mercek sorunu bulur, çözümü önerir ve yeni talebin planına bağlar.",
+    { x: 0.6, y: 1.3, w: 12.1, h: 0.45, fontSize: 18, color: C.text2, margin: 0, valign: "middle", isTextBox: true });
   const diffs = [
     [C.accent1, ic.bolt, "Proaktif", "Müşteri daha yazmadan, o ekranın canlı loglarından olası nedeni söyler ve alternatif yolu gösterir."],
     [C.accent2, ic.code, "Kodu okuyan AI", "Geçmişte benzeri yoksa ilgili servis kodunu ve SP'yi inceler, satır düzeyinde düzeltme önerir."],
@@ -200,7 +203,7 @@ async function icon(Comp, color, size = 256) {
     [C.accent3, ic.shield, "Güvenilir AI", "Hesabı kod yapar, AI açıklar. Eşik altında öneri yok; her öneri kaynağıyla birlikte gelir."],
   ];
   diffs.forEach(([col, img, head, desc], i) => {
-    const x = 0.6 + (i % 2) * 6.25, y = 1.6 + Math.floor(i / 2) * 2.6, w = 5.85, h = 2.3;
+    const x = 0.6 + (i % 2) * 6.25, y = 1.95 + Math.floor(i / 2) * 2.45, w = 5.85, h = 2.2;
     card(s, x, y, w, h, C.background2, `diff-card-${i + 1}`);
     iconCircle(s, x + 0.35, y + 0.4, 0.85, col, img, `diff-${i + 1}`);
     s.addText([{ text: head, options: { fontSize: 22, bold: true, color: C.text1, breakLine: true } }, { text: desc, options: { fontSize: 16, color: C.text2 } }],
@@ -214,20 +217,20 @@ async function icon(Comp, color, size = 256) {
   s.addText("Mimari: Azure üzerinde uçtan uca", { placeholder: "title" });
   const box = (x, y, w, h, fill, head, sub, name, dark) => {
     card(s, x, y, w, h, fill, name, dark ? fill : C.accent5);
-    s.addText([{ text: head, options: { bold: true, fontSize: 16, breakLine: true } }, { text: sub, options: { fontSize: 13 } }],
+    s.addText([{ text: head, options: { bold: true, fontSize: 16, breakLine: true } }, { text: sub, options: { fontSize: 12 } }],
       { x: x + 0.15, y: y + 0.1, w: w - 0.3, h: h - 0.2, color: dark ? C.background1 : C.text1, valign: "middle", align: "center", margin: 0, isTextBox: true });
   };
   box(0.6, 2.35, 1.9, 2.6, C.background2, "Kullanıcılar", "Müşteri\nDestek ekibi\nİş analisti", "arch-users");
-  box(3.05, 2.35, 2.45, 2.6, C.text2, "Azure App Service", "React arayüz\n+ FastAPI\n/health", "arch-app", true);
-  box(6.1, 1.5, 2.6, 1.25, C.background2, "Azure AI Foundry", "chat + embedding modeli", "arch-foundry");
-  box(6.1, 3.0, 2.6, 1.25, C.background2, "Azure SQL", "ekran, log, çağrı, talep, takvim", "arch-sql");
-  box(6.1, 4.5, 2.6, 1.25, C.background2, "Azure AI Search", "hibrit arama: çözüm, çağrı, talep", "arch-search");
+  box(3.05, 2.35, 2.45, 2.6, C.text2, "Azure App Service", "React + FastAPI\nTek dağıtım,\nsağlık kontrolü", "arch-app", true);
+  box(6.0, 1.45, 2.75, 1.35, C.background2, "Azure AI Foundry", "chat + embedding modeli\nYönetilen, kurumsal model erişimi", "arch-foundry");
+  box(6.0, 2.97, 2.75, 1.35, C.background2, "Azure SQL", "Log, çağrı, talep, takvim\nİlişkisel sorgu ve istatistik", "arch-sql");
+  box(6.0, 4.49, 2.75, 1.35, C.background2, "Azure AI Search", "Çözüm, çağrı, talep araması\nVektör + metin (hibrit)", "arch-search");
   const arrow = (x1, y1, x2, y2, name) => s.addShape(pres.shapes.LINE, { x: Math.min(x1, x2), y: Math.min(y1, y2), w: Math.abs(x2 - x1) || 0.001, h: Math.abs(y2 - y1) || 0.001,
     flipV: y2 < y1, line: { color: C.accent5, width: 2, endArrowType: "triangle" }, objectName: name });
   arrow(2.5, 3.65, 3.05, 3.65, "arrow-users-app");
-  arrow(5.5, 3.3, 6.1, 2.12, "arrow-app-foundry");
-  arrow(5.5, 3.65, 6.1, 3.62, "arrow-app-sql");
-  arrow(5.5, 4.0, 6.1, 5.12, "arrow-app-search");
+  arrow(5.5, 3.3, 6.0, 2.12, "arrow-app-foundry");
+  arrow(5.5, 3.65, 6.0, 3.64, "arrow-app-sql");
+  arrow(5.5, 4.0, 6.0, 5.16, "arrow-app-search");
   card(s, 0.6, 6.0, 8.1, 0.8, C.background2, "arch-cicd");
   s.addImage({ data: ic.github, x: 0.8, y: 6.17, w: 0.45, h: 0.45, objectName: "arch-github" });
   s.addText([{ text: "GitHub Actions: ", options: { bold: true } }, { text: "lint · test · audit · gitleaks → build → deploy → health check   " },
@@ -306,9 +309,10 @@ async function icon(Comp, color, size = 256) {
     ["Bilinen sorunun çözümü", "Bilgi kişilerde, aranamıyor", "Geçmiş çözüm saniyeler içinde, kaynaklı"],
     ["Yeni sorunun kök nedeni", "Ekip kodu baştan inceler", "Satır düzeyinde düzeltme önerisi"],
     ["Talep kapsamı", "Çağrı verisinden kopuk", "Ekranın çağrı geçmişi kapsamda"],
+    ["Yaygınlaştırma", "Her kanal ve uygulama ayrı süreç", "Aynı yapı tüm dijital kanallara ve iç uygulamalara"],
   ];
   s.addTable(rows, { x: 0.6, y: 3.4, w: 12.1, colW: [3.2, 4.2, 4.7], fontSize: 14, color: C.text1, fontFace: THEME.bodyFontFace,
-    border: { type: "solid", pt: 1, color: "DDE2E8" }, rowH: 0.56, valign: "middle", margin: [0.05, 0.12, 0.05, 0.12] });
+    border: { type: "solid", pt: 1, color: "DDE2E8" }, rowH: 0.47, valign: "middle", margin: [0.05, 0.12, 0.05, 0.12] });
   s.addText("Rakamlar sentetik veriye ve varsayımlara dayanır; demo ölçümleriyle güncellenecek.", { x: 0.6, y: 6.55, w: 12, h: 0.3, fontSize: 11, italic: true, color: C.accent5, margin: 0, isTextBox: true });
   s.addNotes("4:15–4:40 · Önce/sonra. Ölçümlerden gelen gerçek süreleri (tespit X sn, zenginleştirme Y sn, tahmin Z sn) büyük rakamların yerine koyun. Varsayımları açıkça söyleyin.");
 

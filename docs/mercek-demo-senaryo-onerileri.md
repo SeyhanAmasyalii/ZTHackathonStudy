@@ -118,104 +118,127 @@
 
 ---
 
-### Senaryo D — "Talepten plana, sorundan kapsama" (Talep Yönlendirme · KRDTKULL) ⭐ önerilen kapanış
+### Senaryo D — "Talepten plana, sorundan kapsama" (Talep Yönlendirme · taksit hatırlatma) ⭐ önerilen kapanış
 
-**Senaryo tek cümleyle:** Bankanın bir iş birimi yeni bir özellik istiyor. Mercek talebi hangi ekranı ve hangi servisleri etkilediğine göre çözümlüyor, benzer geçmiş taleplerden adam-gün tahmini ve takvim çıkarıyor. Sonra aynı ekranın sorun geçmişine bakıp *"bu ekranda zaten şöyle bir sorun var, bunu da çözelim mi?"* diye kapsamı büyütmeyi öneriyor.
+**Senaryo tek cümleyle:** Bir iş birimi taksit gecikmelerini azaltmak için hatırlatma özelliği istiyor. Mercek talebi bileşenlerine ayırıyor, etkilenen servisleri, adam-gün tahminini ve takvimi çıkarıyor. Sonra çağrı ve müşteri verisine bakıp hem talebin değerini rakamla doğruluyor, hem de talebin hedef kitlenin önemli bir kısmına ulaşamayacağını fark edip kapsamı düzeltiyor.
 
-**Problem:** Bugün yeni geliştirme talepleri, aynı ekranda yaşanan sorunlardan habersiz kapsamlanıyor ve tahminleniyor. Talep sahibi neyin etkileneceğini bilmiyor, tahmin toplantılarda elle yapılıyor. Ekranın çağrı geçmişi kapsam konuşmasına hiç girmiyor.
+**Problem:** İş birimlerinin talepleri teknolojiye düz metin olarak geliyor. Hangi servislerin etkileneceği, hangi verinin hazır olduğu ve talebin hedeflenen müşteriye gerçekten ulaşıp ulaşmayacağı genellikle geliştirme başladıktan sonra fark ediliyor. Tahmin toplantılarda elle yapılıyor.
 
 **Akış**
 
-**1. Talep girişi.** **Fatma (Kredi Tahsilatları Bölüm Başkanlığı)** Talep Yönlendirme ekranına kendi cümleleriyle yazıyor:
-> *"Müşteriler ödeme planlarını tam bilmedikleri için ilk taksitlerde gecikmeler yaşıyoruz. Kredi kullandırıldığında ödeme planı müşteriye e-posta ile gönderilebilsin."*
+**1. Talep girişi.** **Fatma (Kredi Tahsilatları Bölüm Başkanlığı)** Talep Yönlendirme ekranına yazıyor:
+> *"Taksit ödemelerindeki gecikmeleri azaltmak istiyoruz. Daha önce gecikme yapmış müşterilere, taksit ödeme tarihinden birkaç gün önce otomatik hatırlatma e-postası gönderilsin. Ayrıca temsilcilerimiz gerektiğinde ilgili ekrandan seçtikleri bir müşteriye o taksit için anında hatırlatma e-postası gönderebilsin."*
 
 Talep, teknoloji tarafında analizi yürüten **Ayşe (Kıdemli İş Analisti)**'nin listesine düşüyor. Mercek'in analizi hem Fatma'nın hem Ayşe'nin ekranında görünüyor.
 
-**2. Mercek'in talep analizi** (ekranda kartlar halinde):
+**2. Mercek'in talep analizi** (ekranda kartlar halinde)
 
-**a) Talep özeti** (Mercek talebi netleştirerek yeniden yazıyor)
-> KRDTKULL'de kredi kullandırımı tamamlandığında, ödeme planının müşterinin kayıtlı e-posta adresine gönderilmesi. Gönderim yalnızca müşterinin e-posta iletişim izni varsa yapılır.
+**a) Talep özeti** (Mercek talebi iki bileşene ayırıyor)
+1. **Otomatik hatırlatma:** Her gün çalışan bir iş, ödeme tarihine X gün kalan taksitleri bulur. Bunlardan "daha önce gecikme yapmış" müşterilere ait olanlara hatırlatma e-postası gönderir.
+2. **Manuel hatırlatma:** Şube veya çağrı merkezi temsilcisi, bir müşterinin kredi taksitlerini görüntülediği ekrandan, seçtiği taksit için anında hatırlatma gönderir.
+
+Her iki durumda da gönderim yalnızca müşterinin e-posta iletişim izni varsa yapılır ve kaydı tutulur.
 
 **b) Sınıflandırma**
 
 | Alan | Değer |
 |---|---|
-| Talep tipi | Mevcut ekran değişikliği |
-| Ekran | `KRDTKULL` · Bireysel Kredi Kullandırım |
-| Güven | %92 |
-| Gerekçe | Talepte "kredi kullandırım ekranı" ve "ödeme planı" geçiyor; KRDTKULL zaten ödeme planı üretiyor, ama ekran dışına aktarmıyor. |
+| Talep tipi | Yeni geliştirme: **arka plan işi + yeni ekran** |
+| İlgili mevcut ekranlar | `KRDTKULL` (taksit planının kaynağı), `MUSTGUNC` (e-posta adresi ve iletişim izinleri) |
+| Yeni ekran önerisi | **`KRDTTKIP` · Kredi Taksit Takip.** Kod kurala (`[A-Z]{3}[TR][A-Z0-9]{4}`) uygun, mevcut kodlarla çakışmıyor. |
+| Güven | %88 |
+| Gerekçe | Ekran kataloğunda müşterinin kredilerini ve taksitlerini listeleyen bir ekran yok. Manuel gönderim için böyle bir ekran gerekiyor. |
 
-**c) Mevcut akış ve önerilen değişiklik** (ekranın akış tanımından)
-
-| # | Mevcut adım | Değişiklik |
-|---|---|---|
-| 1 | Tutar ve vade seçimi | — |
-| 2 | Özet ve ödeme planı tablosu | — |
-| 3 | Sözleşme onayı | — |
-| 4 | Kullandır | — |
-| 5 | Sonuç (referans, hesaba geçen tutar, ilk taksit tarihi) | **Yeni:** "Ödeme planını e-posta ile gönder" seçeneği ve gönderilecek adres. Müşterinin e-posta izni yoksa seçenek pasif olur ve "İzin için MUSTGUNC" yönlendirmesi gösterilir. |
+**c) Yeni ekran taslağı: `KRDTTKIP`**
+- **Arama:** Müşteri no ile. Aktif krediler ve her kredinin taksit listesi: vade tarihi, tutar, durum (ödendi / bekliyor / gecikmede).
+- **Taksit satırında "Hatırlatma gönder" butonu.** Müşterinin e-posta izni yoksa buton pasif olur ve "İletişim izni için MUSTGUNC" yönlendirmesi gösterilir.
+- **Gönderim geçmişi:** Bu taksit için daha önce gönderilen hatırlatmalar (otomatik veya manuel), tarih ve gönderen.
 
 **d) Etkilenen servisler**
 
 | Servis | Rol | Neden etkileniyor |
 |---|---|---|
-| **Kredi Kullandırım Servisi** | Ana servis | Ödeme planı dokümanının (PDF) üretilmesi, gönderim talebinin oluşturulması, sonuç ekranındaki yeni seçenek |
-| **Müşteri Yönetim Servisi** | Etkileşimli servis | Müşterinin kayıtlı e-posta adresi ve e-posta iletişim izni bu servisten okunuyor (MUSTGUNC'de güncellenen alanlar). Okuma yapılacak; servisin kendisinde değişiklik beklenmiyor. |
+| **Kredi Takip Servisi** | Ana servis | Taksit vade bilgisi ve gecikme geçmişi buradan geliyor. Hedef müşteri sorgusu, günlük zamanlanmış iş, manuel gönderim uç noktası ve gönderim kaydı bu serviste. |
+| **Müşteri Yönetim Servisi** | Etkileşimli servis | Müşterinin e-posta adresi ve iletişim izinleri bu servisten okunuyor (MUSTGUNC'de güncellenen alanlar). Okuma yapılacak; servisin kendisinde değişiklik beklenmiyor. |
 
-**e) Açık sorular** (Mercek'in netleşmesini istediği noktalar)
-- Ödeme planı PDF'i şifreli mi gönderilmeli? Şifreliyse şifre müşteriye hangi kanalla iletilecek?
-- Plan, kullandırım sonrası değişirse (erken kapama, yapılandırma) yeniden gönderilecek mi?
-- E-posta gönderimini hangi altyapı yapacak? Mevcut bir gönderim servisi var mı?
+**e) Netleştirilecek sorular** (Mercek, benzer taleplere bakarak varsayılan öneriler sunuyor)
+
+| Soru | Mercek'in önerisi |
+|---|---|
+| Ödeme tarihine kaç gün kala gönderilsin? | 3 gün (benzer talep TLP-0871'de 3 gün kullanılmış) |
+| "Daha önce gecikme yapmış" tanımı nedir? | Son 12 ayda en az bir taksiti 1 gün veya daha fazla gecikmiş müşteri |
+| Aynı taksit için en fazla kaç hatırlatma? | 1 otomatik + 1 manuel |
+| Manuel gönderimi kimler yapabilir? | Şube ve çağrı merkezi temsilcileri |
+| E-postada taksit tutarı yer alsın mı? | Hayır; tutar yerine "… tarihli taksitiniz" ifadesi (e-posta güvenliği) |
+
+Fatma önerilen varsayılanları tek tıkla kabul ediyor.
 
 **f) Efor tahmini (adam-gün)**
 
 Dayandığı benzer geçmiş talepler:
 
-| Talep | Başlık | Efor | Benzerlik |
-|---|---|---|---|
-| TLP-0871 | Kredi kartı ekstresini e-posta ile gönderme | 12 a/g | %88 |
-| TLP-0915 | Vadesiz hesap sözleşmesini e-posta ile iletme (HSPTVDSZ) | 10 a/g | %84 |
-| TLP-0962 | KRDTKULL ödeme planını PDF olarak indirme | 14 a/g | %81 |
-| TLP-1004 | Fatura dekontunu e-posta ile gönderme (ODMTFATR) | 17 a/g | %77 |
+| Talep | Başlık | Efor | Benzerlik | Bileşen |
+|---|---|---|---|---|
+| TLP-0871 | Kredi kartı son ödeme tarihi SMS hatırlatması (segment bazlı, otomatik) | 14 a/g | %90 | Otomatik |
+| TLP-0915 | Fatura son ödeme tarihi hatırlatma e-postası | 11 a/g | %84 | Otomatik |
+| TLP-0962 | Vadeli hesap vade sonu bildirim işi | 9 a/g | %79 | Otomatik |
+| TLP-1004 | Kart ekstresini ekrandan müşteriye manuel gönderme | 6 a/g | %76 | Manuel / ekran |
+| TLP-1019 | Hesap hareket dökümünü şube ekranından e-posta ile iletme | 8 a/g | %74 | Manuel / ekran |
 
-**Tahmin: 13 a/g** (medyan; aralık 10–17 a/g)
+**Tahmin: 18 a/g**
+
+| Bileşen | Tahmin |
+|---|---|
+| Otomatik hatırlatma işi | 11 a/g (medyan; aralık 9–14) |
+| Yeni ekran ve manuel gönderim (`KRDTTKIP`) | 7 a/g (medyan; aralık 6–8) |
 
 | Servis | Pay |
 |---|---|
-| Kredi Kullandırım Servisi | 10 a/g |
-| Müşteri Yönetim Servisi (entegrasyon ve izin kontrolü) | 3 a/g |
+| Kredi Takip Servisi | 15 a/g |
+| Müşteri Yönetim Servisi (adres ve izin entegrasyonu) | 3 a/g |
 
 **g) Takvim**
-- Kredi Kullandırım Servisi **8 Kasım'a kadar dolu** (yıl sonu regülasyon işi). Müşteri Yönetim Servisi müsait.
-- **Plan: 9 Kasım → 25 Kasım.** Müşteri Yönetim Servisi işi ilk hafta paralel yürür.
+- Kredi Takip Servisi **8 Kasım'a kadar dolu** (yıl sonu regülasyon işi). Müşteri Yönetim Servisi müsait.
+- **Plan: 9 Kasım → 2 Aralık.** Müşteri Yönetim Servisi işi ilk hafta paralel yürür.
 
 **h) Gerekçe** (Mercek'in açıklaması)
-> *"Tahmin, 4 benzer 'doküman gönderimi' talebinin gerçekleşen eforlarına dayanıyor. En yakın örnek TLP-0962; o talepte PDF üretimi zaten yapılmıştı, bu talepte e-posta gönderimi ve izin kontrolü ekleniyor. Hesap kurallarla yapıldı; ben yalnızca açıklıyorum."*
+> *"Otomatik bileşen için en yakın örnek TLP-0871: o talepte de segment bazlı, zamanlanmış bir hatırlatma yapılmıştı, ama kanal SMS'ti. Manuel bileşen, ekrandan doküman gönderen iki taleple benzer. Bu talepte ek olarak yeni bir ekran gerekiyor. Hesap kurallarla yapıldı; ben yalnızca açıklıyorum."*
 
-**3. Köprü: ekranın sorun geçmişi** (Mercek kendiliğinden ekliyor)
+**3. Köprü: çağrı ve müşteri verisi** (Mercek kendiliğinden ekliyor)
 
-> **KRDTKULL · son 30 gün**
-> - 1.184 kullandırım denemesi, bunların **312'si `AFFORDABILITY_EXCEEDED`** (taksit gelirin %50'sini aşıyor) ile reddedilmiş.
-> - Bu retlerin **58'i çağrıya dönüşmüş.** Bu ekrandaki en sık çağrı nedeni bu.
-> - Bu çağrılarda temsilciler uygun tutarı ve vadeyi elle hesaplamış; ortalama çözüm süresi 25 dakika.
+> **Talebin değeri: çağrı geçmişi**
+> - Son 90 günde "gecikme faizi / taksit tarihi" konulu **186 çağrı** var.
+> - Bunların **71'inde** müşteri "ödeme tarihini unuttum / hatırlatma almadım" diyor.
+> - Bu çağrılar talebin doğrudan hedeflediği sorun: ayda yaklaşık 24 çağrı önlenebilir.
 >
-> **Öneri:** Taksit gelir sınırını aştığında ekranın kendisi uygun tutarı ve vadeyi önersin. Bu, Senaryo A'da Mercek'in Elif için yaptığı hesap; ekrana kalıcı olarak ekleniyor.
-> - Etkilenen servis: Kredi Kullandırım Servisi. Ödeme planı formülü zaten var, ters hesap eklenecek.
-> - Ek efor: **+3 a/g**
-> - Beklenen etki: ayda ~58 çağrı ve ~24 saat destek eforu.
+> **Kapsam riski: hedef kitleye erişim**
+> - Hedef grup (son 12 ayda gecikme yapmış, aktif bireysel kredisi olan müşteri): **2.340 müşteri.**
+> - Bunların yalnızca **%58'inin e-posta iletişim izni var.** Sadece e-posta ile **983 müşteriye ulaşılamaz.**
+> - Hedef grubun **%81'inin SMS izni var.** E-postaya SMS eklenirse erişim **%58 → %89** olur.
+>
+> **Öneri:** Hatırlatmayı e-posta izni olmayan ama SMS izni olan müşterilere SMS ile gönder (otomatik ve manuel).
+> - Etkilenen servisler: Kredi Takip Servisi (kanal seçimi), Müşteri Yönetim Servisi (SMS izni ve telefon).
+> - Ek efor: **+2 a/g**
 >
 > *Kapsama eklensin mi?*
 
-Ayşe öneriyi Fatma'ya iletiyor. Uygun tutar önerisi tahsilat tarafının da işine yarıyor, çünkü taksit gücünü aşan kredi kullandırılmadığı sürece gecikme riski azalıyor. Fatma **"Evet"** diyor ve tahmin kartı güncelleniyor:
-- **13 → 16 a/g** (Kredi Kullandırım 13, Müşteri Yönetim 3)
-- **Bitiş: 25 Kasım → 30 Kasım**
-- Talep kaydında "çağrı geçmişinden eklenen kapsam" olarak işaretleniyor; onaylayan: Fatma, analiz: Ayşe.
+Ayşe öneriyi Fatma'ya iletiyor. Gecikme yapan müşterilerin önemli bir kısmına e-posta ile hiç ulaşılamayacağını gören Fatma **"Evet"** diyor. Tahmin kartı güncelleniyor:
+- **18 → 20 a/g** (Kredi Takip 16, Müşteri Yönetim 4)
+- **Bitiş: 2 Aralık → 4 Aralık**
+- Talep kaydında "veriden eklenen kapsam" olarak işaretleniyor; onaylayan: Fatma, analiz: Ayşe.
 
-**Kanıtladığı:** M2.1 sınıflandırma, M2.2 akış önerisi, M2.4 servis bazlı etki analizi, M2.5 adam-gün tahmini ve takvim, M2.6 köprü.
-**Hikâyenin kapanışı:** Demonun başında Elif'in şubede yaşadığı sorun, sonunda ürünün kalıcı bir iyileştirmesine dönüşüyor. Jüri döngünün kapandığını kendi gözüyle görüyor.
+**Kanıtladığı:**
+- M2.1 sınıflandırma: karma talebi (arka plan işi + yeni ekran) ayırıyor.
+- M2.3 yeni ekran kapsamı: ekran kodu önerisi, taslak, netleştirilecek sorular.
+- M2.4 servis bazlı etki analizi.
+- M2.5 bileşen ve servis bazlı adam-gün tahmini ve takvim.
+- M2.6 köprü: çağrı verisiyle talebin değerini kanıtlıyor, müşteri verisiyle kapsam riskini yakalıyor.
+
+**Hikâyenin kapanışı:** Bir iş biriminin düz metin talebi, beş dakika içinde gerekçesi rakamla kanıtlanmış, kapsamı veriyle düzeltilmiş, servis bazlı tahmini ve takvimi çıkmış bir geliştirme planına dönüşüyor. Talep sahibi, eksik kapsamı geliştirme bittikten sonra değil, talep anında görüyor.
+
 **Hesap ile AI ayrımı:**
-- **Kod:** Medyan efor, servis payları, takvim ve köprüdeki sayılar.
-- **AI:** Talep özeti, sınıflandırma gerekçesi, akış değişikliği, açık sorular ve açıklama metinleri.
+- **Kod:** Benzer talep eforlarının medyanı, servis payları, takvim, hedef grup büyüklüğü ve izin oranları, çağrı sayıları.
+- **AI:** Talebi bileşenlere ayırma, sınıflandırma gerekçesi, ekran taslağı, netleştirilecek sorular ve açıklama metinleri.
 
 ---
 
@@ -245,10 +268,10 @@ Eyüp Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglard
 | 1 | **A** — Hata mı, kural mı? (KRDTKULL) | Elif | ~45 sn | Probleme uygunluk, Kullanıcı deneyimi, İş değeri (çağrı önleme) |
 | 2a | **B** — Yaygın sorun, bilinen çözüm (ODMTFATR) | Mehmet (müşteri) → Zeynep (çağrı merkezi) → Eyüp | ~50 sn | Ürün çalışırlığı, İş değeri (mükerrer çağrı) |
 | 2b | **C** — AI kodu okur (KRTTBASV) | Eyüp | ~30 sn | Yenilikçilik |
-| 3 | **D** — Talepten plana + köprü (KRDTKULL) | Fatma (iş birimi) → Ayşe (analist) | ~45 sn | İş değeri, Yenilikçilik |
+| 3 | **D** — Talepten plana + köprü (taksit hatırlatma) | Fatma (iş birimi) → Ayşe (analist) | ~45 sn | İş değeri, Yenilikçilik |
 | Yedek | E, F | — | video / S-C | — |
 
-**Hikâye ipi:** KRDTKULL'deki sorun Sahne 1'de açılır, Sahne 3'te ürün iyileştirmesine dönüşür. Ekran kodları her sahnede görünür ve Mercek'in "ekran bağlamını" bildiğini sürekli hatırlatır.
+**Hikâye ipi:** Mercek her sahnede aynı veriyi (loglar ve çağrı geçmişi) farklı bir işe koşuyor. Sahne 1'de çağrıyı **önlüyor**, Sahne 2a'da mükerrer çağrıları **birleştiriyor**, Sahne 2b'de çağrıyı **koda bağlıyor**, Sahne 3'te bir iş biriminin talebini **gerekçelendirip kapsamını düzeltiyor**. Ekran kodları her sahnede görünür ve Mercek'in ekran bağlamını bildiğini sürekli hatırlatır.
 
 **Problem slaytı da buna göre değişir:** *"Şube personeli işlem yapamadığında hata mı kural mı bilemiyor, çağrı açıyor. L1 ve L2 Kibana'da log arıyor, aynı sorun için onlarca çağrı açılıyor, bilinen çözümler kişilerde kalıyor. Yeni talepler bu sorunlardan habersiz planlanıyor."*
 
@@ -270,7 +293,7 @@ Eyüp Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglard
 |---|---|
 | Kapsam | Hedef kullanıcı: banka çalışanı ve teknoloji ekipleri. M1.1 girişi: ekran kodu çubuğundaki "Sorun yaşıyorum". Yeni değer: çağrı önleme ve mükerrer çağrı birleştirme. |
 | İş planı | Demo senaryosu (§5), karakterler (Elif, Mehmet, Zeynep, Eyüp, Fatma, Ayşe), kabul kriterleri |
-| Veri planı ve üretim rehberi | Log kaynağı olarak **Faz 5 üreticisi** (kendi log üreticimize gerek kalmıyor). Senaryo kayıtları: Başkentgaz artışı, 14 Gold reddi, 312 AFFORDABILITY reddi, 58 çağrı, 4 benzer talep (adam-gün). Servis kataloğu (Kredi Kullandırım, Müşteri Yönetim, Fatura Ödeme, Kart Başvuru…) ve servis takvimleri; ücret/maliyet yok. |
+| Veri planı ve üretim rehberi | Log kaynağı olarak **Faz 5 üreticisi** (kendi log üreticimize gerek kalmıyor). Senaryo kayıtları: Başkentgaz artışı, 14 Gold reddi, gecikme konulu 186 çağrı (71'i hatırlatma), 2.340 müşterilik hedef grup ve iletişim izin dağılımı (%58 e-posta, %81 SMS), 5 benzer talep (adam-gün). Servis kataloğu (Kredi Kullandırım, Kredi Takip, Müşteri Yönetim, Fatura Ödeme, Kart Başvuru…) ve servis takvimleri; ücret/maliyet yok. |
 | Uygulama rehberi ve prompt'lar | **Teknoloji:** Next.js 16 + FastAPI (uv) → React/Vite varsayımı güncellenir. Ekran kimlikleri → ekran kodları ve `data-tour` hedefleri. Mercek sohbet API'si (`/api/mercek/chat`). Joyride v3 hazır olduğu için M1.5 küçülür. **Dağıtım:** Next.js + FastAPI'nin App Service'e nasıl taşınacağına karar verilmeli. |
 | Sunum ve taslak ekranlar | Problem slaytı, demo slaytı, mockup'lar (iç uygulama ekranlarıyla yeniden) |
 | Takım anlatım cümleleri | 2. ve 3. cümle |

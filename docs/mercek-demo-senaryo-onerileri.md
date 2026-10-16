@@ -57,7 +57,7 @@
 | **A** · KRDTKULL | Temsilci hata mı kural mı bilemiyor | Logdan iş kuralını açıklıyor, uygun tutarı hesaplayıp ekranı dolduruyor | Çağrı hiç açılmıyor |
 | **B** · ODMTFATR | Kurum sorunu; her müşteri ayrı çağrı | Müşteriye hazır açıklama, ana kayda bağlama, %93 eşleşen çözüm | Onlarca çağrı tek kayıtta |
 | **C** · ODMTFATR | Kurum numara formatını değiştirdi, ekran eskide kaldı | Log örüntüsü + kurum duyurusu + kod; düzeltme ve kalıcı öneri | 187 müşteri bulundu, sonraki olay önlendi |
-| **D** · Talep Yönlendirme | Talepler düz metin; servis, efor, erişim geç fark ediliyor | Bileşen ve servis analizi, a/g tahmini, çağrı ve izin verisiyle kapsam düzeltme | Gerekçeli plan: 20 a/g |
+| **D** · Talep Yönlendirme | İş birimi taksit hatırlatması istiyor (otomatik + ekrandan manuel); servis, efor ve erişim geç fark ediliyor | Bileşen ve servis analizi, a/g tahmini, çağrı ve izin verisiyle kapsam düzeltme | Gerekçeli plan: 20 a/g |
 | E · yedek | Yeni ekranlar standart dışı tanımlanıyor | Kod ve alan standardı önerisi | Standartlara uygun taslak |
 | F · yedek | Durum görmek Kibana bilgisi istiyor | Sohbetle günlük özet | Herkes için durum görünürlüğü |
 
@@ -203,6 +203,9 @@ Etiket: **"Öneridir, uygulanmadı."**
 > **Yönetici özeti**
 > - **Problem:** İş birimlerinin talepleri teknolojiye düz metin olarak geliyor. Etkilenen servisler, efor tahmini ve talebin hedefine gerçekten ulaşıp ulaşmayacağı geç fark ediliyor.
 > - **Kim:** Fatma (Kredi Tahsilatları Bölüm Başkanlığı) → Ayşe (iş analisti)
+> - **Fatma'nın talebi:** Taksit gecikmelerini azaltmak için iki şey istiyor:
+>   1. Daha önce gecikme yapmış müşterilere, taksit ödeme tarihinden birkaç gün önce **otomatik hatırlatma e-postası** gönderilsin.
+>   2. Temsilciler, ilgili ekrandan seçtikleri bir müşteriye o taksit için **anında hatırlatma e-postası** gönderebilsin.
 > - **Mercek nasıl yönlendirdi:**
 >   - Taksit hatırlatma talebini otomatik ve manuel bileşenlere ayırdı; yeni ekran (`KRDTTKIP`) önerdi.
 >   - Ana ve etkileşimli servisleri belirledi; benzer taleplerden 18 a/g ve takvim çıkardı.

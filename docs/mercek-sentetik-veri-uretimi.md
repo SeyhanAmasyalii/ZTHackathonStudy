@@ -1,5 +1,7 @@
 # Mercek — Sentetik Veri Üretim Rehberi
 
+> Betikler, testler ve veri dosyaları [ZtHackathonStudyOnlyDoc](https://github.com/SeyhanAmasyalii/ZtHackathonStudyOnlyDoc) reposundadır; aşağıdaki yollar o repoya (ve kopyalandıktan sonra takım reposuna) göredir.
+
 > Hangi verinin elle, betikle ya da uygulamayla üretildiği ve hazır betiklerin açıklaması: `mercek-sentetik-veri-kaynaklari.md`. V2 verisi (`data/seed/`) ve V3 betikleri (`tools/`) repoda hazırdır.
 
 `mercek-sentetik-veri-plani.md` **hangi** verinin **neden** üretileceğini, bu doküman **nasıl ve hangi değerlerle** üretileceğini anlatır. Senaryolar: `mercek-demo-senaryo-onerileri.md`.

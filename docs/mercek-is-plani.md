@@ -88,7 +88,7 @@ Rebuild **Faz 5** (log üretici) V3'ün parçasıdır. **Faz 6** (Kibana yol har
 
 | # | Görev | Sorumluluk | Kabul kriteri |
 |---|---|---|---|
-| V1 | `data/schema.sql` (14 tablo) | [6] | Azure SQL'de tablolar var |
+| V1 | `data/schema.sql` (15 tablo) | [6] | Azure SQL'de tablolar var |
 | V2 | `catalog.json` (kullanıcılar, ekranlar, servisler, kurallar, takvim) ve `announcements.json` | [6] | Değerler üretim rehberi §3 ile birebir |
 | V3 | Faz 5 log üreticisi + `inject_log_scenarios.py` | [5] | C'nin 412 kaydı; 01.10 öncesi 13 hane yok |
 | V4 | `generate_texts.py` (Foundry): çağrı notları, çözümler, talep metinleri → `texts.json` | [5] | Yasak kurallar ihlal edilmiyor |
@@ -149,7 +149,7 @@ Rebuild **Faz 5** (log üretici) V3'ün parçasıdır. **Faz 6** (Kibana yol har
 | M2.3 Yeni ekran kapsamı | C | E: `KRDTERTL` kurala uygun ve çakışmasız; taslak tablosu KRDTKULL'den yeniden kullanım gösteriyor. |
 | M2.4 Servis bazlı etki | M | D: Kredi Takip (ana), Müşteri Yönetim (etkileşimli), gerekçeleriyle. |
 | M2.5 Tahmin ve takvim | M (çatışma C) | D: 5 benzer talep, 18 a/g (11 + 7; 15 / 3), 9 Kasım → 2 Aralık. E: iki seçenek ve yan etkileri. |
-| M2.6 Köprü | M | D: 186 / 71 çağrı, 2.340 kişi, %58 → %89, +2 a/g → 20 a/g, 4 Aralık. E: 6 kat artış, 418 çağrı, +2 a/g → 17 a/g. |
+| M2.6 Köprü | M | D: 186 / 71 müşteri teması, 2.340 kişi, %58 → %89, +2 a/g → 20 a/g, 4 Aralık. E: 6 kat artış, 418 temas, +2 a/g → 17 a/g. |
 
 **Görevler**
 

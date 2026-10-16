@@ -85,7 +85,7 @@
 > - **Mercek nasıl yönlendirdi:**
 >   - Talebi iki bileşene ayırdı: günlük çalışan bir **batch işi** ve mevcut Kredi Taksit Sorgulama ekranına (`KRDRTKSR`) eklenecek bir **"Hatırlatma gönder" butonu**.
 >   - Ana ve etkileşimli servisleri belirledi; benzer taleplerden 18 a/g ve takvim çıkardı.
->   - Çağrı verisiyle talebin değerini gösterdi (71 "hatırlatma almadım" çağrısı).
+>   - Çağrı verisiyle talebin değerini gösterdi (71 "hatırlatma almadım" araması).
 >   - Hedef grubun %42'sine e-postayla ulaşılamayacağını fark edip SMS'i kapsama önerdi.
 > - **Sonuç:** Talep dakikalar içinde gerekçesi kanıtlanmış, kapsamı veriyle düzeltilmiş bir plana dönüştü: **20 a/g, 9 Kasım – 4 Aralık.**
 
@@ -312,9 +312,9 @@ Dayandığı benzer geçmiş talepler:
 **3. Köprü: çağrı ve müşteri verisi** (Mercek kendiliğinden ekliyor)
 
 > **Talebin değeri: çağrı geçmişi**
-> - Son 90 günde "gecikme faizi / taksit tarihi" konulu **186 çağrı** var.
+> - Son 90 günde "gecikme faizi / taksit tarihi" konusunda müşteriler çağrı merkezini ve şubeleri **186 kez** aramış ya da ziyaret etmiş.
 > - Bunların **71'inde** müşteri "ödeme tarihini unuttum / hatırlatma almadım" diyor.
-> - Bu çağrılar talebin doğrudan hedeflediği sorun: ayda yaklaşık 24 çağrı önlenebilir.
+> - Bu aramalar talebin doğrudan hedeflediği sorun: ayda yaklaşık 24 arama önlenebilir.
 >
 > **Kapsam riski: hedef kitleye erişim**
 > - Hedef grup (son 12 ayda gecikme yapmış, aktif bireysel kredisi olan müşteri): **2.340 müşteri.**
@@ -420,8 +420,8 @@ Ayşe iki seçeneği Hakan'a ve servis sahiplerine sunuyor. Afet aciliyeti neden
 **3. Köprü: çağrı verisi**
 
 > **Etkilenen 3 il · son 5 gün**
-> - Bu illerden gelen çağrılar normalin **6 katı.**
-> - En sık konu: *"Taksitimi ödeyemeyeceğim, erteleme var mı?"* (**418 çağrı**).
+> - Bu illerden gelen müşteri aramaları normalin **6 katı.**
+> - En sık konu: *"Taksitimi ödeyemeyeceğim, erteleme var mı?"* (**418 arama**).
 >
 > **Öneri:** Erteleme hakkı olan 4.870 müşteriye **proaktif SMS bilgilendirmesi** gönderilsin: hak, başvuru kanalları, son başvuru tarihi. Hem müşteri hakkından haberdar olur, hem de çağrı merkezine gelen bilgi amaçlı aramalar azalır.
 > - İletişim izni olan müşterilere gönderilir (Müşteri Yönetim Servisi).

@@ -41,7 +41,7 @@
 | 4 | Log senaryo enjeksiyonu | `python3 tools/mercek_data/inject_log_scenarios.py --end 2026-10-17T09:00:00+03:00` | `tools/output/mercek-logs.ndjson` | V3 |
 | 5 | Doğal dil metinleri | `python3 tools/mercek_data/generate_texts.py` | `data/seed/texts.json` (commit'lenir) | V4 |
 | 6 | Portföy | `python3 tools/mercek_data/generate_portfolio.py` | `data/out/customers.csv`, `loans.csv` | V5 |
-| 7 | Çağrılar ve çözümler | `python3 tools/mercek_data/generate_incidents.py` | `data/out/incidents.csv`, `solutions.csv` | V6 |
+| 7 | Temaslar, çağrılar ve çözümler | `python3 tools/mercek_data/generate_incidents.py` | `data/out/contacts.csv`, `incidents.csv`, `solutions.csv` | V6 |
 | 8 | Talepler | `python3 tools/mercek_data/generate_requests.py` | `data/out/requests.csv` | V6 |
 | 8b | Değerlendirme seti | `python3 tools/mercek_data/generate_requests.py --eval` | `data/seed/eval_cases.json` (commit'lenir) | V6 |
 | 9 | Yükleme | `python3 tools/mercek_data/load_all.py --sql --search` | SQL + AI Search | V7 |
@@ -65,6 +65,7 @@ Hedef: 1. gün **13:30'a kadar 1–9 bitmiş ve 11 yeşil** olmalı.
 | `banking_logs` | log_id, ts, level, screen_code, event_action, outcome, error_code, error_type, error_field, customer_number, trace_id, channel, branch_code, employee_id, institution, subscriber_no, subscriber_no_len, amount, message, raw_json | Faz 5 ECS kayıtlarından düzleştirilmiş; indeks: (screen_code, ts), (trace_id), (customer_number, ts), (institution, ts) |
 | `customers` | customer_number, full_name, segment, city, district, region_affected (bit), address_changed_at, email, phone, perm_email, perm_sms, perm_phone | |
 | `loans` | loan_id, customer_number, product, principal, remaining_principal, monthly_rate, term, next_due_date, status (`normal` / `gecikmede`), delinquent_12m (bit), collection_account | |
+| `contacts` | contact_id, created_at, channel (`cagri_merkezi` / `sube`), customer_number, city, region_affected, category, subcategory, note, incident_id | Müşteri temasları (§6) |
 | `incidents` | incident_id, created_at, channel (`sube` / `cagri_merkezi` / `dijital`), screen_code, category, subcategory, note, customer_number, subscriber_no, trace_id, city, service_id, master_incident_id, status, solution_id, resolution_minutes, error_code, institution | |
 | `solutions` | solution_id, title, symptom, root_cause, steps, error_code, service_id | AI Search'e de yüklenir |
 | `announcements` | ann_id, institution, published_at, effective_at, title, body | AI Search'e de yüklenir |
@@ -282,23 +283,34 @@ Demo sırasında uygulama aşağıdaki olayları `POST /api/logs` ile aynı ECS 
 
 ---
 
-## 6. Çağrı kayıtları (`generate_incidents.py`)
+## 6. Müşteri temasları ve teknoloji çağrı kayıtları (`generate_incidents.py`)
 
-**Hacim:** Son 90 günde ~1.400 kayıt + demo anında oluşanlar. `incident_id`: `CAG-0001`'den tarih sırasıyla; demo öncesi en son numara **CAG-2050**.
+> Betik hazır: `tools/mercek_data/generate_incidents.py`. Ayrıntı: `mercek-sentetik-veri-kaynaklari.md` §2.5.
 
-**Kategori dağılımı (temel):** Fatura ödeme %24, Kredi %22, Kart %16, Hesap %14, Müşteri bilgileri %12, Diğer %12.
+İki ayrı kayıt türü vardır:
+
+| Kayıt | Tablo | Ne | Hacim |
+|---|---|---|---|
+| **Müşteri teması** | `contacts` | Müşterinin çağrı merkezini araması veya şubeye gelmesi; temsilci not düşer. Çoğu o an çözülür, teknolojiye kayıt açılmaz. | ~8.300 (son 90 gün), `TMS-000001`… |
+| **Teknoloji çağrı kaydı** | `incidents` | Teknolojiye açılan destek kaydı; servise atanır, L2 bakar. | 1.400 (son 90 gün), **CAG-0651 … CAG-2050** (daha eskileri arşivde) |
+
+D ve E'nin köprü sayıları **temaslardan**, B ve C'nin kayıtları **çağrılardan** gelir.
+
+**Temas dağılımı:** Bölge dışından günde ~69, etkilenen 3 ilden günde ~16 temas. Kategori: Fatura ödeme %24, Kredi %22, Kart %16, Hesap %14, Müşteri bilgileri %12, Diğer %12. Kanal: çağrı merkezi %75, şube %25. Müşteri ve il portföyden (V5).
+
+**Çağrı dağılımı:** Ekran ve hata koduna göre (iş kuralı retleri için de geçmişte çağrı açılmıştır; Mercek'in önlediği durum budur). Servis hata–servis kuralından atanır. Son 3 gündeki çağrıların bir kısmı açık, gerisi kapalı; kapalıların %60'ında ilgili hata kodunun çözümü bağlıdır.
 
 **Senaryo kayıtları (kesin):**
 
-| Senaryo | Kayıtlar |
-|---|---|
-| **B** · geçmiş | 6 kapalı kurum zaman aşımı çağrısı (Başkentgaz 2, İGDAŞ 2, Enerjisa Başkent 1, CK Boğaziçi 1), `error_code = INSTITUTION_TIMEOUT`, `solution_id = SOL-031`, çözüm süresi 45–120 dk |
-| **B** · demo | CAG-2051 ana kayıt ve bağlı 11 vaka: **`demo_reset.py` yazar** (§11) |
-| **C** | 01.10 sonrası 23 çağrı: kategori Fatura ödeme, alt kategori "abone numarası kabul edilmiyor", kurum İSKİ, `status = acik`, `solution_id` boş |
-| **D** | Son 90 günde kategori "Kredi", alt kategori dağılımı: **"hatırlatma almadım / tarihi unuttum" 71**, "gecikme faizi itirazı" 64, "taksit tutarı / tarih sorusu" 51 → toplam **186** |
-| **E** | Son 5 günde (12–16.10) etkilenen 3 ilden **497** çağrı, **418'i** alt kategori "erteleme / ödeme güçlüğü". Önceki 30 günde aynı illerden günlük ortalama **16** çağrı (≈ 6 kat artış) |
+| Senaryo | Tablo | Kayıtlar |
+|---|---|---|
+| **B** · geçmiş | incidents | 6 kapalı kurum zaman aşımı çağrısı (Başkentgaz 2, İGDAŞ 2, Enerjisa Başkent 1, CK Boğaziçi 1), `solution_id = SOL-031`, çözüm süresi 45–120 dk. Arka planda açık Başkentgaz çağrısı yoktur |
+| **B** · demo | incidents | CAG-2051 ana kayıt ve bağlı 11 vaka: **`demo_reset.py` yazar** (§11) |
+| **C** | incidents | 01.10 sonrası 23 açık çağrı: İSKİ, "abone numarası kabul edilmiyor", çözüm yok. Müşteri, abone no ve `trace_id` V3 loglarındaki İSKİ denemelerinden alınır |
+| **D** | contacts | Son 90 günde Kredi kategorisinde: **"hatırlatma almadım / tarihi unuttum" 71**, "gecikme faizi itirazı" 64, "taksit tutarı / tarih sorusu" 51 → toplam **186**. Bu üç alt kategoride arka plan kaydı yoktur |
+| **E** | contacts | 12.10 sonrası etkilenen 3 ilden **497** temas, **418'i** "erteleme / ödeme güçlüğü" (arayanlar bölgedeki kredili müşteriler). 12.09–11.10 arasında aynı illerden tam **480** temas (günde **16**) → ≈ 6 kat artış. Bölgede erteleme konulu temas yalnızca senaryodan gelir |
 
-`note` alanı temsilcinin yazdığı kısa nottur (Foundry, §9.1).
+`note` alanı temsilcinin yazdığı kısa nottur (V4, `texts.json`).
 
 ---
 
@@ -320,6 +332,8 @@ Demo sırasında uygulama aşağıdaki olayları `POST /api/logs` ile aynı ECS 
 ---
 
 ## 8. Geçmiş talepler (`generate_requests.py`)
+
+> Betik hazır: `tools/mercek_data/generate_requests.py`. 87 üretilmiş + 8 kesin = 95 talep, TLP-0500…TLP-1037, 2020-06…2026-10. Uygulamadaki TLP-1038…1042 uygulamanın kendi örnek verisidir.
 
 **Hacim:** ~100 talep (`TLP-0500` – `TLP-1042`), son 24 ay. Tip dağılımı: mevcut ekran değişikliği %55, yeni ekran %20, batch işi %15, karma %10. Efor 3–40 a/g (log-normal, medyan ~12). `services_json` ana ve etkileşimli servisleri içerir. Uygulamadaki mevcut `TLP-1038…1042` kayıtları korunur.
 
@@ -475,7 +489,7 @@ Her prova ve gerçek demodan **hemen önce** çalıştırılır:
 
 | Senaryo | Kontrol | Beklenen |
 |---|---|---|
-| Genel | Kayıt sayıları | logs ≈ 10.400, customers 40.000, loans 33.000, incidents ≈ 1.400, requests ≈ 100, announcements 20 |
+| Genel | Kayıt sayıları | logs ≈ 10.400, customers 40.000, loans 33.000, contacts ≈ 8.300, incidents 1.400 (CAG-0651…2050), solutions 37, requests 95, announcements 20 |
 | A | `users` içinde elif geliri | 38.000 |
 | A | `loanPlan` Python portu ile 400.000/3 ay ve 36 ay taksit; 36 ayda azami tutar | 144.185,92 · 22.754,17 · ≈ 334.004 |
 | B | Son 30 dk Başkentgaz `INSTITUTION_TIMEOUT` (`demo_reset` sonrası) | 46 |
@@ -486,12 +500,12 @@ Her prova ve gerçek demodan **hemen önce** çalıştırılır:
 | C | C çağrıları | 23 |
 | C | `solutions`'ta "İSKİ abone numarası 13 hane kabul edilmiyor" | En yüksek skor eşiğin altında (≈ %35) |
 | C | `announcements`'ta aynı sorgu | İlk sonuç DUY-0412; ASKİ DUY-0419 da döner |
-| D | Son 90 gün "Kredi" kategorisi alt kategoriler | 71 / 64 / 51 = 186 |
+| D | Son 90 gün Kredi temasları (`contacts`), üç alt kategori | 71 / 64 / 51 = 186 |
 | D | Hedef grup ve izinler | 2.340 · e-posta 1.357 · SMS 1.895 · en az biri 2.083 |
 | D | `requests` araması (D talep metni) | İlk 5: TLP-0871, 0915, 0962, 1004, 1019 |
 | D | Servis payları ve takvim (§3.5) | Kredi Takip 15 / Müşteri Yönetim 3; 09.11 → 02.12; SMS ile 16 / 4, 04.12 |
 | E | Etkilenen bölge | 4.870 müşteri · 6.215 kredi · 612 gecikmede · 37 adres değişikliği |
-| E | Son 5 gün çağrı | 497 (418 erteleme); önceki 30 gün günlük ort. 16 |
+| E | Bölge temasları (`contacts`): 12.10 sonrası / 12.09–11.10 günlük ort. | 497 (418 erteleme) / 16 |
 | E | `requests` araması (E talep metni) | İlk 3: TLP-0588, 0712, 0846 |
 | E | Servis payları ve takvim (§3.5) | Kredi Takip 8 / Kredi Kullandırım 3 / Müşteri Yönetim 4; öncelik 19.10 → 30.10 (SMS ile 02.11); sıraya koy 09.11 → 20.11 |
 | E | Katalogda `KRDTERTL` | yok |

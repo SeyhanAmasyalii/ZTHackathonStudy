@@ -62,7 +62,7 @@ Servisler: KREDI_KULLANDIRIM, KREDI_TAKIP, MUSTERI_YONETIM, FATURA_ODEME, HESAP_
 
 ## SQL tabloları
 services, screens, screen_services, error_rules, service_calendar, scope_addons, banking_logs,
-customers, loans, incidents, solutions, announcements, requests, mercek_events
+customers, loans, contacts, incidents, solutions, announcements, requests, mercek_events
 
 ## API
 GET  /api/health                          -> {status:"ok"}
@@ -269,7 +269,7 @@ Değerlerin tamamı `docs/mercek-sentetik-veri-uretimi.md`'dedir; prompt'lar ilg
 
 ```
 Görev V1: data/schema.sql (Azure SQL / T-SQL). Bağlam: #file:docs/mercek-sentetik-veri-uretimi.md (§2)
-§2'deki 14 tabloyu PK, FK ve belirtilen indekslerle oluştur; DROP IF EXISTS ile yeniden çalıştırılabilir olsun.
+§2'deki 15 tabloyu PK, FK ve belirtilen indekslerle oluştur; DROP IF EXISTS ile yeniden çalıştırılabilir olsun.
 Türkçe metin alanları nvarchar; JSON alanları nvarchar(max) + ISJSON check.
 Kişisel veri alanı (TCKN, IBAN) yok.
 ```
@@ -338,23 +338,19 @@ Görev V5: Portföyü üret ve doğrula. Bağlam: #file:tools/README.md
 Betiğin mantığını değiştirme.
 ```
 
-### V6 — Çağrılar, çözümler, talepler · 🟡 Orta · Agent
+### V6 — Temaslar, çağrılar, çözümler, talepler · 🟢 Ucuz · Edit
+
+*Betikler hazırdır: `tools/mercek_data/generate_incidents.py`, `generate_requests.py`, testleri ve `data/seed/eval_cases.json` takım reposuna kopyalanır. Açıklama: `docs/mercek-sentetik-veri-kaynaklari.md` §2.5–2.6.*
 
 ```
-Görev V6: tools/mercek_data/generate_incidents.py ve generate_requests.py.
-Bağlam: docs/mercek-sentetik-veri-uretimi.md §6, §7, §8, #file:data/seed/catalog.json, #file:data/seed/texts.json
-- incidents: ~1.400 kayıt, son 90 gün, CAG-0001… tarih sırasıyla, son numara CAG-2050.
-  §6 tablosundaki B (6 kapalı, SOL-031), C (23 açık İSKİ), D (71/64/51), E (497, 418, önceki 30 gün ort. 16) kesin.
-  note alanı texts.json'dan.
-- solutions: ~40 kayıt (texts.json) + SOL-031 elle (§7). Abone no uzunluğu konulu kayıt yok.
-- requests: ~100 kayıt TLP-0500…TLP-1042; §8'deki D ve E benzer talepleri service_efforts_json ve decisions
-  alanlarıyla AYNEN; mevcut TLP-1038…1042 korunur; hatırlatma/erteleme konulu başka talep yok.
-- Çıktı data/out/incidents.csv, solutions.csv, requests.csv.
-- --eval: §8.1'deki 30 vakalık değerlendirme setini data/seed/eval_cases.json'a yaz
-  ({id, group: match|no_match|request, text, expected_solution_id?, expected_type?, expected_screens?,
-  expected_main_service?}). Metinler texts.json'daki ve indekse yüklenen metinlerden farklı olmalı
-  (normalize edilmiş metinde birebir veya %80+ kelime örtüşmesi varsa ele). Bu vakalar CSV'lere ve indekse girmez.
-- Test: §12 tablosundaki B, C, D, E satırları (SQL'siz, CSV üzerinden); eval_cases.json 30 kayıt, gruplar 10/10/10.
+Görev V6: Temas, çağrı, çözüm ve talep verisini üret ve doğrula. Bağlam: #file:tools/README.md
+1. V3 ve V5 çıktıları yoksa önce onları çalıştır.
+2. python3 tools/mercek_data/generate_incidents.py — özet: çağrı 1400 (CAG-0651…CAG-2050) · çözüm 37 ·
+   D 71/64/51 = 186 · E 497 (418) / günlük 16 · B 6 · C 23 olmalı.
+3. python3 tools/mercek_data/generate_requests.py --eval — 95 talep ve 30 vakalık değerlendirme seti.
+4. eval_cases.json'daki 30 vakayı oku; metni anlamsız olanı düzelt, "reviewed": true yap ve commit'le.
+5. python3 -m pytest tools/mercek_data/tests -q yeşil olmalı. data/out/ git'e girmez.
+Betiklerin mantığını değiştirme.
 ```
 
 ### V7 — Yükleme · 🟡 Orta · Agent
@@ -804,11 +800,11 @@ Görev M2.5-e: components/talep/estimate-card.tsx, timeline.tsx, options-table.t
 
 ```
 Görev M2.6-a: services/bridge.py ve repositories/portfolio.py.
-1. topic_calls(module, days=90): incidents'ta modül kategorisi, alt kategori dağılımı (D: 186 = 71/64/51).
+1. topic_contacts(category, days=90): contacts tablosunda kategori ve alt kategori dağılımı (D: 186 = 71/64/51).
 2. target_reach(template="delinquent_last_12m"): hedef grup ve izinler {total, email, sms, any} (2.340 / 1.357 /
    1.895 / 2.083) — SABİT SQL şablonu, AI SQL yazmaz.
 3. region_size(template="affected_region_active_loans"): {customers, loans, delinquent, address_changed_after}.
-4. region_call_surge(days=5): {count, topic_count, baseline_daily, ratio} (497 / 418 / 16 / ≈6).
+4. region_contact_surge(since=12.10, baseline=12.09–11.10): contacts'tan {count, topic_count, baseline_daily, ratio} (497 / 418 / 16 / ≈6).
 5. suggest_addons(results): email/total < 0.75 ve (any−email)/total ≥ 0.20 → ADD-SMS;
    ratio ≥ 3 → ADD-PROAKTIF-SMS. Her öneri sayılarıyla döner.
 Testler: eşik kuralları ve sayı hesapları (FakeRepo).

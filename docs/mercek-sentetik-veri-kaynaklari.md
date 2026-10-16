@@ -16,13 +16,13 @@ Değerlerin ayrıntısı: `mercek-sentetik-veri-uretimi.md`. Neden bu veri: `mer
 | 2 | Kurum duyuruları (20) | Elle | `data/seed/announcements.json` | ✅ | V2 |
 | 3 | Demo kullanıcıları | Elle | `catalog.json` → `users.ts` | ✅ (veri) · 🔧 (`users.ts`) | V2, A6 |
 | 4 | Kesin senaryo metinleri (SOL-031, D'nin 5 ve E'nin 3 benzer talebi, C'nin 5 çağrı notu) | Elle | `data/seed/fixed_texts.json` | ✅ | V4, V6 |
-| 5 | Değerlendirme seti (30 vaka) | Betik taslağı + elle gözden geçirme | `data/seed/eval_cases.json` | 🔧 | V6 |
+| 5 | Değerlendirme seti (30 vaka) | Betik + elle gözden geçirme | `data/seed/eval_cases.json` | ✅ üretildi · gözden geçirme 🔧 | V6 |
 | 6 | İşlem logları (~10.000) | Betik | `tools/generate_banking_logs.py` | ✅ | V3 |
 | 7 | Senaryo log kayıtları (+415) | Betik | `tools/mercek_data/inject_log_scenarios.py` | ✅ | V3 |
 | 8 | Doğal dil metinleri (~620) | Betik + Foundry | `tools/mercek_data/generate_texts.py`, `prompts/gen-*.md` | ✅ betik · şablon çıktısı hazır; Foundry çıktısı 🔧 | V4 |
 | 9 | Müşteri ve kredi portföyü (40.000 / 33.000) | Betik | `tools/mercek_data/generate_portfolio.py` | ✅ | V5 |
-| 10 | Çağrılar ve çözümler (~1.400 / ~40) | Betik | `tools/mercek_data/generate_incidents.py` | 🔧 | V6 |
-| 11 | Geçmiş talepler (~100) | Betik | `tools/mercek_data/generate_requests.py` | 🔧 | V6 |
+| 10 | Müşteri temasları, çağrılar ve çözümler (~8.300 / 1.400 / 37) | Betik | `tools/mercek_data/generate_incidents.py` | ✅ | V6 |
+| 11 | Geçmiş talepler (95) ve değerlendirme seti (30) | Betik | `tools/mercek_data/generate_requests.py` | ✅ (değerlendirme seti elle gözden geçirilecek) | V6 |
 | 12 | Yükleme (SQL + AI Search) | Betik | `tools/mercek_data/load_all.py` | 🔧 | V7 |
 | 13 | B'nin demo penceresi (46 log + CAG-2051 + 11 vaka) | Betik | `tools/mercek_data/demo_reset.py` (log kısmı ✅ `build_demo_window`) | 🔧 | V8 |
 | 14 | Doğrulama | Betik | `tools/mercek_data/validate_scenarios.py` | 🔧 | V8 |
@@ -186,12 +186,46 @@ python3 tools/mercek_data/generate_portfolio.py
 
 **Testler:** 6 test (senaryo rakamları, log müşterileriyle tutarlılık, bölge ve adres değişikliği, kredi kuralları, kişisel veri yokluğu, belirlenimcilik).
 
-### 2.5 Hackathonda yazılacak betikler 🔧
+### 2.5 `tools/mercek_data/generate_incidents.py` ✅ (V6)
+
+**Ne yapar:** İki ayrı kayıt türünü ve çözüm bilgi bankasını üretir.
+- **Müşteri temasları (`contacts`):** Müşterinin çağrı merkezini araması ya da şubeye gelmesi; temsilcinin notu. Çoğu o an çözülür. D ve E'nin köprü sayıları buradan sayılır.
+- **Teknoloji çağrı kayıtları (`incidents`):** Teknolojiye açılan destek kaydı (CAG-xxxx). B'nin geçmiş olayları ve C'nin açık çağrıları buradadır.
+- **Çözümler (`solutions`):** V4'teki 36 çözüme SOL-001'den numara verir (SOL-031 elle yazılmış kayda ayrılmıştır).
+
+**Nasıl çalışır:**
+1. **Arka plan temasları:** Son 90 günde bölge dışından günde 69, etkilenen illerden günde 16 temas. Kategori dağılımı katalogdan, müşteri ve il portföyden, not V4'ten. D'nin üç alt kategorisi ve C'nin alt kategorisi arka planda hiç kullanılmaz; bölgede erteleme konusu da kullanılmaz. Böylece senaryo sayıları kesin kalır.
+2. **D:** Kredi kategorisinde 71 / 64 / 51 temas (bölge dışı müşterilerden, son 90 güne dağılmış).
+3. **E:** 12.09–11.10 arasında bölgeden tam 480 temas (günde 16); 12.10 sonrası bölgedeki kredili müşterilerden 497 temas, 418'i "erteleme / ödeme güçlüğü".
+4. **Çağrılar:** B'nin 6 geçmiş olayı (SOL-031, 45–120 dk) ve C'nin 23 açık İSKİ çağrısı kesin; C'nin müşteri, abone no ve `trace_id` değerleri V3 loglarındaki İSKİ denemelerinden alınır, böylece log ile çağrı birbirini doğrular. Kalan çağrılar ekran ve hata kodu karışımıyla üretilir; servis hata–servis kuralından atanır. Arka planda açık Başkentgaz çağrısı yoktur (açık olan tek Başkentgaz kaydı demodaki CAG-2051).
+5. Kayıtlar zamana göre sıralanır, numaralanır (TMS-000001…, CAG-0651…CAG-2050) ve kontrol edilir.
+
+**Girdi:** `catalog.json`, `texts.json`, `fixed_texts.json`, `data/out/customers.csv` ve `loans.csv` (V5), `tools/output/mercek-logs.ndjson` (V3). **Çıktı:** `data/out/contacts.csv`, `incidents.csv`, `solutions.csv`.
+
+**Komut:** `python3 tools/mercek_data/generate_incidents.py`
+
+**Ölçülen sonuç:** 8.322 temas · 1.400 çağrı (CAG-0651…CAG-2050) · 37 çözüm · D 71 / 64 / 51 = 186 · E 497 (418) / günlük 16 · B 6 · C 23. Süre yaklaşık 1 saniye.
+
+### 2.6 `tools/mercek_data/generate_requests.py` ✅ (V6)
+
+**Ne yapar:** Geçmiş talepleri (`requests`) ve `--eval` ile değerlendirme setini (`eval_cases.json`) üretir.
+
+**Nasıl çalışır:**
+1. V4'teki 87 talep metnine (hatırlatma ve erteleme konulu olanlar yeniden elenir) TLP-0500…TLP-1037 aralığından numara verir; numarası büyüdükçe tarihi yenidir (2020-06 → 2026-10).
+2. Her talebe ekranı, tipi, talep eden birimi, efor (3–40 a/g, ortanca ~12), bileşen ve servis payları (ana servis ekran–servis ilişkisinden, etkileşimli servis %10–30) ve durum (tamamlandı) ekler.
+3. Elle yazılmış 8 kesin talep (D'nin 5'i, E'nin 3'ü) kendi numaralarıyla ve üretim rehberi §8'deki efor, servis payı ve kararlarla birebir eklenir. Mercek'in 18 a/g ve 15 a/g tahminleri bunlardan hesaplanır.
+4. **`--eval`:** 10 eşleşmeli vaka (rastgele 10 çözüm, başlığı farklı bir cümle kalıbına yerleştirilerek; beklenen çözüm no'suyla), 10 eşleşmesiz vaka (V4 taslakları) ve 10 talep vakası (beklenen tip, ekran ve ana servisle). Her vaka indeksteki çözüm ve talep metinleriyle karşılaştırılır; kelimelerin %80'i ortaksa betik durur. Vakalar `"reviewed": false` ile yazılır, elle gözden geçirilip `true` yapılır.
+
+**Girdi:** `catalog.json`, `texts.json`, `fixed_texts.json`; `--eval` için `data/out/solutions.csv`. **Çıktı:** `data/out/requests.csv` (95), `data/seed/eval_cases.json` (30, commit'lenir).
+
+**Komut:** `python3 tools/mercek_data/generate_requests.py --eval`
+
+**Testler (V6, 7 test):** senaryo rakamları; C çağrılarının loglarla eşleşmesi; B geçmişi ve açık Başkentgaz kaydı olmaması; servis atamaları; çözüm numaraları ve yasak konular; talep numaraları, tarih sırası, kesin talepler ve yasak konular; değerlendirme setinin grupları ve sızıntı kontrolü.
+
+### 2.7 Hackathonda yazılacak betikler 🔧
 
 | Betik | Ne yapar | Girdi → çıktı | Prompt |
 |---|---|---|---|
-| `generate_incidents.py` | ~1.400 çağrı (son 90 gün, CAG-0001…CAG-2050) ve ~40 çözüm; B, C, D, E çağrıları kesin | `catalog.json`, `texts.json` → `incidents.csv`, `solutions.csv` | V6 |
-| `generate_requests.py` | ~100 geçmiş talep; D ve E'nin benzer talepleri kesin; `--eval` ile 30 vakalık değerlendirme seti | `catalog.json`, `texts.json` → `requests.csv`, `eval_cases.json` | V6 |
 | `load_all.py` | Şemayı uygular, tüm veriyi Azure SQL'e ve 3 AI Search indeksine yükler; embedding'leri üretir | `data/seed`, `data/out`, `tools/output` → SQL, Search | V7 |
 | `demo_reset.py` | Prova kayıtlarını siler; B'nin penceresini (`build_demo_window` + CAG-2051 + 11 vaka) demo saatine göre yazar | SQL | V8 |
 | `validate_scenarios.py` | Senaryo rakamlarını SQL ve arama sorgularıyla kontrol eder; `--eval` doğruluk özeti | SQL, Search → rapor | V8 |
@@ -247,8 +281,8 @@ V3  generate_banking_logs.py            ✅
     inject_log_scenarios.py             ✅  → tools/output/mercek-logs.ndjson
 V4  generate_texts.py                   ✅  şablon çıktısı hazır; Foundry hazır olunca --force ile gerçek metinler
 V5  generate_portfolio.py               ✅  → data/out/customers.csv, loans.csv
-V6  generate_incidents.py               🔧
-    generate_requests.py [--eval]       🔧
+V6  generate_incidents.py               ✅  → contacts.csv, incidents.csv, solutions.csv
+    generate_requests.py --eval         ✅  → requests.csv, data/seed/eval_cases.json (gözden geçir)
 V7  load_all.py --sql --search          🔧
 V8  validate_scenarios.py [--eval]      🔧  → hepsi ✓ olmalı
     demo_reset.py --now                 🔧  (her prova ve sunumdan önce)

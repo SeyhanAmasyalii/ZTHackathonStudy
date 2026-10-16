@@ -588,10 +588,10 @@ Saf fonksiyonlar (`services/calendar.py`), bugün = demo tarihi (`TODAY` ayarı,
 
 | Sorgu | Girdi | D | E |
 |---|---|---|---|
-| Konu çağrıları | Talepteki ekranın modülü + son 90 gün + alt kategori dağılımı | 186 · 71 / 64 / 51 | — |
+| Konu temasları (`contacts`) | Talep konusunun kategorisi + son 90 gün + alt kategori dağılımı | 186 · 71 / 64 / 51 | — |
 | Hedef grup ve izinler | AI'ın çıkardığı hedef tanımı → **sabit sorgu şablonu** (`delinquent_12m = 1 AND aktif kredi`) | 2.340 · e-posta 1.357 · SMS 1.895 · en az biri 2.083 | — |
 | Bölge büyüklüğü | `region_affected = 1` | — | 4.870 · 6.215 · 612 · 37 |
-| Bölgesel çağrı artışı | Son 5 gün / önceki 30 gün günlük ortalama | — | 497 · 418 · ×6 |
+| Bölgesel temas artışı (`contacts`) | Son 5 gün / önceki 30 gün günlük ortalama | — | 497 · 418 · ×6 |
 
 AI serbest SQL yazmaz. Hedef tanımı yalnızca hazır şablonlardan birini ve parametresini seçer (`target_template: "delinquent_last_12m"`).
 

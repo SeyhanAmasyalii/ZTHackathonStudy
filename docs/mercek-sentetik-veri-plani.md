@@ -15,7 +15,8 @@
 | **Servis kataloğu ve hata–servis kuralları** | 7 servis, 17 kural | Elle | B, C, D, E | Servis ataması, etki analizi |
 | **Servis takvimi** | 3 ay | Elle | D, E | Takvim ve kapasite çatışması |
 | **Müşteri ve kredi portföyü** | 40.000 müşteri, 33.000 kredi | Betik (Faker) + senaryo kısıtları | D, E | Hedef grup ve izin dağılımı; etkilenen bölge müşterileri |
-| **Çağrı kayıtları** | ~1.400 (90 gün) + demo anında oluşanlar | Betik + Foundry metinleri | B, C, D, E | Ana kayıt, eşleşme, köprü sayıları |
+| **Müşteri temasları** | ~8.300 (90 gün) | Betik + Foundry metinleri | D, E | Köprü sayıları (konu temasları, bölgesel artış) |
+| **Teknoloji çağrı kayıtları** | 1.400 (90 gün, CAG-0651…2050) + demo anında oluşanlar | Betik + Foundry metinleri | B, C | Ana kayıt, eşleşme, benzer geçmiş olaylar |
 | **Çözüm bilgi bankası** | ~40 | Foundry + elle | B (C'de eşleşme olmaması için) | Geçmiş çözüm eşleştirme |
 | **Kurum duyuruları arşivi** | 20 | Elle | C | Kök nedenin dış kaynağı, proaktif bulgu |
 | **Geçmiş talepler** | ~100 | Betik + Foundry metinleri | D, E | Benzer talepler, a/g tahmini |
@@ -29,7 +30,7 @@
 | **A** · KRDTKULL | Elif kullanıcısının gelir alanı 38.000 TL; KRDTKULL uyarısı anında `AFFORDABILITY_EXCEEDED` olay logu (canlı); arka planda normal dağılımlı iş kuralı retleri |
 | **B** · ODMTFATR Başkentgaz | Demo anından önceki 30 dakikada 46 Başkentgaz `INSTITUTION_TIMEOUT`; CAG-2051 ana kaydı ve ona bağlı 11 vaka; geçmişte çözülmüş 6 kurum zaman aşımı olayı ve çözümü (SOL-031); Mehmet'in işlemi canlıda 47. istek |
 | **C** · ODMTFATR İSKİ | 1 Ekim'den beri 412 abone no doğrulama hatası (400'ü İSKİ, hepsi 13 hane; 187 farklı müşteri); 1 Ekim öncesi 13 haneli İSKİ numarası yok; 23 çağrı; İSKİ ve ASKİ duyuruları; bu konuda hiçbir geçmiş çözüm yok |
-| **D** · Taksit hatırlatma | Son 90 günde 186 "gecikme / taksit tarihi" çağrısı (71'i "hatırlatma almadım / tarihi unuttum"); 2.340 müşterilik hedef grup ve izin dağılımı (%58 e-posta, %81 SMS, %89 en az biri); 5 benzer talep; Kredi Takip Servisi 8 Kasım'a kadar dolu; `KRDRTKSR` katalogda |
+| **D** · Taksit hatırlatma | Son 90 günde 186 "gecikme / taksit tarihi" müşteri teması (71'i "hatırlatma almadım / tarihi unuttum"); 2.340 müşterilik hedef grup ve izin dağılımı (%58 e-posta, %81 SMS, %89 en az biri); 5 benzer talep; Kredi Takip Servisi 8 Kasım'a kadar dolu; `KRDRTKSR` katalogda |
 | **E** · Afet erteleme | 3 il "etkilenen bölge" işaretli; orada 4.870 kredili müşteri, 6.215 kredi, 612 gecikmede; afet tarihinden sonra adresi değişen 37 müşteri; son 5 günde bu illerden 497 çağrı (418'i erteleme), önceki 30 günün günlük ortalaması 16; 3 benzer talep; D'nin talebi Kredi Takip takviminde planlı |
 | **F** · Durum özeti | Bugünün logları; en sorunlu ekran ODMTFATR (B'nin artışı) |
 

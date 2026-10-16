@@ -44,9 +44,9 @@
 | 7 | Temaslar, çağrılar ve çözümler | `python3 tools/mercek_data/generate_incidents.py` | `data/out/contacts.csv`, `incidents.csv`, `solutions.csv` | V6 |
 | 8 | Talepler | `python3 tools/mercek_data/generate_requests.py` | `data/out/requests.csv` | V6 |
 | 8b | Değerlendirme seti | `python3 tools/mercek_data/generate_requests.py --eval` | `data/seed/eval_cases.json` (commit'lenir) | V6 |
-| 9 | Yükleme | `python3 tools/mercek_data/load_all.py --sql --search` | SQL + AI Search | V7 |
-| 10 | Demo sıfırlama | `python3 tools/mercek_data/demo_reset.py --now` | B'nin canlı penceresi | V8 |
-| 11 | Doğrulama | `python3 tools/mercek_data/validate_scenarios.py` | Rapor (§12) | V8 |
+| 9 | Yükleme | `python3 tools/mercek_data/load_all.py --all` (yerelde `--sqlite`) | SQL + AI Search | V7 |
+| 10 | Demo sıfırlama | `python3 tools/mercek_data/demo_reset.py --sql [--now …]` | B'nin canlı penceresi | V8 |
+| 11 | Doğrulama | `python3 tools/mercek_data/validate_scenarios.py --sql --search [--eval]` | Rapor (§12) | V8 |
 
 Hedef: 1. gün **13:30'a kadar 1–9 bitmiş ve 11 yeşil** olmalı.
 
@@ -54,23 +54,25 @@ Hedef: 1. gün **13:30'a kadar 1–9 bitmiş ve 11 yeşil** olmalı.
 
 ## 2. SQL şeması (`data/schema.sql`)
 
+`data/schema.sql` elle yazılmaz: `tools/mercek_data/db.py` içindeki tablo tanımlarından üretilir (`load_all.py --write-schema`). Aynı tanımdan yerel testler için SQLite şeması da çıkar. Zaman alanları UTC olarak (`DATETIMEOFFSET(3)`) yazılır. Yabancı anahtar bilinçli olarak yok (toplu yükleme ve demo sıfırlama sırası serbest kalsın); ilişki bütünlüğünü `validate_scenarios.py` kontrol eder.
+
 | Tablo | Alanlar | Not |
 |---|---|---|
 | `services` | service_id, name, description | 7 servis (§3.3) |
-| `screens` | code, name, module, type (T/R), simulated (bit), description, flow_json, components_json | 5 simüle + 15 yalnızca katalogda (§3.2, §3.8) |
+| `screens` | code, name, module, type (T/R), simulated (bit), description, components_json, flow_json, files_json | 5 simüle + 15 yalnızca katalogda (§3.2, §3.8) |
 | `screen_services` | screen_code, service_id, role (`ana` / `etkilesimli`) | |
 | `error_rules` | screen_code, error_code, error_type (`business` / `technical`), service_id, open_incident (bit), explanation_hint | Servis ataması kuralları (§3.4) |
 | `service_calendar` | service_id, date_from, date_to, allocation_pct, note | §3.5 |
 | `scope_addons` | addon_id, name, effort_md, main_share, customer_mgmt_share | §3.5.1 |
-| `banking_logs` | log_id, ts, level, screen_code, event_action, outcome, error_code, error_type, error_field, customer_number, trace_id, channel, branch_code, employee_id, institution, subscriber_no, subscriber_no_len, amount, message, raw_json | Faz 5 ECS kayıtlarından düzleştirilmiş; indeks: (screen_code, ts), (trace_id), (customer_number, ts), (institution, ts) |
-| `customers` | customer_number, full_name, segment, city, district, region_affected (bit), address_changed_at, email, phone, perm_email, perm_sms, perm_phone | |
-| `loans` | loan_id, customer_number, product, principal, remaining_principal, monthly_rate, term, next_due_date, status (`normal` / `gecikmede`), delinquent_12m (bit), collection_account | |
+| `banking_logs` | log_id, ts, level, screen_code, event_action, outcome, error_code, error_type, error_field, customer_number, trace_id, channel, branch_code, employee_id, institution, subscriber_no, subscriber_no_len, amount, message, source (`seed` / `demo` / `live`), raw_json | Faz 5 ECS kayıtlarından düzleştirilmiş; indeks: (screen_code, ts), (trace_id), (customer_number, ts), (institution, ts), (error_code, error_field, ts), (source) |
+| `customers` | customer_number, full_name, segment, age, monthly_income, city, district, region_affected (bit), address_changed_at, email, phone, perm_email, perm_sms, perm_phone, in_logs (bit) | |
+| `loans` | loan_id, customer_number, product, principal, remaining_principal, monthly_rate, term, installment, paid_installments, next_due_date, status (`normal` / `gecikmede`), delinquent_12m (bit), collection_account | |
 | `contacts` | contact_id, created_at, channel (`cagri_merkezi` / `sube`), customer_number, city, region_affected, category, subcategory, note, incident_id | Müşteri temasları (§6) |
-| `incidents` | incident_id, created_at, channel (`sube` / `cagri_merkezi` / `dijital`), screen_code, category, subcategory, note, customer_number, subscriber_no, trace_id, city, service_id, master_incident_id, status, solution_id, resolution_minutes, error_code, institution | |
+| `incidents` | incident_id, created_at, channel (`sube` / `cagri_merkezi` / `dijital`), screen_code, category, subcategory, note, customer_number, subscriber_no, trace_id, city, service_id, master_incident_id, status, solution_id, resolution_minutes, error_code, institution, enriched_json | Bağlı vaka numarası: ana kayıt no + sıra (`CAG-2051-01`); sonraki ana kayıt numarası yalnızca ilk 4 haneden hesaplanır |
 | `solutions` | solution_id, title, symptom, root_cause, steps, error_code, service_id | AI Search'e de yüklenir |
 | `announcements` | ann_id, institution, published_at, effective_at, title, body | AI Search'e de yüklenir |
 | `requests` | request_id, created_at, requester_unit, title, description, type, components_json, screens_json, services_json, effort_md, component_efforts_json, service_efforts_json, decisions, analysis_json, analyst, approved_by, scope_additions, status (`analiz` / `planli` / `tamamlandi`), planned_service_id, planned_from, planned_to | AI Search'e de yüklenir |
-| `mercek_events` | id, ts, kind (`prevented_call` / `linked_case` / `analysis`), screen_code, incident_id, duration_ms | Ölçümler (M1.6) |
+| `mercek_events` | event_id, ts, kind (`prevented_call` / `linked_case` / `analysis`), screen_code, incident_id, duration_ms, tokens, detail_json | Ölçümler (M1.6) |
 
 ---
 
@@ -451,7 +453,9 @@ Adet: {{count}}
 
 ---
 
-## 10. Yükleme (`load_all.py`)
+## 10. Yükleme (`load_all.py`) ✅
+
+Komutlar: `--sqlite` (yerel `data/out/mercek.db`), `--sql` (Azure SQL), `--search` (AI Search), `--all`, `--write-schema`. Tüm SQL yüklemesi tek transaction; hata olursa geri alınır. Loglar `source = 'seed'` ile yazılır.
 
 **Azure SQL:**
 1. `schema.sql` uygulanır.
@@ -467,29 +471,34 @@ Adet: {{count}}
 | `requests` | id, title, description, type (filtre), components, services, effort_md | `content_vector` |
 | `announcements` | id, institution (filtre), published_at, effective_at, title, body | `content_vector` |
 
-Embedding'ler Foundry'deki `embedding` deploy'u ile 50'şerli partilerle üretilir. Türkçe analizör kullanılır (`tr.microsoft`).
+Embedding'ler Foundry'deki `embedding` deploy'u ile 50'şerli partilerle üretilir. Türkçe analizör kullanılır (`tr.microsoft`). Vektör metriği cosine (HNSW). Doğrulamada skor, vektör sorgusunun `@search.score` değerinden 0–1 benzerliğe çevrilir (`cos = 2 − 1/score`); eşik (`MATCH_THRESHOLD = 0,75`) bu değerle karşılaştırılır.
 
 ---
 
-## 11. Demo sıfırlama (`demo_reset.py`)
+## 11. Demo sıfırlama (`demo_reset.py`) ✅
 
 Her prova ve gerçek demodan **hemen önce** çalıştırılır:
 
-1. Önceki provalarda canlı oluşan kayıtları siler: `CAG-2052` ve sonrası, `TLP-1043` ve sonrası, son 2 saatin canlı olay logları.
+1. Önceki provalarda canlı oluşan kayıtları siler: `CAG-2051` ve sonrası (yeniden yazılır), `TLP-1043` ve sonrası, seed dışı loglar (`source <> 'seed'`: önceki demo penceresi ve uygulamanın yazdığı canlı loglar). Seed verisine dokunulmaz.
 2. **B penceresi:**
    - `now − 30 dk` ile `now − 1 dk` arasına **46** Başkentgaz `INSTITUTION_TIMEOUT` logu yazar. Kanallar: İnternet Şube, Mobil, Şube; farklı müşteriler.
    - **CAG-2051** ana kaydı: `now − 24 dk`, kategori Fatura ödeme, kurum Başkentgaz, `service_id = FATURA_ODEME`.
-   - Ana kayda bağlı **11 vaka** (`master_incident_id = CAG-2051`), `now − 22 dk` … `now − 2 dk`.
+   - Ana kayda bağlı **11 vaka** `CAG-2051-01` … `-11` (`master_incident_id = CAG-2051`), `now − 22 dk` … `now − 2 dk`; müşteri, abone no ve `trace_id` pencere loglarından. Mehmet'in vakası `CAG-2051-12` olur, C'nin yeni ana kaydı `CAG-2052`.
 3. `--with-d-plan` verilirse D'nin talebini (TLP-1043, 20 a/g, Kredi Takip 09.11–04.12) planlı olarak ekler (E'yi tek başına oynatmak için).
 4. `mercek_events` sayaçlarını sıfırlar.
 
+Hepsi tek transaction. Pencere seed 7 ile üretilir; her çalıştırmada aynı müşteriler, yalnızca saatler `--now`'a göre kayar. Komut: `python3 tools/mercek_data/demo_reset.py --sql [--now 2026-10-17T13:20:00+03:00] [--with-d-plan]`.
+
 ---
 
-## 12. Doğrulama (`validate_scenarios.py`)
+## 12. Doğrulama (`validate_scenarios.py`) ✅
+
+Komut: `python3 tools/mercek_data/validate_scenarios.py --sql --search [--now …] [--only B,C] [--eval]`. `--now`, `demo_reset` ile aynı an olmalı. Search satırları `--search` verilmezse atlanır (–). Takvim satırları §3.5 kuralının başvuru uygulamasıyla (`plan()`) hesaplanır; backend takvim servisi aynı sonucu vermelidir. Yerel SQLite ile ölçülen sonuç: 17 ✓ · 0 ✗ · 5 atlandı (Search).
 
 | Senaryo | Kontrol | Beklenen |
 |---|---|---|
 | Genel | Kayıt sayıları | logs ≈ 10.400, customers 40.000, loans 33.000, contacts ≈ 8.300, incidents 1.400 (CAG-0651…2050), solutions 37, requests 95, announcements 20 |
+| Genel | Bütünlük: sahipsiz kredi, ana kayıt, temas çağrısı, çözüm | 0 / 0 / 0 / 0 |
 | A | `users` içinde elif geliri | 38.000 |
 | A | `loanPlan` Python portu ile 400.000/3 ay ve 36 ay taksit; 36 ayda azami tutar | 144.185,92 · 22.754,17 · ≈ 334.004 |
 | B | Son 30 dk Başkentgaz `INSTITUTION_TIMEOUT` (`demo_reset` sonrası) | 46 |

@@ -23,9 +23,9 @@ Değerlerin ayrıntısı: `mercek-sentetik-veri-uretimi.md`. Neden bu veri: `mer
 | 9 | Müşteri ve kredi portföyü (40.000 / 33.000) | Betik | `tools/mercek_data/generate_portfolio.py` | ✅ | V5 |
 | 10 | Müşteri temasları, çağrılar ve çözümler (~8.300 / 1.400 / 37) | Betik | `tools/mercek_data/generate_incidents.py` | ✅ | V6 |
 | 11 | Geçmiş talepler (95) ve değerlendirme seti (30) | Betik | `tools/mercek_data/generate_requests.py` | ✅ (değerlendirme seti elle gözden geçirilecek) | V6 |
-| 12 | Yükleme (SQL + AI Search) | Betik | `tools/mercek_data/load_all.py` | 🔧 | V7 |
-| 13 | B'nin demo penceresi (46 log + CAG-2051 + 11 vaka) | Betik | `tools/mercek_data/demo_reset.py` (log kısmı ✅ `build_demo_window`) | 🔧 | V8 |
-| 14 | Doğrulama | Betik | `tools/mercek_data/validate_scenarios.py` | 🔧 | V8 |
+| 12 | Yükleme (SQL + AI Search) ve şema | Betik | `tools/mercek_data/load_all.py`, `db.py`, `search.py` → `data/schema.sql` | ✅ (Azure bağlantısı hackathonda denenecek) | V1, V7 |
+| 13 | B'nin demo penceresi (46 log + CAG-2051 + 11 vaka) | Betik | `tools/mercek_data/demo_reset.py` | ✅ | V8 |
+| 14 | Doğrulama (§12 tablosu + değerlendirme seti) | Betik | `tools/mercek_data/validate_scenarios.py` | ✅ | V8 |
 | 15 | Canlı olay logları (A, B, C) | Uygulama | `/api/logs`, `/api/odm/bills/query` | 🔧 | M1.1-b |
 | 16 | Canlı çağrı kayıtları (ana kayıt, bağlı vaka, yeni çağrı) | Uygulama | `/api/mercek/assist` | 🔧 | M1.3 |
 | 17 | Canlı talep kayıtları (TLP-1043, TLP-1044) | Uygulama | `/api/requests/*` | 🔧 | M2.5-d |
@@ -222,13 +222,49 @@ python3 tools/mercek_data/generate_portfolio.py
 
 **Testler (V6, 7 test):** senaryo rakamları; C çağrılarının loglarla eşleşmesi; B geçmişi ve açık Başkentgaz kaydı olmaması; servis atamaları; çözüm numaraları ve yasak konular; talep numaraları, tarih sırası, kesin talepler ve yasak konular; değerlendirme setinin grupları ve sızıntı kontrolü.
 
-### 2.7 Hackathonda yazılacak betikler 🔧
+### 2.7 `tools/mercek_data/load_all.py` + `db.py` + `search.py` ✅ (V1, V7)
 
-| Betik | Ne yapar | Girdi → çıktı | Prompt |
-|---|---|---|---|
-| `load_all.py` | Şemayı uygular, tüm veriyi Azure SQL'e ve 3 AI Search indeksine yükler; embedding'leri üretir | `data/seed`, `data/out`, `tools/output` → SQL, Search | V7 |
-| `demo_reset.py` | Prova kayıtlarını siler; B'nin penceresini (`build_demo_window` + CAG-2051 + 11 vaka) demo saatine göre yazar | SQL | V8 |
-| `validate_scenarios.py` | Senaryo rakamlarını SQL ve arama sorgularıyla kontrol eder; `--eval` doğruluk özeti | SQL, Search → rapor | V8 |
+**Ne yapar:** Şemayı kurar, tüm veriyi veritabanına yükler; `--search` ile 3 AI Search indeksini oluşturup embedding'leriyle doldurur.
+
+**Nasıl çalışır:**
+1. **Şema (`db.py`):** 15 tablonun tanımı tek yerde durur. Aynı tanımdan Azure SQL (T-SQL) ve SQLite DDL'i üretilir; `data/schema.sql` bu tanımdan yazılır (`--write-schema`), elle düzenlenmez. JSON alanlarında `ISJSON` kontrolü, zaman alanları UTC (`DATETIMEOFFSET(3)`). Yabancı anahtar yok; bütünlüğü doğrulama betiği kontrol eder.
+2. **Yükleme sırası:** şema → katalog (6 tablo) → duyurular → müşteri/kredi → loglar (ECS kaydı düzleştirilir, tam kayıt `raw_json`'da, `source = 'seed'`) → temas → çözüm → çağrı → talep. Tek transaction; hata olursa hiçbir şey yazılmaz.
+3. **Toplu yazma:** parametreli `INSERT`, 1.000'lik paketler; Azure SQL'de `fast_executemany`.
+4. **Bağlantı:** `SQL_SERVER`, `SQL_DATABASE`; `SQL_USER` + `SQL_PASSWORD` varsa SQL kimlik doğrulama, yoksa Entra (`ActiveDirectoryDefault`, Managed Identity dahil). Şifre koda ve loga yazılmaz.
+5. **AI Search (`search.py`):** `solutions` (37), `requests` (95), `announcements` (20). Türkçe analizör, `content_vector` (boyut `EMBEDDING_DIM`, HNSW, cosine). Embedding'ler Foundry `embedding` deploy'uyla 50'şerli; model başka boyut döndürürse betik durur. Yalnızca standart kütüphane (REST).
+
+**Komutlar:** `load_all.py --sqlite` (yerel) · `--sql` · `--search` · `--all` · `--write-schema`
+
+**Ölçülen sonuç (SQLite):** 15 tablo, 10.415 log, 40.000 müşteri, 33.000 kredi, 8.322 temas, 1.400 çağrı, 37 çözüm, 95 talep, 20 duyuru. Süre yaklaşık 2 saniye.
+
+### 2.8 `tools/mercek_data/demo_reset.py` ✅ (V8)
+
+**Ne yapar:** Her prova ve sunumdan hemen önce demo verisini temiz ve tekrarlanabilir bir başlangıca getirir.
+
+**Nasıl çalışır (tek transaction):**
+1. Siler: `CAG-2051` ve sonrası, `TLP-1043` ve sonrası, seed dışı loglar (önceki demo penceresi ve uygulamanın yazdığı canlı loglar), `mercek_events`. Seed verisine dokunmaz.
+2. B penceresi: `build_demo_window` ile `now − 30 dk … now − 1 dk` arasına 46 Başkentgaz zaman aşımı logu (seed 7: her seferinde aynı müşteriler). **CAG-2051** (`now − 24 dk`) ve bağlı **11 vaka** `CAG-2051-01 … -11` (`now − 22 … − 2 dk`); müşteri, abone no ve `trace_id` pencere loglarından alınır, yani çağrı ile log birbirini doğrular.
+3. `--with-d-plan`: D'nin talebi TLP-1043 planlı olarak eklenir (20 a/g, Kredi Takip, 09.11 – 04.12). E'yi tek başına oynatmak için.
+
+**Numara kuralı:** Bağlı vaka numarası ana kayıt no + sıra. Böylece Mehmet'in vakası `CAG-2051-12`, C'de açılacak yeni ana kayıt `CAG-2052` olur.
+
+**Komut:** `demo_reset.py --sql [--now 2026-10-17T13:20:00+03:00] [--with-d-plan]` (yerelde `--sqlite`). `--now` verilmezse şu an.
+
+### 2.9 `tools/mercek_data/validate_scenarios.py` ✅ (V8)
+
+**Ne yapar:** Üretim rehberi §12 tablosundaki her satırı sorgular; beklenen ve bulunan değeri yan yana yazar (✓ / ✗ / – atlandı). En az bir ✗ varsa çıkış kodu 1.
+
+**Kapsam:** kayıt sayıları ve bütünlük; A (Elif'in geliri, `loanPlan` taksitleri ve azami tutar); B (son 30 dk 46 log, 11 bağlı vaka, SOL-031 aramada ve skor ≥ eşik); C (412 / 400 / 13 hane / 187, öncesinde 0, 23 çağrı, skor < eşik, DUY-0412 ve DUY-0419); D (71 / 64 / 51, hedef grup ve izinler, ilk 5 benzer talep, takvim); E (bölge sayıları, temas artışı, ilk 3 benzer talep, takvim seçenekleri, `KRDTERTL` yok); F (bugünün en sorunlu ekranı).
+
+**Takvim:** §3.5 kuralının başvuru uygulaması (`plan()`): süre ⌈pay × 1,2⌉, hafta sonu atlanır, öncelik verilirse takvime bakılmaz. Backend'in takvim servisi aynı tarihleri vermelidir.
+
+**`--eval`:** değerlendirme setinde match ≥ 8/10, yanlış eşleşme ≤ 1/10; talep grubu backend API'siyle ölçülür. Gözden geçirilmemiş vaka varsa "!" ile uyarır.
+
+**Komut:** `validate_scenarios.py --sql --search [--now …] [--only B,C] [--eval]`. `--now`, `demo_reset` ile aynı an olmalı.
+
+**Ölçülen sonuç (SQLite):** 17 ✓ · 0 ✗ · 5 atlandı (Search satırları; Azure'da çalışacak).
+
+**Testler (V7/V8, 14 test):** şema dosyasının tanımla aynı olması, T-SQL biçimi, zaman normalizasyonu; SQLite'ta yükle → sıfırla → doğrula (17 ✓) ve sıfırlamanın tekrarlanabilirliği; bağlı vakaların pencere loglarından gelmesi ve numaraları; takvim kuralı; sahte Azure SQL bağlantısıyla 1.000'lik paketler ve hata durumunda geri alma; sahte Search ve embedding ile indeks tanımı, 50'lik partiler, boyut kontrolü, skor dönüşümü ve değerlendirme sayımı.
 
 ---
 
@@ -255,7 +291,7 @@ Bu veriler demo sırasında uygulama çalışırken oluşur. Böylece "anlık lo
 | Senaryo | Ne oluşur |
 |---|---|
 | A | Çağrı açılmaz; `mercek_events`'e `prevented_call` |
-| B | Mehmet'in vakası (Zeynep'in mesajıyla) CAG-2051'e bağlı yeni satır olur: müşteri no, abone no, `trace.id`, kanal çağrı merkezi. Bağlı vaka 11 → 12. `linked_case` olayı |
+| B | Mehmet'in vakası (Zeynep'in mesajıyla) CAG-2051'e bağlı yeni satır olur (`CAG-2051-12`): müşteri no, abone no, `trace.id`, kanal çağrı merkezi. Bağlı vaka 11 → 12. `linked_case` olayı |
 | C | Yeni ana kayıt **CAG-2052** açılır (Fatura Ödeme Servisi), yapay zekâ ile zenginleştirilir; 23 açık İSKİ çağrısı "ilişkili çağrılar" olarak bağlanır |
 
 ### 3.3 Canlı talep kayıtları (M2.5-d)
@@ -283,7 +319,7 @@ V4  generate_texts.py                   ✅  şablon çıktısı hazır; Foundry
 V5  generate_portfolio.py               ✅  → data/out/customers.csv, loans.csv
 V6  generate_incidents.py               ✅  → contacts.csv, incidents.csv, solutions.csv
     generate_requests.py --eval         ✅  → requests.csv, data/seed/eval_cases.json (gözden geçir)
-V7  load_all.py --sql --search          🔧
-V8  validate_scenarios.py [--eval]      🔧  → hepsi ✓ olmalı
-    demo_reset.py --now                 🔧  (her prova ve sunumdan önce)
+V7  load_all.py --all                   ✅  (yerelde --sqlite) → SQL + 3 indeks
+V8  demo_reset.py --sql                 ✅  (her prova ve sunumdan önce)
+    validate_scenarios.py --sql --search [--eval]  ✅  → hepsi ✓ olmalı (--now, demo_reset ile aynı)
 ```

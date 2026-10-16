@@ -267,11 +267,13 @@ Değerlerin tamamı `docs/mercek-sentetik-veri-uretimi.md`'dedir; prompt'lar ilg
 
 ### V1 — SQL şeması · 🟢 Ucuz · Edit
 
+*Şema hazırdır: `data/schema.sql`, `tools/mercek_data/db.py` tablo tanımlarından üretilir. Dosyalar takım reposuna aynı yollarla kopyalanır; Copilot yalnızca backend modelleriyle uyumu kontrol eder.*
+
 ```
-Görev V1: data/schema.sql (Azure SQL / T-SQL). Bağlam: #file:docs/mercek-sentetik-veri-uretimi.md (§2)
-§2'deki 15 tabloyu PK, FK ve belirtilen indekslerle oluştur; DROP IF EXISTS ile yeniden çalıştırılabilir olsun.
-Türkçe metin alanları nvarchar; JSON alanları nvarchar(max) + ISJSON check.
-Kişisel veri alanı (TCKN, IBAN) yok.
+Görev V1: Hazır şemayı doğrula. Bağlam: #file:data/schema.sql #file:tools/mercek_data/db.py #file:docs/contracts.md
+1. backend'deki SQL sorgularında kullanılan tablo ve kolon adlarını schema.sql ile karşılaştır; uyuşmayanı listele.
+   Şemayı elle değiştirme: gerekiyorsa db.py TABLES'a ekle ve `python3 tools/mercek_data/load_all.py --write-schema`.
+2. Zaman alanlarının DATETIMEOFFSET (UTC) olduğunu backend'in okuma/yazma kodunda dikkate al.
 ```
 
 ### V2 — Katalog ve duyurular · 🟢 Ucuz · Edit
@@ -353,35 +355,32 @@ Görev V6: Temas, çağrı, çözüm ve talep verisini üret ve doğrula. Bağla
 Betiklerin mantığını değiştirme.
 ```
 
-### V7 — Yükleme · 🟡 Orta · Agent
+### V7 — Yükleme · 🟢 Ucuz · Edit
+
+*Betik hazırdır: `tools/mercek_data/load_all.py`, `db.py`, `search.py` takım reposuna kopyalanır. Copilot bağlantıyı kurar ve yüklemeyi doğrular.*
 
 ```
-Görev V7: tools/mercek_data/load_all.py. Bağlam: #file:data/schema.sql #file:backend/app/config.py
-#file:backend/app/clients/llm.py · docs/mercek-sentetik-veri-uretimi.md §10
-
-1. --sql: schema.sql uygula; catalog.json ve announcements.json; mercek-logs.ndjson -> banking_logs
-   (düzleştirme §2 sütunları, raw_json tam kayıt); data/out/*.csv. pyodbc fast_executemany, parametreli, FK sırası.
-2. --search: solutions, requests, announcements indekslerini oluştur/güncelle (§10 alanları, tr.microsoft analizör,
-   content_vector boyutu EMBEDDING_DIM, HNSW). Embedding'ler LLMClient.embed ile 50'şerli.
-3. --all ikisini birden. Bağlantı bilgileri ortam değişkeninden; şifre loglanmaz.
-4. Sonunda tablo/indeks başına kayıt sayısı.
+Görev V7: Hazır yükleme betiğini Azure'a bağla. Bağlam: #file:tools/mercek_data/load_all.py #file:tools/mercek_data/search.py
+#file:backend/app/config.py
+1. Ortam değişkenlerini backend config ile aynı adlarla hizala (SQL_SERVER, SQL_DATABASE, SEARCH_ENDPOINT,
+   AZURE_OPENAI_ENDPOINT, EMBEDDING_DEPLOYMENT, EMBEDDING_DIM). Yeni secret ekleme; anahtar yoksa Entra kullanılır.
+2. `python3 tools/mercek_data/load_all.py --all` çalıştır; sayıları kontrol et (logs 10.415, customers 40.000,
+   loans 33.000, contacts 8.322, incidents 1.400, solutions 37, requests 95, announcements 20; indeksler 37/95/20).
+3. Hata olursa yalnızca bağlantı/yetki kısmını düzelt; tablo tanımı ve sıra değişmez.
 ```
 
-### V8 — Demo sıfırlama ve doğrulama · 🟡 Orta · Agent
+### V8 — Demo sıfırlama ve doğrulama · 🟢 Ucuz · Edit
+
+*Betikler hazırdır: `demo_reset.py` ve `validate_scenarios.py`. Copilot yalnızca Azure'da çalıştırıp sonucu yorumlar.*
 
 ```
-Görev V8: tools/mercek_data/demo_reset.py ve validate_scenarios.py.
-Bağlam: docs/mercek-sentetik-veri-uretimi.md §11, §12, #file:backend/app/services/loan.py (varsa)
-
-demo_reset.py --now [--with-d-plan]: §11 adım 1–4 (canlı kayıtları sil; B penceresi: 46 Başkentgaz
-INSTITUTION_TIMEOUT now-30dk…now-1dk, CAG-2051 now-24dk, 11 bağlı vaka; opsiyonel TLP-1043 planı;
-mercek_events temizliği). Tek transaction.
-
-validate_scenarios.py: §12 tablosundaki her satır için SQL/Search sorgusu, beklenen ve bulunan değeri yan yana
-(--eval: eval_cases.json'daki 30 vakayı Search ve talep analizi servisinden geçirip doğruluk özetini yaz;
-hedefin altındaysa çıkış kodu 1)
-yazdır; ✓/✗; herhangi biri ✗ ise çıkış kodu 1. Search kontrolleri backend'in SearchClient'ını kullanır.
---only A,B gibi filtre.
+Görev V8: Hazır sıfırlama ve doğrulama betiklerini çalıştır. Bağlam: #file:tools/mercek_data/demo_reset.py
+#file:tools/mercek_data/validate_scenarios.py · docs/mercek-sentetik-veri-uretimi.md §11, §12
+1. `python3 tools/mercek_data/demo_reset.py --sql` (çıktıdaki now değerini not et).
+2. `python3 tools/mercek_data/validate_scenarios.py --sql --search --now <aynı an> --eval`.
+3. ✗ olan satır için nedeni bul: veri mi (betik çıktısı), arama mı (skor/eşik), backend mi. Eşiği yalnızca
+   değerlendirme setine göre ayarla (MATCH_THRESHOLD), demo cümlelerine göre değil.
+4. Backend takvim servisinin D/E tarihleri validate_scenarios.plan() ile aynı olmalı; değilse backend'i düzelt.
 ```
 
 ---

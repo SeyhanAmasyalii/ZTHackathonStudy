@@ -2,7 +2,7 @@
 
 Ayrıntılı açıklama: [`docs/mercek-sentetik-veri-kaynaklari.md`](../docs/mercek-sentetik-veri-kaynaklari.md).
 
-## Hazır betikler (V3–V6)
+## Hazır betikler (V1, V3–V8)
 
 | Betik | Ne yapar | Çıktı |
 |---|---|---|
@@ -12,8 +12,11 @@ Ayrıntılı açıklama: [`docs/mercek-sentetik-veri-kaynaklari.md`](../docs/mer
 | `mercek_data/generate_incidents.py` | Müşteri temasları, teknoloji çağrı kayıtları (CAG-0651…2050), çözüm bilgi bankası; B, C, D, E kesin | `../data/out/contacts.csv`, `incidents.csv`, `solutions.csv` |
 | `mercek_data/generate_requests.py` | Geçmiş talepler (D ve E'nin benzer talepleri kesin); `--eval` ile değerlendirme seti | `../data/out/requests.csv`, `../data/seed/eval_cases.json` |
 | `mercek_data/inject_log_scenarios.py` | Üretici çıktısına senaryo kayıtlarını ekler (C: 412 abone no hatası; Mehmet'in ödemeleri); B'nin demo penceresi için `build_demo_window()` | `output/mercek-logs.ndjson` |
+| `mercek_data/load_all.py` (+ `db.py`, `search.py`) | Şema + tüm veriyi Azure SQL'e (veya yerel SQLite'a) ve 3 AI Search indeksine yükler; `--write-schema` | `../data/schema.sql`, SQL, Search |
+| `mercek_data/demo_reset.py` | Prova kayıtlarını siler; B penceresi (46 log, CAG-2051, 11 bağlı vaka); `--with-d-plan` | SQL |
+| `mercek_data/validate_scenarios.py` | §12 senaryo kontrolleri (✓/✗), `--only`, `--eval` | Rapor, çıkış kodu |
 
-Yalnızca standart kütüphane, Python 3.9+ (Foundry'de anahtar yoksa isteğe bağlı `azure-identity`).
+Yalnızca standart kütüphane, Python 3.9+. Azure SQL için `pyodbc` + ODBC Driver 18; anahtar yoksa `azure-identity`.
 
 ```bash
 python3 tools/generate_banking_logs.py --count 10000 --days 30 --seed 42 --end 2026-10-17T09:00:00+03:00
@@ -23,6 +26,16 @@ python3 tools/mercek_data/generate_portfolio.py
 python3 tools/mercek_data/generate_incidents.py
 python3 tools/mercek_data/generate_requests.py --eval
 python3 -m pytest tools/mercek_data/tests -q
+
+# Yerel deneme (SQLite: data/out/mercek.db)
+python3 tools/mercek_data/load_all.py --sqlite
+python3 tools/mercek_data/demo_reset.py --sqlite --now 2026-10-17T09:00:00+03:00
+python3 tools/mercek_data/validate_scenarios.py --sqlite --now 2026-10-17T09:00:00+03:00
+
+# Azure (ortam değişkenleri: SQL_SERVER, SQL_DATABASE, SEARCH_ENDPOINT, AZURE_OPENAI_ENDPOINT, EMBEDDING_DIM ...)
+python3 tools/mercek_data/load_all.py --all
+python3 tools/mercek_data/demo_reset.py --sql            # her prova ve sunumdan hemen önce
+python3 tools/mercek_data/validate_scenarios.py --sql --search --eval
 ```
 
 ## Üretici parametreleri

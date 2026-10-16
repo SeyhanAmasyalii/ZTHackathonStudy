@@ -201,8 +201,8 @@ Neyin neden üretildiği `mercek-sentetik-veri-plani.md`'de, birebir değerler, 
 | 3 | V3 log üretici + enjeksiyon | [5] | Faz 5 betiği değiştirilmez; enjeksiyon ayrı betik |
 | 4 | V4 Foundry metinleri | [5] | Foundry deploy'u hazır olunca. Çıktı commit'lenir |
 | 5 | V5, V6 portföy, çağrılar, talepler | [5] | Senaryo sayıları sabit, gerisi dağılımla |
-| 6 | V7 yükleme | [6] | SQL + 3 indeks; embedding'ler Foundry'den |
-| 7 | V8 `validate_scenarios.py` | [6] | Kırmızı satır varsa ilgili betik düzeltilir |
+| 6 | V7 yükleme (`load_all.py --all`, betik hazır) | [6] | SQL + 3 indeks; embedding'ler Foundry'den |
+| 7 | V8 `demo_reset.py --sql` + `validate_scenarios.py --sql --search` (betikler hazır) | [6] | Kırmızı satır varsa ilgili betik düzeltilir |
 
 **Kabul:** Doğrulama raporu yeşil.
 
@@ -358,8 +358,8 @@ Panelde ve sohbette aynı bileşen (`components/mercek/assist-card.tsx`):
 > 🤖 Prompt: **M1.3-c**
 
 - Anahtar: `(screen_code, institution, error_code)`.
-- Son 60 dakikada açılmış, `status = acik` bir ana kayıt varsa vaka ona bağlanır: yeni `incidents` satırı, `master_incident_id = CAG-2051`, müşteri no, abone no, `trace_id`, kanal `cagri_merkezi`. `mercek_events`'e `linked_case`.
-- Yoksa yeni ana kayıt açılır (M1.3-a ile zenginleştirilir). Numara: `CAG-` + son numara + 1.
+- Son 60 dakikada açılmış, `status = acik` bir ana kayıt varsa vaka ona bağlanır: yeni `incidents` satırı (no: ana kayıt no + sıra, ör. `CAG-2051-12`), `master_incident_id = CAG-2051`, müşteri no, abone no, `trace_id`, kanal `cagri_merkezi`. `mercek_events`'e `linked_case`.
+- Yoksa yeni ana kayıt açılır (M1.3-a ile zenginleştirilir). Numara: `CAG-` + son ana kayıt numarası (ilk 4 hane) + 1.
 - C'de aynı anahtarla ana kayıt yoktur, yeni kayıt açılır (CAG-2052). O konudaki 23 açık çağrı "ilişkili çağrılar" olarak listelenir.
 - Bağlı vaka sayısı = ana kayda bağlı satırlar. B'de demo öncesi 11, Mehmet'inkiyle 12.
 

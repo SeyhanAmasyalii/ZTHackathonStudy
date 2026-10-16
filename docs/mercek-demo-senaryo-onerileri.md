@@ -1,22 +1,12 @@
-# Mercek — Demo Senaryo Önerileri (taslak, onay bekliyor)
+# Mercek — Demo Senaryoları
 
-> Bu doküman **öneridir**. Senaryolar onaylandıktan sonra kapsam, iş planı, veri, uygulama rehberi, prompt'lar ve sunum bu seçime göre güncellenecek. Son bölümde onay gereken kararlar listeli.
+## 1. Uygulama ve kullanıcılar
 
----
+### Uygulama
 
-## 1. Değişen çerçeve
+**Ana modüller:** Bankacılık · **Mercek** (sohbet arayüzü) · **Talep Yönlendirme** (talep analizi ve efor tahmini)
 
-| Önceki varsayım | Yeni çerçeve |
-|---|---|
-| Mercek'i son kullanıcı (müşteri) kullanıyor | Mercek'i **banka çalışanları ve teknoloji ekipleri** kullanıyor |
-| Mobil banka simülasyonu (Giriş, Transfer, Fatura) | `COPILOT_REBUILD_GUIDE.md` Faz 2 ve Faz 4'teki **iç bankacılık uygulaması** ve 5 işlem ekranı |
-| "Ayşe EFT yapamıyor" | **Şube personeli işlem ekranında takılıyor**, Mercek'e soruyor |
-
-### Simüle edilen uygulama (rebuild rehberinden)
-
-**Ana modüller (Faz 2):** Bankacılık · **Mercek** (sohbet arayüzü) · **Talep Yönlendirme** (talep analizi ve efor tahmini)
-
-**İşlem ekranları (Faz 4):**
+**İşlem ekranları:**
 
 | Kod | Ekran | Senaryoda kullanılan iş kuralı |
 |---|---|---|
@@ -26,14 +16,7 @@
 | `MUSTGUNC` | Müşteri Bilgi Güncelleme | İletişim izinleri (SMS, e-posta, telefon) |
 | `HSPTVDSZ` | Vadesiz Hesap Açılışı | Döviz cinsi, şube, IBAN üretimi |
 
-**Hazır olan ve bize zaman kazandıracaklar:**
-- **Sahte kullanıcılar (Faz 3)** demonun karakterleri olabilir:
-  - **Mehmet Yılmaz:** Faz 3'te Müşteri Temsilcisi; bu demoda **banka müşterisi** olarak kullanılır (işlem ekranları giriş yapan kullanıcının bilgileriyle dolduğu için doğal).
-  - **Eyüp Dalan:** Platform Yöneticisi.
-  - **Ayşe Kaya:** Kıdemli İş Analisti (teknoloji tarafı; iş biriminden gelen talepleri analiz eder).
-- **Sentetik log üretici (Faz 5):** Her log kaydında ekran kodu, müşteri, `trace.id` ve hata kodu var. İş reddi kodları: `INSUFFICIENT_INCOME`, `AFFORDABILITY_EXCEEDED`, `INSTITUTION_TIMEOUT` vb. Teknik hata kodları: `CORE_BANKING_TIMEOUT`, `SERVICE_UNAVAILABLE`, `DB_CONNECTION_ERROR`. Mercek'in okuyacağı log kaynağı hazır.
-- **Joyride senaryoları (Faz 7):** `krd-gelir-orani`, `odm-dogalgaz`, `krt-gold-onay` gibi senaryolar hazır. Mercek'in "Bana göster" çözümleri bunların üzerine kurulabilir.
-- **Talep Yönlendirme (Faz 2):** Talep listesi ve `TLP-…` talepleri mevcut. Şu anki anahtar kelimeyle ekip önerme ve ücret hesabı yerine Mercek'in **servis bazlı etki analizi ve adam-gün tahmini** gelecek. Teknoloji tarafında ekip yerine **servis** dili kullanılır: Kredi Kullandırım Servisi, Kredi Takip Servisi, Müşteri Yönetim Servisi vb.
+**Servisler:** Teknoloji tarafı servis bazlı anlatılır: Kredi Kullandırım, Kredi Takip, Müşteri Yönetim, Fatura Ödeme, Hesap Yönetim ve Kart Başvuru servisleri. Talep analizlerinde her talep için bir **ana servis** ve **etkileşimli servisler** belirlenir; tahminler **adam-gün (a/g)** cinsindendir.
 
 ### Kullanıcılar ve Mercek'e giriş noktaları
 
@@ -42,13 +25,13 @@
 | **Elif** (şube müşteri temsilcisi) | Bankacılık işlem ekranları | Ekran kodu çubuğundaki **"Sorun yaşıyorum"** butonu. Mercek paneli ekran kodu, müşteri no, son `trace.id` ve ekrandaki hata mesajıyla açılır. |
 | **Mehmet** (banka müşterisi) | İnternet şubesi (ODMTFATR) | Mercek'i kullanmaz; sorun yaşayınca çağrı merkezini arar. |
 | **Zeynep** (çağrı merkezi temsilcisi) | Mercek sohbet | Müşterinin anlattığını serbest metinle yazar; Mercek logları, ana kaydı ve müşteriye söylenecekleri getirir. |
-| **Eyüp** (Platform Yöneticisi / L2 destek) | Mercek sayfası | Sohbet + çağrı listesi: zenginleştirilmiş kayıtlar, loglar, eşleşmeler, kod analizi |
+| **Kerem** (Platform Yöneticisi / L2 destek) | Mercek sayfası | Sohbet + çağrı listesi: zenginleştirilmiş kayıtlar, loglar, eşleşmeler, kod analizi |
 | **Fatma** (Kredi Tahsilatları Bölüm Başkanlığı, iş birimi) | Talep Yönlendirme | İhtiyacını kendi cümleleriyle yazar; Mercek'in analizini görür, kapsam önerisini onaylar. |
 | **Ayşe** (Kıdemli İş Analisti, teknoloji) | Talep Yönlendirme | Mercek'in analizini gözden geçirir, açık soruları iş birimiyle netleştirir, köprü önerisini iş birimine sunar. |
 
 ---
 
-## 2. Önerilen senaryolar
+## 2. Senaryolar
 
 ### Senaryolar bir bakışta
 
@@ -63,17 +46,17 @@
 
 ### 2.1 Yönetici özetleri
 
-#### Senaryo A — "Hata mı, kural mı?" (KRDTKULL · iş kuralı reddi) ⭐ önerilen açılış
+#### Senaryo A — "Hata mı, kural mı?" (KRDTKULL · iş kuralı reddi) · açılış
 
 > - **Problem:** Şube temsilcisi müşteriye kredi kullandıramıyor. Ekrandaki uyarının sistem hatası mı yoksa iş kuralı mı olduğunu ayırt edemiyor ve çağrı açmaya yöneliyor.
 > - **Kim:** Elif (şube müşteri temsilcisi)
 > - **Mercek nasıl yönlendirdi:** Ekran kodu ve son işlem üzerinden logu buldu. Durumun hata değil iş kuralı olduğunu açıkladı (taksit gelirin %50'sini aşıyor). Kullandırılabilecek en yüksek tutarı hesapladı (36 ay, ~334.000 TL) ve "Bana göster" ile ekranı doğru değerlerle doldurdu.
 > - **Sonuç:** İşlem şubede tamamlandı, **çağrı hiç açılmadı.**
 
-#### Senaryo B — "Yaygın teknik sorun, bilinen çözüm" (ODMTFATR · kurum zaman aşımı · çağrı merkezi) ⭐
+#### Senaryo B — "Yaygın teknik sorun, bilinen çözüm" (ODMTFATR · kurum zaman aşımı · çağrı merkezi)
 
 > - **Problem:** Bir kurumun (Başkentgaz) entegrasyonu yavaşladı, müşteriler fatura ödeyemiyor ve çağrı merkezini arıyor. Her aramada ayrı çağrı açılıyor, temsilci müşteriye ne söyleyeceğini bilmiyor.
-> - **Kim:** Mehmet (müşteri) → Zeynep (çağrı merkezi) → Eyüp (L2)
+> - **Kim:** Mehmet (müşteri) → Zeynep (çağrı merkezi) → Kerem (L2)
 > - **Mercek nasıl yönlendirdi:**
 >   - Temsilcinin serbest metninden ekranı, kurumu ve abone no'yu çıkardı; loglarda müşterinin başarısız işlemini ve yaygın kurum sorununu buldu.
 >   - Temsilciye müşteriye söylenecek hazır açıklamayı verdi.
@@ -81,10 +64,10 @@
 >   - L2'ye %93 eşleşen geçmiş çözümü getirdi.
 > - **Sonuç:** Müşteri doğru bilgilendirildi, onlarca arama **tek kayıtta toplandı**, L2 bilinen çözümü dakikalar içinde uyguladı.
 
-#### Senaryo C — "Dış dünya değişti, ekran değişmedi" (ODMTFATR · İSKİ abone numarası formatı) ⭐
+#### Senaryo C — "Dış dünya değişti, ekran değişmedi" (ODMTFATR · İSKİ abone numarası formatı)
 
 > - **Problem:** İSKİ yeni abonelere 13 haneli numara vermeye başladı, ama ekranımız 6–12 hane kabul ediyor. Müşteriler su faturasını ödeyemiyor ve kimse nedenini bilmiyor.
-> - **Kim:** Elif (şube) → Eyüp (L2)
+> - **Kim:** Elif (şube) → Kerem (L2)
 > - **Mercek nasıl yönlendirdi:**
 >   - Log örüntüsünü buldu: hatalar yalnızca İSKİ'de, yalnızca 13 haneli numaralarda ve 1 Ekim'den beri görülüyor.
 >   - Kurum duyuruları arşivinde İSKİ'nin geçiş duyurusunu buldu.
@@ -92,7 +75,7 @@
 >   - ASKİ'nin Ocak'taki benzer geçişini önceden haber verdi.
 > - **Sonuç:** Kök neden dakikalar içinde bulundu, **187 etkilenen müşteri** belirlendi, bir sonraki benzer olay önlendi.
 
-#### Senaryo D — "Talepten plana, sorundan kapsama" (Talep Yönlendirme · taksit hatırlatma) ⭐ önerilen kapanış
+#### Senaryo D — "Talepten plana, sorundan kapsama" (Talep Yönlendirme · taksit hatırlatma) · kapanış
 
 > - **Problem:** İş birimlerinin talepleri teknolojiye düz metin olarak geliyor. Etkilenen servisler, efor tahmini ve talebin hedefine gerçekten ulaşıp ulaşmayacağı geç fark ediliyor.
 > - **Kim:** Fatma (Kredi Tahsilatları Bölüm Başkanlığı) → Ayşe (iş analisti)
@@ -122,7 +105,7 @@
 #### Senaryo F — Günlük durum özeti (Mercek sohbet) · yedek
 
 > - **Problem:** Ekranların günlük durumunu görmek için Kibana'da panel taramak gerekiyor; bu herkesin yapabileceği bir iş değil.
-> - **Kim:** Eyüp (platform yöneticisi)
+> - **Kim:** Kerem (platform yöneticisi)
 > - **Mercek nasıl yönlendirdi:** "Bugün en çok sorun yaşanan ekran hangisi?" sorusuna loglardan özet çıkardı: ekran, sorun, etkilenen şube ve işlem sayısı, açık ana kayıt.
 > - **Sonuç:** Kibana bilgisi gerektirmeden, sohbetle durum özeti.
 
@@ -130,7 +113,7 @@
 
 ### 2.2 Senaryo detayları
 
-#### Senaryo A — "Hata mı, kural mı?" (KRDTKULL · iş kuralı reddi) ⭐ önerilen açılış
+#### Senaryo A — "Hata mı, kural mı?" (KRDTKULL · iş kuralı reddi) · açılış
 
 **Problem:** Şube personeli ekranda "işlem yapılamıyor" gördüğünde bunun sistem hatası mı yoksa iş kuralı reddi mi olduğunu çoğu zaman ayırt edemiyor ve çağrı açıyor. Oysa log üreticisinin dağılımına göre iş kuralı retleri teknik hatalardan çok daha sık.
 
@@ -148,7 +131,7 @@
 
 ---
 
-#### Senaryo B — "Yaygın teknik sorun, bilinen çözüm" (ODMTFATR · kurum zaman aşımı · çağrı merkezi) ⭐
+#### Senaryo B — "Yaygın teknik sorun, bilinen çözüm" (ODMTFATR · kurum zaman aşımı · çağrı merkezi)
 
 **Problem:** Bir kurum entegrasyonu yavaşladığında çok sayıda müşteri aynı anda çağrı merkezini arıyor. Her temsilci ayrı çağrı açıyor ve aynı sorun için onlarca kayıt oluşuyor. Temsilci müşteriye ne söyleyeceğini bilmiyor, L2 de kayıtlara tek tek bakıyor.
 
@@ -161,7 +144,7 @@
    > *"Müşterinin ödemesi tamamlanmadı ve hesabından tahsilat yapılmadı. Neden müşteriyle ilgili değil: son 30 dakikada Başkentgaz'a giden 47 ödeme isteği tüm kanallarda `INSTITUTION_TIMEOUT` ile düştü. Konu Fatura Ödeme Servisi'nin kurum entegrasyonunda.*
    > *Müşteriye söyleyebileceğiniz: 'Ödemeniz alınmadı, hesabınızdan para çekilmedi. Kurum kaynaklı geçici bir sorun var; sorun giderilince SMS ile bilgilendirileceksiniz. Son ödeme tarihine kadar gecikme faizi oluşmaz.'"*
 5. **Mükerrer çağrı birleştirme:** Aynı dakikalarda başka müşteriler de aynı sorun için çağrı merkezini arıyor ve başka temsilciler de Mercek'e yazıyor. Mercek ilk vakada **ana çağrı kaydını** (CAG-2051) açmış. Her yeni vakayı yeni çağrı açmadan bu kayda bağlıyor: müşteri no, abone no, `trace.id`. Zeynep'in ekranında *"Ana kayıt CAG-2051'e bağlandı · bağlı vaka: 12"* görünüyor; sayaç demo sırasında artmaya devam ediyor.
-6. **Eyüp (L2)**, Mercek sayfasında CAG-2051'i açıyor:
+6. **Kerem (L2)**, Mercek sayfasında CAG-2051'i açıyor:
    - Zenginleştirilmiş kayıt: ekran, kurum, hata kodu, ilk görülme zamanı, etkilenen müşteri sayısı, kanal dağılımı, örnek `trace.id`'ler, bağlı 12 vaka.
    - Servis ataması kuralla: `INSTITUTION_TIMEOUT` + ODMTFATR → Fatura Ödeme Servisi (kurum entegrasyonu).
    - **%93 eşleşme:** geçmişte 6 benzer kurum zaman aşımı olayı ve kaynaklarıyla birlikte uyarlanmış çözüm (kurum zaman aşımı eşiği, istek kuyruklama, kurumla iletişim adımları).
@@ -179,7 +162,7 @@
 
 ---
 
-#### Senaryo C — "Dış dünya değişti, ekran değişmedi" (ODMTFATR · İSKİ abone numarası formatı) ⭐
+#### Senaryo C — "Dış dünya değişti, ekran değişmedi" (ODMTFATR · İSKİ abone numarası formatı)
 
 **Olay sırası (basitçe):**
 1. İSKİ, 12 Eylül'de kurumlara bir duyuru gönderiyor: *"1 Ekim 2026 itibarıyla yeni abonelere 13 haneli abone numarası verilecektir."*
@@ -198,7 +181,7 @@ Kimse hata yapmamış: kural yazıldığı gün doğruydu, sonra dış dünya de
 
 Mercek çağrıyı **Fatura Ödeme Servisi**'ne atıyor (kural: ODMTFATR + kurum doğrulaması).
 
-**3. Eyüp (L2) çağrıyı açıyor.** Geçmiş çözümlerle eşleşme **%35**, eşiğin (%75) altında; bu yeni bir sorun. Mercek koda geçiyor.
+**3. Kerem (L2) çağrıyı açıyor.** Geçmiş çözümlerle eşleşme **%35**, eşiğin (%75) altında; bu yeni bir sorun. Mercek koda geçiyor.
 
 **4. Kod analizi:** Mercek abone numarası kuralının **iki yerde** tanımlı olduğunu buluyor: ekranda (ODMTFATR formu) ve Fatura Ödeme Servisi'nde. İkisi de aynı sabit kuralı kullanıyor:
 
@@ -227,15 +210,14 @@ Etiket: **"Öneridir, uygulanmadı."**
 **Jüriye tek cümleyle:** *"Kurum numarayı uzattı, bizim ekran hâlâ eski uzunluğu bekliyor; Mercek bunu loglardan, kurumun duyurusundan ve koddan birlikte çıkarıyor."*
 
 **Uygulama notları:**
-- Bu sefer kasıtlı bir hata gömülmüyor. Rebuild rehberinde ODMTFATR abone numarası kuralı zaten **6–12 hane** olarak tanımlı. Mercek **uygulamanın kendi kodunu** okuyabilir; `sample-codebase/` kopyasına gerek yok.
+- Bu sefer kasıtlı bir hata gömülmüyor. Uygulamada ODMTFATR abone numarası kuralı zaten **6–12 hane** olarak tanımlı. Mercek **uygulamanın kendi kodunu** okuyabilir; `sample-codebase/` kopyasına gerek yok.
 - Demo modunda ekrandaki doğrulama hatası backend'e log olarak yazılır (gerçekte Fatura Ödeme Servisi'nin `VALIDATION_ERROR` kaydı).
 - **Veride hazır olacaklar:** 1 Ekim'den beri İSKİ için 13 haneli 412 doğrulama hatası (187 müşteri), 23 çağrı ve kurum duyuruları arşivi (İSKİ 12 Eylül, ASKİ Ocak 2027 ve birkaç ilgisiz duyuru). Arşiv AI Search'te ayrı bir indeks olur.
 
-**Yedek senaryo:** Faiz parametresi güncellendiğinde 24 saat boyunca eski oranı kullanan önbellek. Daha etkileyici, ama anlatımı daha uzun.
 
 ---
 
-#### Senaryo D — "Talepten plana, sorundan kapsama" (Talep Yönlendirme · taksit hatırlatma) ⭐ önerilen kapanış
+#### Senaryo D — "Talepten plana, sorundan kapsama" (Talep Yönlendirme · taksit hatırlatma) · kapanış
 
 **Problem:** İş birimlerinin talepleri teknolojiye düz metin olarak geliyor. Hangi servislerin etkileneceği, hangi verinin hazır olduğu ve talebin hedeflenen müşteriye gerçekten ulaşıp ulaşmayacağı genellikle geliştirme başladıktan sonra fark ediliyor. Tahmin toplantılarda elle yapılıyor.
 
@@ -468,17 +450,17 @@ Hakan **"Evet"** diyor. Tahmin kartı güncelleniyor:
 
 #### Senaryo F — Günlük durum özeti (Mercek sohbet) · yedek
 
-Eyüp Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglardan cevap: ODMTFATR, Başkentgaz zaman aşımı artışı, etkilenen şube ve işlem sayısı, açık ana kayıt. Kibana'ya girmeden sohbetle durum özeti alınıyor.
+Kerem Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglardan cevap: ODMTFATR, Başkentgaz zaman aşımı artışı, etkilenen şube ve işlem sayısı, açık ana kayıt. Kibana'ya girmeden sohbetle durum özeti alınıyor.
 
 ---
 
-## 3. Önerilen demo kurgusu (≈ 2,5 dakika)
+## 3. Demo kurgusu (≈ 2,5 dakika)
 
 | Sahne | Senaryo | Kim | Süre | Jüri kriteri |
 |---|---|---|---|---|
 | 1 | **A** — Hata mı, kural mı? (KRDTKULL) | Elif | ~45 sn | Probleme uygunluk, Kullanıcı deneyimi, İş değeri (çağrı önleme) |
-| 2a | **B** — Yaygın sorun, bilinen çözüm (ODMTFATR) | Mehmet (müşteri) → Zeynep (çağrı merkezi) → Eyüp | ~50 sn | Ürün çalışırlığı, İş değeri (mükerrer çağrı) |
-| 2b | **C** — Dış dünya değişti (ODMTFATR · İSKİ) | Elif → Eyüp | ~35 sn | Yenilikçilik, Ürün çalışırlığı |
+| 2a | **B** — Yaygın sorun, bilinen çözüm (ODMTFATR) | Mehmet (müşteri) → Zeynep (çağrı merkezi) → Kerem | ~50 sn | Ürün çalışırlığı, İş değeri (mükerrer çağrı) |
+| 2b | **C** — Dış dünya değişti (ODMTFATR · İSKİ) | Elif → Kerem | ~35 sn | Yenilikçilik, Ürün çalışırlığı |
 | 3 | **D** — Talepten plana + köprü (taksit hatırlatma) | Fatma (iş birimi) → Ayşe (analist) | ~45 sn | İş değeri, Yenilikçilik |
 | Yedek | E, F | — | video / S-C | — |
 
@@ -486,7 +468,7 @@ Eyüp Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglard
 
 **Problem slaytı da buna göre değişir:** *"Şube personeli işlem yapamadığında hata mı kural mı bilemiyor, çağrı açıyor. L1 ve L2 Kibana'da log arıyor, aynı sorun için onlarca çağrı açılıyor, bilinen çözümler kişilerde kalıyor. Yeni talepler bu sorunlardan habersiz planlanıyor."*
 
-### İş değeri anlatımı (rakamlar veride sabitlenecek)
+### İş değeri anlatımı
 
 | Ölçü | Bugün | Mercek ile |
 |---|---|---|
@@ -495,27 +477,3 @@ Eyüp Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglard
 | Bilinen sorun | L2 log arar, çözüm kişide | %93 eşleşme, kaynaklı çözüm, saniyeler |
 | Yeni hata | Kod baştan incelenir | Log + kod ilişkilendirilip satır düzeyinde öneri |
 | Talep tahmini | Toplantıda elle; etkilenen servisler sonradan ortaya çıkıyor | Servis bazlı etki, benzer taleplerden adam-gün ve takvim; ekranın sorun geçmişi kapsamda |
-
----
-
-## 4. Seçim yapılırsa diğer dokümanlara etkisi (onay sonrası yapılacak)
-
-| Doküman | Değişecek |
-|---|---|
-| Kapsam | Hedef kullanıcı: banka çalışanı ve teknoloji ekipleri. M1.1 girişi: ekran kodu çubuğundaki "Sorun yaşıyorum". Yeni değer: çağrı önleme ve mükerrer çağrı birleştirme. |
-| İş planı | Demo senaryosu (§5), karakterler (Elif, Mehmet, Zeynep, Eyüp, Fatma, Ayşe), kabul kriterleri |
-| Veri planı ve üretim rehberi | Log kaynağı olarak **Faz 5 üreticisi** (kendi log üreticimize gerek kalmıyor). Senaryo kayıtları: Başkentgaz artışı, İSKİ 13 haneli abone no doğrulama hataları (1 Ekim'den beri 412 deneme, 187 müşteri, 23 çağrı), kurum duyuruları arşivi, gecikme konulu 186 çağrı (71'i hatırlatma), 2.340 müşterilik hedef grup ve iletişim izin dağılımı (%58 e-posta, %81 SMS), 5 benzer talep (adam-gün). Servis kataloğu (Kredi Kullandırım, Kredi Takip, Müşteri Yönetim, Fatura Ödeme, Kart Başvuru…) ve servis takvimleri; ücret/maliyet yok. |
-| Uygulama rehberi ve prompt'lar | **Teknoloji:** Next.js 16 + FastAPI (uv) → React/Vite varsayımı güncellenir. Ekran kimlikleri → ekran kodları ve `data-tour` hedefleri. Mercek sohbet API'si (`/api/mercek/chat`). Joyride v3 hazır olduğu için M1.5 küçülür. **Dağıtım:** Next.js + FastAPI'nin App Service'e nasıl taşınacağına karar verilmeli. |
-| Sunum ve taslak ekranlar | Problem slaytı, demo slaytı, mockup'lar (iç uygulama ekranlarıyla yeniden) |
-| Takım anlatım cümleleri | 2. ve 3. cümle |
-
----
-
-## 5. Onay gereken kararlar
-
-1. **Senaryo seti:** Önerim A + B + C + D canlı, E ve F yedek. Değişiklik var mı?
-2. ~~Sahne 2b'deki hata~~ **Karar verildi:** ODMTFATR · İSKİ abone numarası formatı değişikliği. Yedek: faiz parametresi önbellek senaryosu.
-3. ~~Mercek'in incelediği kod~~ **Karar verildi (senaryodan doğdu):** Mercek uygulamanın kendi kodunu okur. Kasıtlı hata gömülmüyor; 6–12 hane kuralı rebuild rehberinde zaten tanımlı.
-4. **Mercek'e giriş:** Ekran kodu çubuğunda "Sorun yaşıyorum" butonu ile bağlamlı yan panel + ayrı Mercek sohbet sayfası (önerim) mi, yalnızca sohbet sayfası mı?
-5. ~~Maliyet modeli~~ **Karar verildi:** Ücret hesaplanmaz; tahmin yalnızca **adam-gün** ve takvim. Teknoloji tarafı **servis** bazlı anlatılır (ana servis / etkileşimli servis).
-6. **Demo kullanıcıları:** Faz 3'teki Mehmet (müşteri), Eyüp (L2) ve Ayşe (analist) kullanılır; sahte kullanıcı listesine üç kişi eklenir: **Elif** (şube müşteri temsilcisi, Senaryo A), **Zeynep** (çağrı merkezi temsilcisi, Senaryo B) ve **Fatma** (Kredi Tahsilatları Bölüm Başkanlığı, Senaryo D). Uygun mu?

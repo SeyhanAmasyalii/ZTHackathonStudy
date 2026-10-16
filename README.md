@@ -3,7 +3,7 @@
 **Takım:** AI Overflow · **Proje:** Mercek · **Slogan:** "Soruna odaklanır, çözümü netleştirir."
 **Hackathon:** Ziraat Teknoloji Yapay Zeka Hackathonu, 16–17 Ekim 2026, Tema 2
 
-> **Bu repo yalnızca bilgi dokümanlarını içerir.** Hazır kod ve veri (betikler, testler, `data/seed`, `data/schema.sql`, sunum üretim betiği ve görselleri) [ZtHackathonStudyOnlyDoc](https://github.com/SeyhanAmasyalii/ZtHackathonStudyOnlyDoc) reposundadır; takım reposuna oradan kopyalanır.
+> **Bu repo yalnızca bilgi dokümanlarını içerir.** Hazır kod ve veri (betikler, testler, `data/seed`, `data/schema.sql`, sunum üretim betiği ve görselleri) [ZtHackathonStudyWithData](https://github.com/SeyhanAmasyalii/ZtHackathonStudyWithData) reposundadır; takım reposuna oradan kopyalanır.
 
 Bu doküman, hackathon boyunca kullanacağımız tüm dokümanları (hepsi bu repoda, `docs/` ve `presentation/` altında) **hangi sırayla, ne zaman ve ne için** açacağımızı anlatır. Hepsini baştan sona okumak gerekmiyor; aşağıdaki sırayı izleyin.
 
@@ -26,12 +26,12 @@ Bu doküman, hackathon boyunca kullanacağımız tüm dokümanları (hepsi bu re
 | 9 | [`docs/mercek-sentetik-veri-plani.md`](docs/mercek-sentetik-veri-plani.md) | Hangi veriler, ne kadar, neden; her senaryonun veride taşıması gerekenler | Veri sorumluları, analist |
 | 10 | [`docs/mercek-sentetik-veri-uretimi.md`](docs/mercek-sentetik-veri-uretimi.md) | Verinin **nasıl ve hangi değerlerle** üretileceği: şema, kataloglar, senaryo rakamları, yasak kurallar, betikler, Foundry prompt'ları, demo sıfırlama, doğrulama tablosu | Veri sorumluları |
 | 11 | [`presentation/Mercek_AI_Overflow_Sunum.pptx`](presentation/Mercek_AI_Overflow_Sunum.pptx) ([PDF](presentation/Mercek_AI_Overflow_Sunum.pdf)) | Ziraat Teknoloji sunum şablonuyla 11 slaytlık sunum: altı senaryo tek slaytta, canlı demo dört sahne, konuşmacı notları, taslak ekranlar | Sunum sorumlusu, herkes |
-| 12 | [`presentation/sablon/`](presentation/sablon) | Ziraat Teknoloji kurum sunum şablonu (sunumu üreten betik ve taslak ekranlar [ZtHackathonStudyOnlyDoc](https://github.com/SeyhanAmasyalii/ZtHackathonStudyOnlyDoc) reposunda) | Sunum sorumlusu |
+| 12 | [`presentation/sablon/`](presentation/sablon) | Ziraat Teknoloji kurum sunum şablonu (sunumu üreten betik ve taslak ekranlar [ZtHackathonStudyWithData](https://github.com/SeyhanAmasyalii/ZtHackathonStudyWithData) reposunda) | Sunum sorumlusu |
 | 13 | [`docs/mercek-takim-anlatim-cumleleri.md`](docs/mercek-takim-anlatim-cumleleri.md) | Her dokümanın ana fikri tek cümlede ve akılda kalacak rakamlar | Toplantıyı yöneten, herkes |
 | 14 | [`docs/mercek-sentetik-veri-kaynaklari.md`](docs/mercek-sentetik-veri-kaynaklari.md) | Her verinin kaynağı: **elle** yazılanlar, **betikle** üretilenler (betik açıklamalarıyla), **uygulamanın** ürettikleri; durum ve çalıştırma sırası | Veri sorumluları, geliştiriciler |
 | 15 | [`docs/mercek-sentetik-veri-sayilari.md`](docs/mercek-sentetik-veri-sayilari.md) | Üretilen tüm sentetik verinin konu konu adetleri | Herkes |
 | 16 | [`prompts/`](prompts) | Foundry'ye veri metni ürettiren prompt'lar (V4) | Veri sorumluları |
-| 17 | [ZtHackathonStudyOnlyDoc](https://github.com/SeyhanAmasyalii/ZtHackathonStudyOnlyDoc) | Hazır veri ve betikler (V1–V8, testleriyle), sunum üretim betiği ve görselleri | Veri sorumluları, sunum sorumlusu |
+| 17 | [ZtHackathonStudyWithData](https://github.com/SeyhanAmasyalii/ZtHackathonStudyWithData) | Hazır veri ve betikler (V1–V8, testleriyle), sunum üretim betiği ve görselleri | Veri sorumluları, sunum sorumlusu |
 
 **Dokümanlar arası ilişki**
 
@@ -105,8 +105,8 @@ Görev kodları (A1, V3, M1.2-b, Q9 …) ve sorumluluk numaraları ([1]–[19]) 
 | [`docs/COPILOT_REBUILD_GUIDE.md`](docs/COPILOT_REBUILD_GUIDE.md) | `docs/` |
 | [`.github/copilot-instructions.md`](.github/copilot-instructions.md) | `.github/` (dosya adı değişmeden) |
 | Prompt kütüphanesi §1 "Ortak sözleşmeler" | `docs/contracts.md` |
-| [ZtHackathonStudyOnlyDoc](https://github.com/SeyhanAmasyalii/ZtHackathonStudyOnlyDoc) → `data/seed/`, `data/schema.sql` | `data/` (aynı yollar) |
-| [ZtHackathonStudyOnlyDoc](https://github.com/SeyhanAmasyalii/ZtHackathonStudyOnlyDoc) → `tools/` (betikler ve testler) | `tools/` (aynı yollar) |
+| [ZtHackathonStudyWithData](https://github.com/SeyhanAmasyalii/ZtHackathonStudyWithData) → `data/seed/`, `data/schema.sql` | `data/` (aynı yollar) |
+| [ZtHackathonStudyWithData](https://github.com/SeyhanAmasyalii/ZtHackathonStudyWithData) → `tools/` (betikler ve testler) | `tools/` (aynı yollar) |
 | [`prompts/gen-*.md`](prompts) | `prompts/` |
 
 Kapsam, senaryolar, iş planı, uygulama rehberi ve prompt kütüphanesi **ürün reposuna konmaz**; takımın çalışma dokümanıdır. Sunum dosyası teslim için ayrıca yüklenir.

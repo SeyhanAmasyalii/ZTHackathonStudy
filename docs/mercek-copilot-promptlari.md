@@ -278,7 +278,7 @@ Görev V1: Hazır şemayı doğrula. Bağlam: #file:data/schema.sql #file:tools/
 
 ### V2 — Katalog ve duyurular · 🟢 Ucuz · Edit
 
-*Katalog verisi hazırdır: [ZtHackathonStudyOnlyDoc](https://github.com/SeyhanAmasyalii/ZtHackathonStudyOnlyDoc) reposundaki `data/seed/catalog.json` ve `announcements.json` takım reposuna aynı yola kopyalanır. Copilot yalnızca dosya haritasını doğrular ve testi yazar.*
+*Katalog verisi hazırdır: [ZtHackathonStudyWithData](https://github.com/SeyhanAmasyalii/ZtHackathonStudyWithData) reposundaki `data/seed/catalog.json` ve `announcements.json` takım reposuna aynı yola kopyalanır. Copilot yalnızca dosya haritasını doğrular ve testi yazar.*
 
 ```
 Görev V2: Hazır katalog dosyalarını doğrula. Bağlam: #file:data/seed/catalog.json
@@ -295,7 +295,7 @@ Görev V2: Hazır katalog dosyalarını doğrula. Bağlam: #file:data/seed/catal
 
 ### V3 — Log üretimi ve enjeksiyonu · 🟢 Ucuz · Edit
 
-*Betikler hazırdır: [ZtHackathonStudyOnlyDoc](https://github.com/SeyhanAmasyalii/ZtHackathonStudyOnlyDoc) reposundaki `tools/generate_banking_logs.py`, `tools/mercek_data/inject_log_scenarios.py` ve `tools/mercek_data/tests/` takım reposuna aynı yollarla kopyalanır. Açıklama: `docs/mercek-sentetik-veri-kaynaklari.md` §2.1–2.2.*
+*Betikler hazırdır: [ZtHackathonStudyWithData](https://github.com/SeyhanAmasyalii/ZtHackathonStudyWithData) reposundaki `tools/generate_banking_logs.py`, `tools/mercek_data/inject_log_scenarios.py` ve `tools/mercek_data/tests/` takım reposuna aynı yollarla kopyalanır. Açıklama: `docs/mercek-sentetik-veri-kaynaklari.md` §2.1–2.2.*
 
 ```
 Görev V3: Hazır log betiklerini repoya entegre et. Bağlam: #file:tools/README.md

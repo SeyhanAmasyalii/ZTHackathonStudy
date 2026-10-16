@@ -1,6 +1,6 @@
 # Mercek — Sentetik Veri Sayıları
 
-> Betikler, testler ve veri dosyaları [ZtHackathonStudyOnlyDoc](https://github.com/SeyhanAmasyalii/ZtHackathonStudyOnlyDoc) reposundadır; aşağıdaki yollar o repoya (ve kopyalandıktan sonra takım reposuna) göredir.
+> Betikler, testler ve veri dosyaları [ZtHackathonStudyWithData](https://github.com/SeyhanAmasyalii/ZtHackathonStudyWithData) reposundadır; aşağıdaki yollar o repoya (ve kopyalandıktan sonra takım reposuna) göredir.
 
 Bu doküman, üretilen tüm sentetik verinin adetlerini konu konu listeler. Değerler yerel veritabanındaki (`load_all.py --sqlite`) gerçek üretim çıktısından alınmıştır (seed 42, veri sonu 17.10.2026 09:00).
 

@@ -26,6 +26,8 @@ Bu doküman, hackathon boyunca kullanacağımız tüm dokümanları (hepsi bu re
 | 11 | [`presentation/Mercek_AI_Overflow_Sunum.pptx`](presentation/Mercek_AI_Overflow_Sunum.pptx) ([PDF](presentation/Mercek_AI_Overflow_Sunum.pdf)) | Ziraat Teknoloji sunum şablonuyla 11 slaytlık sunum: altı senaryo tek slaytta, canlı demo dört sahne, konuşmacı notları, taslak ekranlar | Sunum sorumlusu, herkes |
 | 12 | [`presentation/build_deck.py`](presentation/build_deck.py), [`presentation/sablon/`](presentation/sablon), [`presentation/mockups/`](presentation/mockups) | Sunumu şablondan yeniden üreten betik, kurum şablonu, taslak ekranların HTML kaynağı | Sunum sorumlusu |
 | 13 | [`docs/mercek-takim-anlatim-cumleleri.md`](docs/mercek-takim-anlatim-cumleleri.md) | Her dokümanın ana fikri tek cümlede ve akılda kalacak rakamlar | Toplantıyı yöneten, herkes |
+| 14 | [`docs/mercek-sentetik-veri-kaynaklari.md`](docs/mercek-sentetik-veri-kaynaklari.md) | Her verinin kaynağı: **elle** yazılanlar, **betikle** üretilenler (betik açıklamalarıyla), **uygulamanın** ürettikleri; durum ve çalıştırma sırası | Veri sorumluları, geliştiriciler |
+| 15 | [`data/seed/`](data/seed), [`tools/`](tools) | Hazır veri ve betikler: V2 katalog ve duyurular, V3 log üretici ve senaryo enjeksiyonu (testleriyle) | Veri sorumluları |
 
 **Dokümanlar arası ilişki**
 
@@ -36,7 +38,7 @@ kılavuz (kurallar)
              └─ iş planı (kim, ne zaman, sunum)
                   ├─ rebuild rehberi (temel uygulama)
                   ├─ uygulama rehberi (nasıl) ──► Copilot prompt'ları (Copilot'a ne yazılır)
-                  ├─ veri planı (hangi veri)  ──► veri üretim rehberi (hangi değerlerle)
+                  ├─ veri planı (hangi veri)  ──► veri üretim rehberi (hangi değerlerle) ──► veri kaynakları (elle / betik / uygulama)
                   └─ sunum taslağı (jüriye nasıl anlatılır)
 ```
 

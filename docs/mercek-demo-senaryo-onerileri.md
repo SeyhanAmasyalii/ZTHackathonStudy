@@ -194,7 +194,7 @@ Mercek çağrıyı **Fatura Ödeme Servisi**'ne atıyor (kural: ODMTFATR + kurum
 > *Kısa vadeli düzeltme: Üst sınırı iki yerde de 13'e çıkar.*
 > *Kalıcı öneri: Abone numarası uzunluğu kurum bazında parametre olsun (kurum tablosunda en az/en çok hane). Bir sonraki format değişikliği kod değişikliği gerektirmesin.*
 > *Test önerisi: İSKİ 13 hane geçer, 14 hane reddedilir; diğer kurumların kuralları değişmez.*
-> *Etki: 1 Ekim'den beri 187 farklı müşteri 412 kez denemiş, 23 çağrı açılmış. Bu müşterilerin faturaları son ödeme tarihine yaklaşıyor."*
+> *Etki: 1 Ekim'den beri 187 farklı müşteri İSKİ faturasını 400 kez ödemeye çalışmış, 23 çağrı açılmış. Bu müşterilerin faturaları son ödeme tarihine yaklaşıyor."*
 
 Etiket: **"Öneridir, uygulanmadı."**
 

@@ -291,23 +291,20 @@ Görev V2: Hazır katalog dosyalarını doğrula. Bağlam: #file:data/seed/catal
    announcements 20 kayıt; İSKİ/ASKİ dışında "hane" veya "abone numara" geçen duyuru yok.
 ```
 
-### V3 — Log enjeksiyonu · 🟡 Orta · Agent
+### V3 — Log üretimi ve enjeksiyonu · 🟢 Ucuz · Edit
 
-*Önce rebuild **Faz 5** (log üretici) uygulanır ve `--count 10000 --days 30 --seed 42 --format ndjson` ile çalıştırılır.*
+*Betikler hazırdır: bu çalışma reposundaki `tools/generate_banking_logs.py`, `tools/mercek_data/inject_log_scenarios.py` ve `tools/mercek_data/tests/` takım reposuna aynı yollarla kopyalanır. Açıklama: `docs/mercek-sentetik-veri-kaynaklari.md` §2.1–2.2.*
 
 ```
-Görev V3: tools/mercek_data/inject_log_scenarios.py. Bağlam: #file:tools/generate_banking_logs.py
-Kurallar: docs/mercek-sentetik-veri-uretimi.md §0, §4.2.
-
-- Girdi tools/output/dalan-banking-logs.ndjson, çıktı tools/output/mercek-logs.ndjson; --today 2026-10-17, seed 42.
-- Yalnızca standart kütüphane, Python 3.9+; Faz 5 üreticisinin yardımcılarını (müşteri havuzu, kanal, ECS alanları)
-  import ederek aynı formatta kayıt üret.
-- §4.2 adım 1–4'ü uygula: normalizasyon (ODMTFATR VALIDATION_ERROR -> error.field "amount", abone no ekleme),
-  C'nin 412 kaydı (400 İSKİ 13 hane, 187 farklı müşteri, kanal oranları; 12 diğer), Mehmet'in 3 başarılı ödemesi.
-- Her kayda banking.bill.subscriber_no_len alanı ekle.
-- Sonuç @timestamp'e göre sıralı yazılır.
-- tools/mercek_data/tests/test_inject.py: 412 / 400 / 187; 01.10 öncesi İSKİ 13 hane = 0;
-  enjeksiyon dışında error.field=subscriber_no yok.
+Görev V3: Hazır log betiklerini repoya entegre et. Bağlam: #file:tools/README.md
+1. Kök .gitignore'da tools/output/ olduğunu doğrula.
+2. backend'in pytest yapılandırması tools/mercek_data/tests'i de çalıştırsın (ya da CI'da ayrı adım:
+   python3 -m pytest tools/mercek_data/tests -q). Testler internet ve Azure gerektirmez.
+3. Ruff'u tools/ için de çalıştır (ruff check --ignore UP017,UP006,UP035,UP045 tools/); bulgu varsa düzelt.
+4. Betikleri çalıştır ve çıktı özetinin 412 / 400 / %97,1 / 187 / 0 / 3 olduğunu doğrula:
+   python3 tools/generate_banking_logs.py --count 10000 --days 30 --seed 42 --end 2026-10-17T09:00:00+03:00
+   python3 tools/mercek_data/inject_log_scenarios.py --end 2026-10-17T09:00:00+03:00
+Betiklerin mantığını değiştirme.
 ```
 
 ### V4 — Foundry metinleri · 🟢 Ucuz · Edit

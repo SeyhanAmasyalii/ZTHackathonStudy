@@ -1,5 +1,7 @@
 # Mercek — Sentetik Veri Üretim Rehberi
 
+> Hangi verinin elle, betikle ya da uygulamayla üretildiği ve hazır betiklerin açıklaması: `mercek-sentetik-veri-kaynaklari.md`. V2 verisi (`data/seed/`) ve V3 betikleri (`tools/`) repoda hazırdır.
+
 `mercek-sentetik-veri-plani.md` **hangi** verinin **neden** üretileceğini, bu doküman **nasıl ve hangi değerlerle** üretileceğini anlatır. Senaryolar: `mercek-demo-senaryo-onerileri.md`.
 
 ---
@@ -35,8 +37,8 @@
 |---|---|---|---|---|
 | 1 | Şema | `data/schema.sql` | Azure SQL tabloları | V1 |
 | 2 | Katalog ve elle veriler | `data/seed/catalog.json`, `announcements.json` | JSON | V2 |
-| 3 | Log üretimi | `python3 tools/generate_banking_logs.py --count 10000 --days 30 --seed 42 --format ndjson` | `tools/output/dalan-banking-logs.ndjson` | rebuild Faz 5 |
-| 4 | Log senaryo enjeksiyonu | `python3 -I tools/mercek_data/inject_log_scenarios.py` | `tools/output/mercek-logs.ndjson` | V3 |
+| 3 | Log üretimi | `python3 tools/generate_banking_logs.py --count 10000 --days 30 --seed 42 --end 2026-10-17T09:00:00+03:00` | `tools/output/dalan-banking-logs.ndjson` | rebuild Faz 5 |
+| 4 | Log senaryo enjeksiyonu | `python3 tools/mercek_data/inject_log_scenarios.py --end 2026-10-17T09:00:00+03:00` | `tools/output/mercek-logs.ndjson` | V3 |
 | 5 | Doğal dil metinleri | `python3 tools/mercek_data/generate_texts.py` | `data/seed/texts.json` (commit'lenir) | V4 |
 | 6 | Portföy | `python3 tools/mercek_data/generate_portfolio.py` | `data/out/customers.csv`, `loans.csv` | V5 |
 | 7 | Çağrılar ve çözümler | `python3 tools/mercek_data/generate_incidents.py` | `data/out/incidents.csv`, `solutions.csv` | V6 |
@@ -219,7 +221,7 @@ Katalogun tamamı `data/seed/catalog.json` ve `announcements.json` dosyalarında
 ### 4.1 Üretim (rebuild Faz 5, değiştirmeden)
 
 ```bash
-python3 tools/generate_banking_logs.py --count 10000 --days 30 --seed 42 --format ndjson
+python3 tools/generate_banking_logs.py --count 10000 --days 30 --seed 42 --end 2026-10-17T09:00:00+03:00
 ```
 
 Ekran ağırlıkları: ODMTFATR 35, HSPTVDSZ 18, KRTTBASV 16, KRDTKULL 16, MUSTGUNC 15. Seviye dağılımı: info %89, warn %9, error %2. İş reddi ve teknik hata kodları üreticideki gibidir.

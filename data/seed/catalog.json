@@ -1,0 +1,575 @@
+{
+  "_meta": {
+    "description": "Mercek sentetik katalog verisi (V2). Değerler docs/mercek-sentetik-veri-uretimi.md §3 ile birebir. Gerçek veri yoktur.",
+    "today": "2026-10-17",
+    "calendar_rule": {
+      "capacity_md_per_workday": 1,
+      "duration_days": "ceil(main_service_share * 1.2)",
+      "weekends_skipped": true,
+      "public_holidays": false
+    },
+    "notes": [
+      "KRDTERTL bilerek katalogda yoktur (Senaryo E).",
+      "Simüle ekranların dosya adları uygulama kurulduktan sonra gerçek adlarla doğrulanmalıdır (tools/snapshot_code.py hata verir)."
+    ]
+  },
+  "demo_users": [
+    {
+      "id": "u-4",
+      "username": "elif",
+      "name": "Elif Demir",
+      "role": "Şube Temsilcisi",
+      "title": "Şube Müşteri Temsilcisi",
+      "department": "Bireysel Bankacılık",
+      "customerNo": "10000004",
+      "monthlyIncome": 38000,
+      "address": {
+        "city": "Ankara",
+        "district": "Çankaya",
+        "line": "Kızılay Mah. Ziya Gökalp Cad. No: 20"
+      },
+      "permissions": {
+        "sms": true,
+        "email": true,
+        "phone": false
+      },
+      "email": "elif@ornek.test",
+      "phone": "+90 532 000 00 04"
+    },
+    {
+      "id": "u-5",
+      "username": "zeynep",
+      "name": "Zeynep Arslan",
+      "role": "Çağrı Merkezi",
+      "title": "Çağrı Merkezi Temsilcisi",
+      "department": "Müşteri Hizmetleri",
+      "customerNo": "10000005",
+      "monthlyIncome": 42000,
+      "address": {
+        "city": "İstanbul",
+        "district": "Ümraniye",
+        "line": "Atakent Mah. Alemdağ Cad. No: 41"
+      },
+      "permissions": {
+        "sms": true,
+        "email": false,
+        "phone": false
+      },
+      "email": "zeynep@ornek.test",
+      "phone": "+90 532 000 00 05"
+    },
+    {
+      "id": "u-6",
+      "username": "kerem",
+      "name": "Kerem Aydın",
+      "role": "L2 Destek",
+      "title": "Platform Yöneticisi · L2 Destek",
+      "department": "Bilgi Teknolojileri",
+      "customerNo": "10000006",
+      "monthlyIncome": 98000,
+      "address": {
+        "city": "İstanbul",
+        "district": "Ataşehir",
+        "line": "Barbaros Mah. Begonya Sok. No: 3"
+      },
+      "permissions": {
+        "sms": true,
+        "email": true,
+        "phone": false
+      },
+      "email": "kerem@ornek.test",
+      "phone": "+90 532 000 00 06"
+    },
+    {
+      "id": "u-7",
+      "username": "fatma",
+      "name": "Fatma Öztürk",
+      "role": "Bölüm Başkanı",
+      "title": "Bölüm Başkanı",
+      "department": "Kredi Tahsilatları",
+      "customerNo": "10000007",
+      "monthlyIncome": 115000,
+      "address": {
+        "city": "Ankara",
+        "district": "Yenimahalle",
+        "line": "Batıkent Mah. Kardelen Cad. No: 12"
+      },
+      "permissions": {
+        "sms": true,
+        "email": true,
+        "phone": true
+      },
+      "email": "fatma@ornek.test",
+      "phone": "+90 532 000 00 07"
+    },
+    {
+      "id": "u-8",
+      "username": "hakan",
+      "name": "Hakan Çelik",
+      "role": "Bölüm Başkanı",
+      "title": "Bölüm Başkanı",
+      "department": "Bireysel Krediler",
+      "customerNo": "10000008",
+      "monthlyIncome": 118000,
+      "address": {
+        "city": "İzmir",
+        "district": "Bornova",
+        "line": "Kazımdirik Mah. 372. Sok. No: 8"
+      },
+      "permissions": {
+        "sms": true,
+        "email": true,
+        "phone": false
+      },
+      "email": "hakan@ornek.test",
+      "phone": "+90 532 000 00 08"
+    }
+  ],
+  "screens": [
+    {
+      "code": "KRTTBASV",
+      "name": "Kredi Kartı Başvurusu",
+      "module": "KRT",
+      "type": "T",
+      "simulated": true,
+      "description": "Kart tipi seçimi, gelir ve limit bilgisiyle kredi kartı başvurusu",
+      "components": [
+        "kart seçimi",
+        "çalışma durumu, meslek, işyeri",
+        "aylık net gelir",
+        "talep edilen limit",
+        "hesap kesim günü",
+        "teslimat",
+        "KVKK ve ön bilgilendirme onayları",
+        "sonuç paneli"
+      ],
+      "flow": [
+        "Kart tipini seç",
+        "Gelir ve limit bilgilerini gir",
+        "Kesim günü ve teslimat",
+        "Onaylar",
+        "Başvur",
+        "Sonuç (onay / kısmi onay / ret)"
+      ],
+      "files": {
+        "frontend": [
+          "frontend/src/app/(dashboard)/bankacilik/krttbasv/page.tsx",
+          "frontend/src/app/(dashboard)/bankacilik/krttbasv/card-application-form.tsx"
+        ],
+        "backend": []
+      }
+    },
+    {
+      "code": "KRDTKULL",
+      "name": "Bireysel Kredi Kullandırım",
+      "module": "KRD",
+      "type": "T",
+      "simulated": true,
+      "description": "İhtiyaç kredisi kullandırım, ödeme planı ve uygunluk kontrolü",
+      "components": [
+        "tutar",
+        "vade",
+        "alacak hesabı",
+        "özet kutuları (taksit, toplam, faiz, yıllık maliyet)",
+        "ödeme planı (loanPlan)",
+        "uygunluk uyarısı (taksit > gelirin %50'si)",
+        "sözleşme onayı",
+        "sonuç paneli"
+      ],
+      "flow": [
+        "Tutar ve vade gir",
+        "Ödeme planını incele",
+        "Uygunluk kontrolü",
+        "Sözleşme onayı",
+        "Kullandır",
+        "Sonuç"
+      ],
+      "files": {
+        "frontend": [
+          "frontend/src/app/(dashboard)/bankacilik/krdtkull/page.tsx",
+          "frontend/src/app/(dashboard)/bankacilik/krdtkull/loan-form.tsx"
+        ],
+        "backend": []
+      }
+    },
+    {
+      "code": "ODMTFATR",
+      "name": "Fatura Ödeme",
+      "module": "ODM",
+      "type": "T",
+      "simulated": true,
+      "description": "Kurum seçerek abone numarasıyla fatura sorgulama ve ödeme",
+      "components": [
+        "fatura türü ve kurum",
+        "abone numarası (6–12 hane)",
+        "sorgula",
+        "fatura listesi",
+        "hesap seçimi",
+        "öde",
+        "dekont"
+      ],
+      "flow": [
+        "Tür ve kurum seç",
+        "Abone numarası gir",
+        "Sorgula",
+        "Fatura seç",
+        "Hesap seç",
+        "Öde",
+        "Dekont"
+      ],
+      "files": {
+        "frontend": [
+          "frontend/src/app/(dashboard)/bankacilik/odmtfatr/page.tsx",
+          "frontend/src/app/(dashboard)/bankacilik/odmtfatr/bill-payment-form.tsx"
+        ],
+        "backend": [
+          "backend/app/api/odm.py"
+        ]
+      }
+    },
+    {
+      "code": "MUSTGUNC",
+      "name": "Müşteri Bilgi Güncelleme",
+      "module": "MUS",
+      "type": "T",
+      "simulated": true,
+      "description": "İletişim, adres, gelir ve iletişim izinlerinin güncellenmesi",
+      "components": [
+        "e-posta, cep telefonu",
+        "il, ilçe, açık adres",
+        "eğitim, meslek, işyeri, gelir",
+        "iletişim izinleri (SMS, e-posta, telefon)",
+        "değişiklik özeti"
+      ],
+      "flow": [
+        "Bilgileri düzenle",
+        "Kaydet",
+        "Değişiklik özeti"
+      ],
+      "files": {
+        "frontend": [
+          "frontend/src/app/(dashboard)/bankacilik/mustgunc/page.tsx",
+          "frontend/src/app/(dashboard)/bankacilik/mustgunc/customer-update-form.tsx"
+        ],
+        "backend": []
+      }
+    },
+    {
+      "code": "HSPTVDSZ",
+      "name": "Vadesiz Hesap Açılışı",
+      "module": "HSP",
+      "type": "T",
+      "simulated": true,
+      "description": "Döviz cinsi ve şube seçerek vadesiz hesap açılışı",
+      "components": [
+        "müşteri özeti",
+        "döviz cinsi",
+        "şube",
+        "hesap adı, amaç, fon kaynağı",
+        "sözleşme ve ön bilgilendirme onayları",
+        "IBAN üretimi",
+        "sonuç paneli"
+      ],
+      "flow": [
+        "Döviz ve şube seç",
+        "Hesap bilgileri",
+        "Onaylar",
+        "Hesap aç",
+        "Sonuç (IBAN)"
+      ],
+      "files": {
+        "frontend": [
+          "frontend/src/app/(dashboard)/bankacilik/hsptvdsz/page.tsx",
+          "frontend/src/app/(dashboard)/bankacilik/hsptvdsz/account-opening-form.tsx"
+        ],
+        "backend": []
+      }
+    },
+    {
+      "code": "KRDRTKSR",
+      "name": "Kredi Taksit Sorgulama",
+      "module": "KRD",
+      "type": "R",
+      "simulated": false,
+      "description": "Müşteri numarasıyla aktif kredilerin ve taksitlerin listelenmesi",
+      "components": [
+        "müşteri numarası ile arama",
+        "kredi listesi",
+        "taksit listesi (vade, tutar, durum)",
+        "gecikme durumu"
+      ],
+      "flow": [
+        "Müşteri no gir",
+        "Kredileri listele",
+        "Krediyi seç",
+        "Taksitleri görüntüle"
+      ],
+      "files": {
+        "frontend": [],
+        "backend": []
+      }
+    },
+    {
+      "code": "HSPRHRKT",
+      "name": "Hesap Hareketleri Raporu",
+      "module": "HSP",
+      "type": "R",
+      "simulated": false,
+      "description": "Seçilen hesap ve tarih aralığı için hareket listesi",
+      "components": [
+        "hesap seçimi",
+        "tarih aralığı",
+        "hareket listesi",
+        "dışa aktarma"
+      ],
+      "flow": [
+        "Hesap seç",
+        "Tarih aralığı seç",
+        "Listele"
+      ],
+      "files": {
+        "frontend": [],
+        "backend": []
+      }
+    },
+    {
+      "code": "KRTRKRTL",
+      "name": "Kart Listesi",
+      "module": "KRT",
+      "type": "R",
+      "simulated": false,
+      "description": "Müşterinin kartlarının ve limitlerinin listesi",
+      "components": [
+        "müşteri numarası ile arama",
+        "kart listesi",
+        "limit ve kullanılabilir limit"
+      ],
+      "flow": [
+        "Müşteri no gir",
+        "Kartları listele"
+      ],
+      "files": {
+        "frontend": [],
+        "backend": []
+      }
+    }
+  ],
+  "services": [
+    {
+      "service_id": "KREDI_KULLANDIRIM",
+      "name": "Kredi Kullandırım Servisi",
+      "description": "Yeni kredi kullandırım, ödeme planı hesaplama, uygunluk kuralları"
+    },
+    {
+      "service_id": "KREDI_TAKIP",
+      "name": "Kredi Takip Servisi",
+      "description": "Aktif krediler, taksit vadeleri, gecikme takibi, zamanlanmış kredi işleri"
+    },
+    {
+      "service_id": "MUSTERI_YONETIM",
+      "name": "Müşteri Yönetim Servisi",
+      "description": "Müşteri bilgileri, adres, iletişim kanalları ve izinler, kimlik doğrulama"
+    },
+    {
+      "service_id": "FATURA_ODEME",
+      "name": "Fatura Ödeme Servisi",
+      "description": "Fatura sorgulama ve ödeme, kurum entegrasyonları"
+    },
+    {
+      "service_id": "HESAP_YONETIM",
+      "name": "Hesap Yönetim Servisi",
+      "description": "Hesap açılışı, bakiye, hesap hareketleri, IBAN"
+    },
+    {
+      "service_id": "KART_BASVURU",
+      "name": "Kart Başvuru Servisi",
+      "description": "Kredi kartı başvurusu, limit kararı, kart listesi"
+    }
+  ],
+  "screen_services": [
+    {
+      "screen_code": "KRDTKULL",
+      "service_id": "KREDI_KULLANDIRIM",
+      "role": "ana"
+    },
+    {
+      "screen_code": "KRDTKULL",
+      "service_id": "MUSTERI_YONETIM",
+      "role": "etkilesimli"
+    },
+    {
+      "screen_code": "KRDRTKSR",
+      "service_id": "KREDI_TAKIP",
+      "role": "ana"
+    },
+    {
+      "screen_code": "KRDRTKSR",
+      "service_id": "MUSTERI_YONETIM",
+      "role": "etkilesimli"
+    },
+    {
+      "screen_code": "ODMTFATR",
+      "service_id": "FATURA_ODEME",
+      "role": "ana"
+    },
+    {
+      "screen_code": "ODMTFATR",
+      "service_id": "HESAP_YONETIM",
+      "role": "etkilesimli"
+    },
+    {
+      "screen_code": "MUSTGUNC",
+      "service_id": "MUSTERI_YONETIM",
+      "role": "ana"
+    },
+    {
+      "screen_code": "HSPTVDSZ",
+      "service_id": "HESAP_YONETIM",
+      "role": "ana"
+    },
+    {
+      "screen_code": "HSPTVDSZ",
+      "service_id": "MUSTERI_YONETIM",
+      "role": "etkilesimli"
+    },
+    {
+      "screen_code": "HSPRHRKT",
+      "service_id": "HESAP_YONETIM",
+      "role": "ana"
+    },
+    {
+      "screen_code": "KRTTBASV",
+      "service_id": "KART_BASVURU",
+      "role": "ana"
+    },
+    {
+      "screen_code": "KRTTBASV",
+      "service_id": "MUSTERI_YONETIM",
+      "role": "etkilesimli"
+    },
+    {
+      "screen_code": "KRTRKRTL",
+      "service_id": "KART_BASVURU",
+      "role": "ana"
+    }
+  ],
+  "error_rules": [
+    {
+      "screen_code": "KRDTKULL",
+      "error_code": "AFFORDABILITY_EXCEEDED",
+      "error_type": "business",
+      "service_id": "KREDI_KULLANDIRIM",
+      "open_incident": false,
+      "explanation_hint": "Taksit müşterinin aylık gelirinin %50'sini aşıyor. Sistem hatası değil; uygun tutar/vade önerilir."
+    },
+    {
+      "screen_code": "KRTTBASV",
+      "error_code": "INSUFFICIENT_INCOME",
+      "error_type": "business",
+      "service_id": "KART_BASVURU",
+      "open_incident": false,
+      "explanation_hint": "Seçilen kart tipinin gelir şartı karşılanmıyor. Daha düşük kart tipi önerilir."
+    },
+    {
+      "screen_code": "ODMTFATR",
+      "error_code": "INSUFFICIENT_BALANCE",
+      "error_type": "business",
+      "service_id": "HESAP_YONETIM",
+      "open_incident": false,
+      "explanation_hint": "Seçilen hesapta bakiye yetersiz. Başka hesap seçilebilir."
+    },
+    {
+      "screen_code": "ODMTFATR",
+      "error_code": "INSTITUTION_TIMEOUT",
+      "error_type": "business",
+      "service_id": "FATURA_ODEME",
+      "open_incident": true,
+      "explanation_hint": "Kurum entegrasyonu zaman aşımı. Ödeme alınmaz, hesaptan tahsilat yapılmaz."
+    },
+    {
+      "screen_code": "ODMTFATR",
+      "error_code": "VALIDATION_ERROR",
+      "error_type": "business",
+      "service_id": "FATURA_ODEME",
+      "open_incident": true,
+      "explanation_hint": "Alan doğrulama hatası; error_field alanına bakılır (abone no, tutar)."
+    },
+    {
+      "screen_code": "*",
+      "error_code": "KYC_CHECK_FAILED",
+      "error_type": "business",
+      "service_id": "MUSTERI_YONETIM",
+      "open_incident": true,
+      "explanation_hint": "Müşteri kimlik doğrulaması başarısız."
+    },
+    {
+      "screen_code": "*",
+      "error_code": "CORE_BANKING_TIMEOUT",
+      "error_type": "technical",
+      "service_id": null,
+      "open_incident": true,
+      "explanation_hint": "Ana bankacılık sistemi zaman aşımı. Servis: ekranın ana servisi."
+    },
+    {
+      "screen_code": "*",
+      "error_code": "SERVICE_UNAVAILABLE",
+      "error_type": "technical",
+      "service_id": null,
+      "open_incident": true,
+      "explanation_hint": "Servis geçici olarak erişilemez. Servis: ekranın ana servisi."
+    },
+    {
+      "screen_code": "*",
+      "error_code": "DB_CONNECTION_ERROR",
+      "error_type": "technical",
+      "service_id": null,
+      "open_incident": true,
+      "explanation_hint": "Veritabanı bağlantı hatası. Servis: ekranın ana servisi."
+    }
+  ],
+  "service_calendar": [
+    {
+      "service_id": "KREDI_TAKIP",
+      "date_from": "2026-10-12",
+      "date_to": "2026-11-08",
+      "allocation_pct": 100,
+      "note": "Yıl sonu regülasyon işi"
+    },
+    {
+      "service_id": "KREDI_KULLANDIRIM",
+      "date_from": "2026-10-12",
+      "date_to": "2026-10-30",
+      "allocation_pct": 50,
+      "note": "Kampanya parametreleri"
+    },
+    {
+      "service_id": "FATURA_ODEME",
+      "date_from": "2026-10-19",
+      "date_to": "2026-10-23",
+      "allocation_pct": 40,
+      "note": "Kurum entegrasyon bakımı"
+    }
+  ],
+  "scope_addons": [
+    {
+      "addon_id": "ADD-SMS",
+      "name": "Mevcut bildirime SMS kanalı ekleme",
+      "effort_md": 2,
+      "main_share": 1,
+      "customer_mgmt_share": 1
+    },
+    {
+      "addon_id": "ADD-PROAKTIF-SMS",
+      "name": "Hedef gruba tek seferlik proaktif SMS bilgilendirmesi",
+      "effort_md": 2,
+      "main_share": 1,
+      "customer_mgmt_share": 1
+    }
+  ],
+  "affected_region": {
+    "description": "Senaryo E: etkilenen bölge. İl adları arayüzde ve sunumda gösterilmez.",
+    "count": 3,
+    "provinces_source": "Faz 5 log üreticisindeki 12 ilden İstanbul dışında 3 il; generate_portfolio.py ilk çalıştırmada seçer ve buraya yazar.",
+    "provinces": []
+  }
+}

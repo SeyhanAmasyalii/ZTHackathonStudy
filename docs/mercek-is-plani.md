@@ -175,7 +175,7 @@ Rebuild **Faz 5** (log üretici) V3'ün parçasıdır. **Faz 6** (Kibana yol har
 | # | Görev | Sorumluluk | Ne zaman |
 |---|---|---|---|
 | Q1 | Birim testleri: `loanPlan`, uygun tutar, örüntü sorguları, eşik, ana kayıt, medyan, takvim; AI çağrıları mock'lu | [19] + herkes kendi kodu için | Sürekli |
-| Q2 | Senaryo testleri: A–D uçtan uca (E, F varsa), beklenen değerler `validate_scenarios` ile aynı | [7] | 1. gün gece, 2. gün sabah |
+| Q2 | Senaryo testleri: A–D uçtan uca (E, F varsa), beklenen değerler `validate_scenarios` ile aynı; değerlendirme seti (30 vaka) doğruluk özeti `validate_scenarios --eval` | [7] | 1. gün gece, 2. gün sabah |
 | Q3 | Süre ölçümü (analiz, eşleştirme, tahmin) ve token sayısı loglanır | [13] [15] → yorum [3] | 1. gün |
 | Q4 | Security sekmesi, Dependabot uyarıları | [17] | Her merge sonrası |
 | Q5 | Copilot harcama takibi (hedef < 20 $) | [4] | Her durum kontrolü |
@@ -261,7 +261,7 @@ Senaryoların ayrıntısı: `mercek-demo-senaryo-onerileri.md`. Sahne sahne konu
 
 ## 7. Soru-cevap hazırlığı [3]
 
-- **AI yanlış önerirse?** Eşik altında çözüm önerilmez (C'de %35). Kaynaklar her zaman gösterilir. Kod düzeltmeleri yalnızca öneridir. Rakamları AI değil kod hesaplar.
+- **AI yanlış önerirse?** Eşik altında çözüm önerilmez (C'de %35). Eşik, demo dışındaki 30 vakalık değerlendirme setiyle ayarlandı ve doğruluğu ölçüldü. Kaynaklar her zaman gösterilir. Kod düzeltmeleri yalnızca öneridir. Rakamları AI değil kod hesaplar.
 - **Canlıya geçiş?** Log kaynağı Kibana/Elasticsearch (rebuild Faz 6 yol haritası), çağrı sistemi ve kod reposu için okuma entegrasyonları; KVKK için log maskeleme.
 - **Çalışma maliyeti?** Küçük model, kısa bağlam (rakamlar SQL'den özet olarak gelir), analiz başına token Q3'te ölçülür.
 - **Kim kullanır?** Şube ve çağrı merkezi temsilcileri (sorun anında), L2 ve platform ekipleri (her çağrıda), iş birimleri ve analistler (her talepte).

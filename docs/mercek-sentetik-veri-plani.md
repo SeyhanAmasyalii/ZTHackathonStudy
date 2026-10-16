@@ -19,6 +19,7 @@
 | **Çözüm bilgi bankası** | ~40 | Foundry + elle | B (C'de eşleşme olmaması için) | Geçmiş çözüm eşleştirme |
 | **Kurum duyuruları arşivi** | 20 | Elle | C | Kök nedenin dış kaynağı, proaktif bulgu |
 | **Geçmiş talepler** | ~100 | Betik + Foundry metinleri | D, E | Benzer talepler, a/g tahmini |
+| **Değerlendirme seti** | 30 vaka (10 eşleşmeli, 10 eşleşmesiz, 10 talep) | Betik + Foundry taslağı, elle gözden geçirme | Kalibrasyon, jüri | Eşik ve arama kalitesini demo cümlelerinden bağımsız ölçme; indekse yüklenmez |
 | **Demo kullanıcıları** | 8 | Elle (fake auth) | Hepsi | Elif, Mehmet, Zeynep, Kerem, Fatma, Hakan, Ayşe ve mevcut kullanıcılar |
 
 ## Senaryoların veride taşıması gerekenler (özet)
@@ -40,6 +41,6 @@
 4. **Foundry modeli:** Çağrı notu, çözüm ve talep metinleri (doğal dil). Maliyeti Copilot bütçesine yazılmaz.
 5. **Yükleme:** Azure SQL (tüm yapısal veri ve loglar), Azure AI Search (çözümler, talepler, duyurular).
 6. **Demo öncesi sıfırlama:** `demo_reset.py`, B'nin "son 30 dakika" kayıtlarını demo saatine göre yeniden yazar, önceki provaların oluşturduğu kayıtları temizler.
-7. **Doğrulama:** `validate_scenarios.py` senaryo rakamlarını sorgularla kontrol eder.
+7. **Doğrulama:** `validate_scenarios.py` senaryo rakamlarını sorgularla kontrol eder; `--eval` ile 30 vakalık değerlendirme setinde doğruluk özeti çıkarır.
 
 **Dikkat:** Büyük veri setlerini Copilot'a ürettirmeyin; çıktı token'ı bütçeyi hızla tüketir. Copilot'tan yalnızca üreten betikleri yazmasını isteyin.

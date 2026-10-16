@@ -384,7 +384,7 @@ Panelde ve sohbette aynı bileşen (`components/mercek/assist-card.tsx`):
 - Skor: semantic reranker varsa onun skoru /4, yoksa vektör benzerliği (kosinüs) kullanılır. Ham hibrit RRF skorları yüzdeye çevrilmez.
 - **Eşik kodda:** `MATCH_THRESHOLD = 0.75`. Ekranda "%93 eşleşme" ve "eşik %75" birlikte görünür.
 - "Benzer geçmiş olay" sayısı `incidents` tablosunda `solution_id = <eşleşen>` olan kapalı kayıt sayısıdır (B'de 6).
-- **Kalibrasyon:** V7'den sonra B ve C metinleriyle bir kez çalıştırılır; B ≥ %90 ve C ≤ %40 çıkmalı. Çıkmazsa `solutions` metinleri ayarlanır, eşik değiştirilmez.
+- **Kalibrasyon:** Eşik demo cümleleriyle değil, değerlendirme setiyle (üretim rehberi §8.1: 10 `match`, 10 `no_match`) seçilir; hedef eşleşme ≥ 8/10, yanlış eşleşme ≤ 1/10. Ardından son kontrol olarak B ve C çalıştırılır: B ≥ %90, C ≤ %40. Tutmazsa `solutions` metinleri ayarlanır.
 
 ### M1.4-b — Prompt `cozum-uyarla` [14]
 

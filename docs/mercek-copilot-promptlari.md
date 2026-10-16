@@ -351,7 +351,11 @@ Bağlam: docs/mercek-sentetik-veri-uretimi.md §6, §7, §8, #file:data/seed/cat
 - requests: ~100 kayıt TLP-0500…TLP-1042; §8'deki D ve E benzer talepleri service_efforts_json ve decisions
   alanlarıyla AYNEN; mevcut TLP-1038…1042 korunur; hatırlatma/erteleme konulu başka talep yok.
 - Çıktı data/out/incidents.csv, solutions.csv, requests.csv.
-- Test: §12 tablosundaki B, C, D, E satırları (SQL'siz, CSV üzerinden).
+- --eval: §8.1'deki 30 vakalık değerlendirme setini data/seed/eval_cases.json'a yaz
+  ({id, group: match|no_match|request, text, expected_solution_id?, expected_type?, expected_screens?,
+  expected_main_service?}). Metinler texts.json'daki ve indekse yüklenen metinlerden farklı olmalı
+  (normalize edilmiş metinde birebir veya %80+ kelime örtüşmesi varsa ele). Bu vakalar CSV'lere ve indekse girmez.
+- Test: §12 tablosundaki B, C, D, E satırları (SQL'siz, CSV üzerinden); eval_cases.json 30 kayıt, gruplar 10/10/10.
 ```
 
 ### V7 — Yükleme · 🟡 Orta · Agent
@@ -379,6 +383,8 @@ INSTITUTION_TIMEOUT now-30dk…now-1dk, CAG-2051 now-24dk, 11 bağlı vaka; opsi
 mercek_events temizliği). Tek transaction.
 
 validate_scenarios.py: §12 tablosundaki her satır için SQL/Search sorgusu, beklenen ve bulunan değeri yan yana
+(--eval: eval_cases.json'daki 30 vakayı Search ve talep analizi servisinden geçirip doğruluk özetini yaz;
+hedefin altındaysa çıkış kodu 1)
 yazdır; ✓/✗; herhangi biri ✗ ise çıkış kodu 1. Search kontrolleri backend'in SearchClient'ını kullanır.
 --only A,B gibi filtre.
 ```

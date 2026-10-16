@@ -41,6 +41,7 @@
 | 6 | Portföy | `python3 tools/mercek_data/generate_portfolio.py` | `data/out/customers.csv`, `loans.csv` | V5 |
 | 7 | Çağrılar ve çözümler | `python3 tools/mercek_data/generate_incidents.py` | `data/out/incidents.csv`, `solutions.csv` | V6 |
 | 8 | Talepler | `python3 tools/mercek_data/generate_requests.py` | `data/out/requests.csv` | V6 |
+| 8b | Değerlendirme seti | `python3 tools/mercek_data/generate_requests.py --eval` | `data/seed/eval_cases.json` (commit'lenir) | V6 |
 | 9 | Yükleme | `python3 tools/mercek_data/load_all.py --sql --search` | SQL + AI Search | V7 |
 | 10 | Demo sıfırlama | `python3 tools/mercek_data/demo_reset.py --now` | B'nin canlı penceresi | V8 |
 | 11 | Doğrulama | `python3 tools/mercek_data/validate_scenarios.py` | Rapor (§12) | V8 |
@@ -346,6 +347,30 @@ Kontrol (kod): medyan 15 (13–17). Müşteri Yönetim oran medyanı (0,267; 0,3
 
 ---
 
+### 8.1 Değerlendirme seti (`data/seed/eval_cases.json`)
+
+Mercek model eğitmez (hazır model + arama + kurallar), bu yüzden klasik eğitim/test ayrımı yoktur. Ama eşik ve arama kalitesi demo cümlelerine ezberlenmesin diye **ayrı bir değerlendirme seti** tutulur.
+
+| Grup | Adet | Girdi | Beklenen |
+|---|---|---|---|
+| `match` · eşleşmesi gereken çağrılar | 10 | Bilinen sorunları anlatan temsilci cümleleri (kurum zaman aşımı, bakiye yetersiz, KYC, ana bankacılık zaman aşımı…) | Doğru `solution_id` ilk sırada, skor ≥ eşik |
+| `no_match` · eşleşmemesi gereken çağrılar | 10 | Bilgi bankasında karşılığı olmayan yeni sorunlar (yeni alan formatı, yeni kurum davranışı, ekran görüntüleme sorunu…) | En yüksek skor < eşik |
+| `request` · talepler | 10 | İş birimi ağzından yeni talepler (mevcut ekran değişikliği, batch, yeni ekran karışık) | Doğru tip, doğru ekran(lar), doğru ana servis; efor benzer taleplerin aralığında |
+
+**Kurallar:**
+- Vakalar AI Search'e ve SQL'e **yüklenmez**; yalnızca sorgu olarak kullanılır.
+- Metinler, indekse yüklenen çözüm ve talep metinlerinden **farklı ifadelerle** yazılır (aynı cümle yeniden kullanılmaz).
+- Demo senaryolarının (A–F) metinleri ve Copilot prompt'larındaki örnekler bu sette yer almaz.
+- Yasak kurallar burada da geçerlidir: abone numarası uzunluğu, taksit hatırlatma ve taksit erteleme konulu vaka yoktur.
+- Üretim: V6 betikleri `--eval` ile 30 vakayı üretir. Metinler Foundry ile taslak, son hali elle gözden geçirilir. Beklenen değerler (`expected_solution_id`, `expected_type`, `expected_screens`, `expected_main_service`) elle doldurulur.
+
+**Kullanım:**
+1. **Eşik kalibrasyonu** (M1.4-a): Eşik `match` ve `no_match` gruplarına göre seçilir. Demo senaryoları yalnızca son kontrol olarak çalıştırılır.
+2. **Doğrulama** (V8): `validate_scenarios.py --eval` doğruluk özetini yazar.
+3. **Jüri:** Sunumda ve soru-cevapta "30 vakada …" rakamı kullanılır.
+
+**Hedef:** `match` en az 8/10 doğru ve eşik üstü, `no_match` en fazla 1/10 yanlış eşleşme, `request` en az 8/10 doğru tip ve ana servis.
+
 ## 9. Foundry ile doğal dil metinleri (`generate_texts.py`)
 
 **Ayarlar:**
@@ -465,3 +490,4 @@ Her prova ve gerçek demodan **hemen önce** çalıştırılır:
 | E | Servis payları ve takvim (§3.5) | Kredi Takip 8 / Kredi Kullandırım 3 / Müşteri Yönetim 4; öncelik 19.10 → 30.10 (SMS ile 02.11); sıraya koy 09.11 → 20.11 |
 | E | Katalogda `KRDTERTL` | yok |
 | F | Bugün en çok warn/error alan ekran | ODMTFATR |
+| Değerlendirme (`--eval`) | §8.1 setinde doğruluk | match ≥ 8/10 · yanlış eşleşme ≤ 1/10 · talep ≥ 8/10 |

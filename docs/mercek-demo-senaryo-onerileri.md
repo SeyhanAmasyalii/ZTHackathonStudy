@@ -28,7 +28,7 @@
 
 **Hazır olan ve bize zaman kazandıracaklar:**
 - **Sahte kullanıcılar (Faz 3)** demonun karakterleri olabilir:
-  - **Mehmet Yılmaz:** Müşteri Temsilcisi.
+  - **Mehmet Yılmaz:** Faz 3'te Müşteri Temsilcisi; bu demoda **banka müşterisi** olarak kullanılır (işlem ekranları giriş yapan kullanıcının bilgileriyle dolduğu için doğal).
   - **Eyüp Dalan:** Platform Yöneticisi.
   - **Ayşe Kaya:** Kıdemli İş Analisti.
 - **Sentetik log üretici (Faz 5):** Her log kaydında ekran kodu, müşteri, `trace.id` ve hata kodu var. İş reddi kodları: `INSUFFICIENT_INCOME`, `AFFORDABILITY_EXCEEDED`, `INSTITUTION_TIMEOUT` vb. Teknik hata kodları: `CORE_BANKING_TIMEOUT`, `SERVICE_UNAVAILABLE`, `DB_CONNECTION_ERROR`. Mercek'in okuyacağı log kaynağı hazır.
@@ -39,7 +39,9 @@
 
 | Kullanıcı | Nerede çalışır | Mercek'e nasıl ulaşır |
 |---|---|---|
-| **Mehmet** (Müşteri Temsilcisi, şube) | Bankacılık işlem ekranları | Ekran kodu çubuğundaki **"Sorun yaşıyorum"** butonu. Mercek paneli ekran kodu, müşteri no, son `trace.id` ve ekrandaki hata mesajıyla açılır. |
+| **Elif** (şube müşteri temsilcisi) | Bankacılık işlem ekranları | Ekran kodu çubuğundaki **"Sorun yaşıyorum"** butonu. Mercek paneli ekran kodu, müşteri no, son `trace.id` ve ekrandaki hata mesajıyla açılır. |
+| **Mehmet** (banka müşterisi) | İnternet şubesi (ODMTFATR) | Mercek'i kullanmaz; sorun yaşayınca çağrı merkezini arar. |
+| **Zeynep** (çağrı merkezi temsilcisi) | Mercek sohbet | Müşterinin anlattığını serbest metinle yazar; Mercek logları, ana kaydı ve müşteriye söylenecekleri getirir. |
 | **Eyüp** (Platform Yöneticisi / L2 destek) | Mercek sayfası | Sohbet + çağrı listesi: zenginleştirilmiş kayıtlar, loglar, eşleşmeler, kod analizi |
 | **Ayşe** (Kıdemli İş Analisti) | Talep Yönlendirme | Talep metni → sınıflandırma, etki, maliyet, takvim, köprü |
 
@@ -52,11 +54,11 @@
 **Problem:** Şube personeli ekranda "işlem yapılamıyor" gördüğünde bunun sistem hatası mı yoksa iş kuralı reddi mi olduğunu çoğu zaman ayırt edemiyor ve çağrı açıyor. Oysa log üreticisinin dağılımına göre iş kuralı retleri teknik hatalardan çok daha sık.
 
 **Akış**
-1. Mehmet, KRDTKULL'de müşteriye **400.000 TL, 3 ay** kredi kullandırmaya çalışıyor (gelir 38.000 TL). Uyarı çıkıyor, "Kullandır" butonu kapalı.
-2. "Sorun yaşıyorum" butonuna basıyor. Mercek, Mehmet bir şey yazmadan ekran kodu ve `trace.id` üzerinden logu buluyor: `AFFORDABILITY_EXCEEDED`.
+1. Şube temsilcisi Elif, KRDTKULL'de müşteriye **400.000 TL, 3 ay** kredi kullandırmaya çalışıyor (gelir 38.000 TL). Uyarı çıkıyor, "Kullandır" butonu kapalı.
+2. "Sorun yaşıyorum" butonuna basıyor. Mercek, Elif bir şey yazmadan ekran kodu ve `trace.id` üzerinden logu buluyor: `AFFORDABILITY_EXCEEDED`.
 3. Mercek'in cevabı:
    > *"Bu bir sistem hatası değil, iş kuralı. Taksit 144.186 TL, müşterinin gelirinin %50'si olan 19.000 TL'yi aşıyor. En uzun vade olan 36 ayda bile taksit 22.754 TL. 36 ayda kullandırılabilecek en yüksek tutar yaklaşık 334.000 TL."*
-4. Mehmet **"Bana göster"** diyor. Joyride turu tutarı 330.000 TL ve vadeyi 36 ay olarak dolduruyor. Taksit 18.772 TL, uyarı kalkıyor, ödeme planı görünüyor.
+4. Elif **"Bana göster"** diyor. Joyride turu tutarı 330.000 TL ve vadeyi 36 ay olarak dolduruyor. Taksit 18.772 TL, uyarı kalkıyor, ödeme planı görünüyor.
 5. **Çağrı açılmıyor.** Mercek bunu "önlenen çağrı" olarak sayıyor (iş değeri ölçümü).
 
 **Kanıtladığı:** M1.1 bağlam yakalama, M1.2 log inceleme, M1.5 görsel anlatım, ve **çağrı önleme**.
@@ -65,21 +67,34 @@
 
 ---
 
-### Senaryo B — "Yaygın teknik sorun, bilinen çözüm" (ODMTFATR · kurum zaman aşımı) ⭐
+### Senaryo B — "Yaygın teknik sorun, bilinen çözüm" (ODMTFATR · kurum zaman aşımı · çağrı merkezi) ⭐
 
-**Problem:** Bir kurum entegrasyonu yavaşladığında onlarca şube aynı sorun için ayrı ayrı çağrı açıyor, L2 hepsine tek tek bakıyor.
+**Problem:** Bir kurum entegrasyonu yavaşladığında çok sayıda müşteri aynı anda çağrı merkezini arıyor. Her temsilci ayrı çağrı açıyor ve aynı sorun için onlarca kayıt oluşuyor. Temsilci müşteriye ne söyleyeceğini bilmiyor, L2 de kayıtlara tek tek bakıyor.
 
 **Akış**
-1. Mehmet, ODMTFATR'de doğalgaz faturası ödüyor (Başkentgaz, abone 4012345678). Sorgula → "Kurumdan yanıt alınamadı".
-2. "Sorun yaşıyorum" → Mercek'in cevabı:
-   > *"Sizinle ilgili değil. Son 30 dakikada Başkentgaz'a giden 47 istek `INSTITUTION_TIMEOUT` ile düştü, 19 şubede aynı hata var. Konu Altyapı ekibinde. Müşteriye ödemeyi tekrar denememesini, mükerrer tahsilat riski olduğunu söyleyin."*
-3. Mercek yeni çağrı açmak yerine **mevcut ana kayda bağlıyor** (bugün aynı konuda 11 çağrı var).
-4. Eyüp, Mercek sayfasında ana kaydı açıyor:
-   - Zenginleştirilmiş kayıt: ekran, kurum, hata kodu, etkilenen şube sayısı, zaman aralığı, örnek `trace.id`'ler.
-   - **%93 eşleşme**: geçmişte 6 benzer olay, kaynaklarıyla birlikte uyarlanmış çözüm (kurum zaman aşımı eşiği, kuyruklama, kurumla iletişim adımları).
+1. **Mehmet (banka müşterisi)**, internet şubesinde ODMTFATR ekranından doğalgaz faturası ödüyor (Başkentgaz, abone 4012345678). Sorgula → *"Kurumdan yanıt alınamadı."* Arka planda log yazılıyor: ekran `ODMTFATR`, `INSTITUTION_TIMEOUT`, Mehmet'in müşteri no'su, `trace.id`, kanal "İnternet Şube".
+2. Mehmet **çağrı merkezini arıyor.**
+3. **Çağrı merkezi temsilcisi Zeynep**, Mercek'e yazıyor:
+   > *"Doğalgaz Başkentgaz, abone 4012345678, fatura ödemede sorun yaşıyor."*
+4. Mercek serbest metinden ekran (`ODMTFATR`), kurum (Başkentgaz) ve abone no'yu çıkarıyor. Loglarda Mehmet'in 3 dakika önceki başarısız işlemini buluyor ve genel tabloyu görüyor:
+   > *"Müşterinin ödemesi tamamlanmadı ve hesabından tahsilat yapılmadı. Neden müşteriyle ilgili değil: son 30 dakikada Başkentgaz'a giden 47 ödeme isteği tüm kanallarda `INSTITUTION_TIMEOUT` ile düştü. Konu Altyapı ekibinde.*
+   > *Müşteriye söyleyebileceğiniz: 'Ödemeniz alınmadı, hesabınızdan para çekilmedi. Kurum kaynaklı geçici bir sorun var; sorun giderilince SMS ile bilgilendirileceksiniz. Son ödeme tarihine kadar gecikme faizi oluşmaz.'"*
+5. **Mükerrer çağrı birleştirme:** Aynı dakikalarda başka müşteriler de aynı sorun için çağrı merkezini arıyor ve başka temsilciler de Mercek'e yazıyor. Mercek ilk vakada **ana çağrı kaydını** (CAG-2051) açmış. Her yeni vakayı yeni çağrı açmadan bu kayda bağlıyor: müşteri no, abone no, `trace.id`. Zeynep'in ekranında *"Ana kayıt CAG-2051'e bağlandı · bağlı vaka: 12"* görünüyor; sayaç demo sırasında artmaya devam ediyor.
+6. **Eyüp (L2)**, Mercek sayfasında CAG-2051'i açıyor:
+   - Zenginleştirilmiş kayıt: ekran, kurum, hata kodu, ilk görülme zamanı, etkilenen müşteri sayısı, kanal dağılımı, örnek `trace.id`'ler, bağlı 12 vaka.
+   - Ekip ataması kuralla: kurum entegrasyonu hatası → Altyapı.
+   - **%93 eşleşme:** geçmişte 6 benzer kurum zaman aşımı olayı ve kaynaklarıyla birlikte uyarlanmış çözüm (kurum zaman aşımı eşiği, istek kuyruklama, kurumla iletişim adımları).
+   - Sorun kapanınca bağlı 12 müşteriye toplu bilgilendirme (opsiyonel, Could).
 
-**Kanıtladığı:** M1.2 log inceleme, M1.3 zenginleştirme ve ekip ataması (kural: kurum hatası → Altyapı), M1.4 geçmiş çözüm eşleştirme. Ek değer: **mükerrer çağrı birleştirme**.
-**Mevcut altyapı:** `odm-dogalgaz` senaryosu, log üreticisindeki `INSTITUTION_TIMEOUT`. Demo modunda Başkentgaz ödemesi bilerek hata döner ve log yazar.
+**Kanıtladığı:**
+- M1.1 bağlam yakalama: burada ekran kodundan değil, temsilcinin serbest metninden.
+- M1.2 log inceleme: müşterinin kendi işlemi ve genel tablo.
+- M1.3 zenginleştirme ve ekip ataması.
+- M1.4 geçmiş çözüm eşleştirme.
+- Ek değerler: **mükerrer çağrı birleştirme** ve **temsilciye hazır müşteri açıklaması**.
+
+**Mevcut altyapı:** Mehmet'in adımı `odm-dogalgaz` Joyride senaryosuyla otomatik oynatılabilir (demoda zaman kazandırır). Log üreticisinde `INSTITUTION_TIMEOUT` var. Demo modunda Başkentgaz ödemesi bilerek hata döner ve log yazar.
+**Veride hazır olacaklar:** Son 30 dakikaya düşen yaklaşık 46 başarısız Başkentgaz isteği, CAG-2051 ana kaydı ve ona bağlı 11 vaka. Mehmet'in vakası canlıda 12. olarak eklenir.
 
 ---
 
@@ -117,7 +132,7 @@
    Ayşe "Evet" diyor → +24 saat, **265.650 ₺**, bitiş tarihi güncelleniyor.
 
 **Kanıtladığı:** M2.1 sınıflandırma, M2.4 etki analizi, M2.5 maliyet ve takvim, M2.6 köprü.
-**Hikâyenin kapanışı:** Demonun başında Mehmet'in yaşadığı sorun, sonunda ürünün kalıcı bir iyileştirmesine dönüşüyor. Jüri döngünün kapandığını kendi gözüyle görüyor.
+**Hikâyenin kapanışı:** Demonun başında Elif'in şubede yaşadığı sorun, sonunda ürünün kalıcı bir iyileştirmesine dönüşüyor. Jüri döngünün kapandığını kendi gözüyle görüyor.
 **Mevcut altyapı:** Maliyet formülü (saatlik ücret × saat × öncelik katsayısı) ve `TLP-…` talepleri Talep Yönlendirme modülünde zaten var.
 
 ---
@@ -145,8 +160,8 @@ Eyüp Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglard
 
 | Sahne | Senaryo | Kim | Süre | Jüri kriteri |
 |---|---|---|---|---|
-| 1 | **A** — Hata mı, kural mı? (KRDTKULL) | Mehmet | ~45 sn | Probleme uygunluk, Kullanıcı deneyimi, İş değeri (çağrı önleme) |
-| 2a | **B** — Yaygın sorun, bilinen çözüm (ODMTFATR) | Mehmet → Eyüp | ~40 sn | Ürün çalışırlığı, İş değeri (mükerrer çağrı) |
+| 1 | **A** — Hata mı, kural mı? (KRDTKULL) | Elif | ~45 sn | Probleme uygunluk, Kullanıcı deneyimi, İş değeri (çağrı önleme) |
+| 2a | **B** — Yaygın sorun, bilinen çözüm (ODMTFATR) | Mehmet (müşteri) → Zeynep (çağrı merkezi) → Eyüp | ~50 sn | Ürün çalışırlığı, İş değeri (mükerrer çağrı) |
 | 2b | **C** — AI kodu okur (KRTTBASV) | Eyüp | ~30 sn | Yenilikçilik |
 | 3 | **D** — Talepten plana + köprü (KRDTKULL) | Ayşe | ~45 sn | İş değeri, Yenilikçilik |
 | Yedek | E, F | — | video / S-C | — |
@@ -172,7 +187,7 @@ Eyüp Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglard
 | Doküman | Değişecek |
 |---|---|
 | Kapsam | Hedef kullanıcı: banka çalışanı ve teknoloji ekipleri. M1.1 girişi: ekran kodu çubuğundaki "Sorun yaşıyorum". Yeni değer: çağrı önleme ve mükerrer çağrı birleştirme. |
-| İş planı | Demo senaryosu (§5), karakterler (Mehmet, Eyüp, Ayşe), kabul kriterleri |
+| İş planı | Demo senaryosu (§5), karakterler (Elif, Mehmet, Zeynep, Eyüp, Ayşe), kabul kriterleri |
 | Veri planı ve üretim rehberi | Log kaynağı olarak **Faz 5 üreticisi** (kendi log üreticimize gerek kalmıyor). Senaryo kayıtları: Başkentgaz artışı, 14 Gold reddi, 312 AFFORDABILITY reddi, 58 çağrı, 4 benzer talep (saat bazlı). Ekipler ve ücretler mock-data'dan. Adam-gün yerine saat. |
 | Uygulama rehberi ve prompt'lar | **Teknoloji:** Next.js 16 + FastAPI (uv) → React/Vite varsayımı güncellenir. Ekran kimlikleri → ekran kodları ve `data-tour` hedefleri. Mercek sohbet API'si (`/api/mercek/chat`). Joyride v3 hazır olduğu için M1.5 küçülür. **Dağıtım:** Next.js + FastAPI'nin App Service'e nasıl taşınacağına karar verilmeli. |
 | Sunum ve taslak ekranlar | Problem slaytı, demo slaytı, mockup'lar (iç uygulama ekranlarıyla yeniden) |
@@ -187,4 +202,4 @@ Eyüp Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglard
 3. **Mercek'in incelediği kod:** `sample-codebase/` altındaki kopya (önerim, uygulama doğru kalır) mı, uygulamanın kendi kodu mu?
 4. **Mercek'e giriş:** Ekran kodu çubuğunda "Sorun yaşıyorum" butonu ile bağlamlı yan panel + ayrı Mercek sohbet sayfası (önerim) mi, yalnızca sohbet sayfası mı?
 5. **Maliyet modeli:** Mevcut Talep Yönlendirme formülü olan saat × saatlik ücret × öncelik katsayısı (önerim) mı, adam-gün mü?
-6. **Demo kullanıcıları:** Faz 3'teki sahte kullanıcılar (Mehmet, Eyüp, Ayşe) demonun karakterleri olsun mu?
+6. **Demo kullanıcıları:** Faz 3'teki Mehmet (müşteri), Eyüp (L2) ve Ayşe (analist) kullanılır; sahte kullanıcı listesine iki kişi eklenir: **Elif** (şube müşteri temsilcisi, Senaryo A) ve **Zeynep** (çağrı merkezi temsilcisi, Senaryo B). Uygun mu?

@@ -99,60 +99,61 @@
 
 ---
 
-### Senaryo C — "AI kodu okur" (HSPTVDSZ · IBAN kontrol hanesi hatası) ⭐
+### Senaryo C — "Dış dünya değişti, ekran değişmedi" (ODMTFATR · İSKİ abone numarası formatı) ⭐
 
-**Senaryo tek cümleyle:** Geçmişte örneği olmayan bir hata geliyor. Mercek önce kuralla IBAN'ın bozuk olduğunu ve bunun banka kaynaklı olduğunu kanıtlıyor. Sonra loglardan sorunun kaç hesabı etkilediğini buluyor, son olarak kodu okuyup hatanın satırını ve düzeltmesini gösteriyor.
+**Senaryo tek cümleyle:** Bir kurum abone numarası formatını değiştiriyor, bizim ekran eski formatı beklediği için müşteriler faturalarını ödeyemiyor. Mercek logdaki örüntüden, kurum duyurusundan ve koddan sorunun kaynağını buluyor ve düzeltmeyi gösteriyor.
 
-**Problem:** Geçmişte örneği olmayan bir hata çağrısında L2 nereden başlayacağını bilmiyor: kullanıcı hatası mı, karşı banka mı, bizim kodumuz mu? Kod baştan inceleniyor; aynı hatadan kaç müşterinin etkilendiği ise çoğu zaman hiç bilinmiyor.
+**Olay sırası (basitçe):**
+1. İSKİ, 12 Eylül'de kurumlara bir duyuru gönderiyor: *"1 Ekim 2026 itibarıyla yeni abonelere 13 haneli abone numarası verilecektir."*
+2. Duyuru ilgili birimde kalıyor ve ekrandaki kurala yansımıyor. ODMTFATR abone numarası olarak hâlâ yalnızca **6–12 hane** kabul ediyor (`^\d{6,12}$`).
+3. 1 Ekim'den sonra İSKİ'ye yeni abone olan müşteriler (örneğin yeni taşınanlar) su faturasını ödemeye çalışıyor. Ekran *"Abone numarası 6–12 haneli olmalıdır"* deyip işlemi yapmıyor. Müşteri numarayı faturasından doğru okumuş; hata bizim kuralımızda.
+
+Kimse hata yapmamış: kural yazıldığı gün doğruydu, sonra dış dünya değişti.
 
 **Akış**
 
-**1. Çağrı.** Bir müşteri şubeye geliyor: yeni açtığı vadesiz hesaba başka bir bankadan para gönderilemiyor, karşı banka "IBAN hatalı" diyor. **Elif (şube temsilcisi)** Mercek'e yazıyor:
-> *"Müşterinin geçen hafta HSPTVDSZ'den açılan hesabına başka bankadan para gelmiyor, IBAN hatalı diyorlar. IBAN: TR30 0999 0711 4710 4974 6507 5"*
+**1. Çağrı.** Bir müşteri şubeye geliyor. **Elif (şube temsilcisi)** Mercek'e yazıyor:
+> *"Müşteri İSKİ su faturasını ödeyemiyor. Abone numarası 13 haneli, faturada da öyle yazıyor, ama ekran 6–12 hane olmalı diyor."*
 
-**2. Mercek'in ilk kontrolü** (kural, AI değil):
-> *"Bu IBAN geçersiz ve hata bankamız kaynaklı. Türkiye IBAN'ı 26 karakter olmalı, bu 25 karakter. Hesap numarası doğru, ama kontrol hanesinin başındaki 0 eksik: kontrol hanesi '03' olmalıyken '3' yazılmış. 4'lü gruplamada bu, IBAN'ı 'TR30…' gibi normal gösterip hatayı gizliyor. Doğru IBAN: **TR03 0099 9071 1471 0497 4650 75**. Müşteriye bu IBAN'ı verebilirsiniz; para bu IBAN'a gelir."*
+**2. Mercek'in ilk analizi (Elif'e):**
+> *"Sorun müşterinin numarasında değil. 1 Ekim'den beri ODMTFATR'de abone numarası doğrulama hatası **412 kez** görülmüş. Bunların **%97'si İSKİ'de** ve **hepsi 13 haneli** numaralar. 1 Ekim'den önce İSKİ'de 13 haneli numara hiç yok. Kurum duyuruları arşivinde İSKİ'nin 12 Eylül tarihli 13 hane geçiş duyurusu var. Yani İSKİ yeni abonelere 13 haneli numara vermeye başlamış, ekranımız henüz kabul etmiyor. Çağrı açıldı; şimdilik müşteri faturasını İSKİ'nin kendi kanallarından ödeyebilir."*
 
-Elif müşteriyi doğru IBAN ile hemen gönderiyor. Mercek çağrıyı açıp **Hesap Açılış Servisi**'ne atıyor (kural: HSPTVDSZ + IBAN üretimi).
+Mercek çağrıyı **Fatura Ödeme Servisi**'ne atıyor (kural: ODMTFATR + kurum doğrulaması).
 
-**3. Eyüp (L2) çağrıyı açıyor.** Geçmiş çözümlerle eşleşme **%38**, eşiğin (%75) altında. Mercek uydurma bir çözüm önermiyor, analize geçiyor.
+**3. Eyüp (L2) çağrıyı açıyor.** Geçmiş çözümlerle eşleşme **%35**, eşiğin (%75) altında; bu yeni bir sorun. Mercek koda geçiyor.
 
-**4. Loglarla etki analizi:**
-> *"Son 30 günde HSPTVDSZ ile **1.432** hesap açılmış. Bunların **117'sinin** (%8,2) IBAN'ı 25 karakter. Hepsinde kontrol hanesi 02 ile 09 arasında. Kontrol hanesi 2–98 arasında 97 farklı değer alabildiği için tek haneli 8 değer beklenen oran olan %8,2'yi veriyor. Yani hata rastgele değil, sistematik."*
-
-Etkilenen 117 hesabın listesi (hesap no, şube, açılış tarihi) çağrıya ekleniyor.
-
-**5. Kod analizi:** Mercek Hesap Açılış Servisi'nin IBAN üretim kodunu okuyor:
+**4. Kod analizi:** Mercek abone numarası kuralının **iki yerde** tanımlı olduğunu buluyor: ekranda (ODMTFATR formu) ve Fatura Ödeme Servisi'nde. İkisi de aynı sabit kuralı kullanıyor:
 
 ```diff
-   const check = 98 - mod97(bban + "292700");
--  return `TR${check}${bban}`;
-+  return `TR${String(check).padStart(2, "0")}${bban}`;
+- const ABONE_NO_PATTERN = /^\d{6,12}$/;
++ const ABONE_NO_PATTERN = /^\d{6,13}$/;
 ```
 
-> *"Kök neden: Kontrol hanesi 10'dan küçük çıktığında başına 0 eklenmiyor. Bu yüzden IBAN 25 karakter oluyor ve diğer bankaların doğrulamasından geçmiyor.*
-> *Test önerisi: 1.000 rastgele IBAN üret; hepsinin 26 karakter olduğunu ve ISO 13616 mod-97 doğrulamasından geçtiğini kontrol et.*
-> *Ek öneri: Etkilenen 117 hesabın doğru IBAN'ı, aynı hesap numarasından yeniden hesaplanabilir. Müşterilere bilgilendirme gönderilmeli."*
+> *"Kök neden: Abone numarası uzunluğu kodda sabit yazılmış ve İSKİ'nin 1 Ekim'deki format değişikliğine güncellenmemiş.*
+> *Kısa vadeli düzeltme: Üst sınırı iki yerde de 13'e çıkar.*
+> *Kalıcı öneri: Abone numarası uzunluğu kurum bazında parametre olsun (kurum tablosunda en az/en çok hane). Bir sonraki format değişikliği kod değişikliği gerektirmesin.*
+> *Test önerisi: İSKİ 13 hane geçer, 14 hane reddedilir; diğer kurumların kuralları değişmez.*
+> *Etki: 1 Ekim'den beri 187 farklı müşteri 412 kez denemiş, 23 çağrı açılmış. Bu müşterilerin faturaları son ödeme tarihine yaklaşıyor."*
 
 Etiket: **"Öneridir, uygulanmadı."**
 
+**5. Proaktif ek bulgu:**
+> *"Kurum duyuruları arşivinde ASKİ'nin de Ocak 2027'de 13 haneli numaraya geçeceğine dair bir duyuru var. Kalıcı öneri uygulanırsa o geçiş sorunsuz olur; uygulanmazsa aynı olay Ocak'ta ASKİ için tekrarlanır."*
+
 **Kanıtladığı:**
-- **Kural ile AI'ın birlikte çalışması:** IBAN doğrulaması ve doğru IBAN'ın hesabı kodla yapılıyor (deterministik, kesin). Yorum ve kök neden AI'dan geliyor.
-- **M1.4 eşleşme yoksa kod analizi** ve dürüst eşik: uydurma eşleşme yok.
-- **Log + kod ilişkilendirme:** Tek bir çağrıdan, sessizce etkilenen 117 müşteriye ulaşılıyor. Bu müşteriler henüz çağrı açmamış; Mercek sorunu onlar fark etmeden buluyor.
-- **Anında müşteri çözümü:** Elif, kod düzeltilmeden önce müşteriye doğru IBAN'ı veriyor.
+- **M1.2 log örüntüsü:** Hata yalnızca bir kurumda, yalnızca bir numara uzunluğunda ve belli bir tarihten sonra görülüyor.
+- **M1.4 eşleşme yoksa analiz:** Kurum duyurularında arama ve kod analizi birlikte. Uydurma eşleşme yok.
+- **Üç kaynağı ilişkilendirme:** Log (ne oluyor), kurum duyurusu (neden oluyor), kod (nerede düzeltilir).
+- **Proaktiflik:** Henüz yaşanmamış bir sorunu (ASKİ, Ocak) önceden haber veriyor.
 
-**Jüriye nasıl görünür:** Önce ekranda görünen hali, sonra boşluksuz hali gösterilir.
-- Ekranda (4'lü grup): **TR30 0999 0711 4710 4974 6507 5** — normal bir IBAN gibi görünüyor.
-- Boşluksuz, hatalı: `TR3` + `0099907114710497465075` → 25 karakter
-- Boşluksuz, doğru: `TR03` + `0099907114710497465075` → 26 karakter
+**Jüriye tek cümleyle:** *"Kurum numarayı uzattı, bizim ekran hâlâ eski uzunluğu bekliyor; Mercek bunu loglardan, kurumun duyurusundan ve koddan birlikte çıkarıyor."*
 
-Tek bir eksik "0" görsel olarak hemen anlaşılır; gruplamanın hatayı nasıl gizlediği de neden kimsenin fark etmediğini açıklar. Ardından "%8,2 = 97 değerden 8'i" açıklaması, hatanın rastgele değil sistematik olduğunu gösterir.
+**Uygulama notları:**
+- Bu sefer kasıtlı bir hata gömülmüyor. Rebuild rehberinde ODMTFATR abone numarası kuralı zaten **6–12 hane** olarak tanımlı. Mercek **uygulamanın kendi kodunu** okuyabilir; `sample-codebase/` kopyasına gerek yok.
+- Demo modunda ekrandaki doğrulama hatası backend'e log olarak yazılır (gerçekte Fatura Ödeme Servisi'nin `VALIDATION_ERROR` kaydı).
+- **Veride hazır olacaklar:** 1 Ekim'den beri İSKİ için 13 haneli 412 doğrulama hatası (187 müşteri), 23 çağrı ve kurum duyuruları arşivi (İSKİ 12 Eylül, ASKİ Ocak 2027 ve birkaç ilgisiz duyuru). Arşiv AI Search'te ayrı bir indeks olur.
 
-**Önemli:** Hatalı kod **uygulamanın kendisinde değil**, `sample-codebase/` altındaki "Hesap Açılış Servisi" kopyasında durur. Uygulamadaki `generateIban()` doğru kalır (rebuild rehberinin "1.000 IBAN'ın tamamı geçerli" kabul kriteri bozulmaz) ve kod kalitesi puanı zarar görmez.
-**Veride hazır olacaklar:** HSPTVDSZ için 30 günde 1.432 hesap açılış logu; bunların 117'sinde 25 karakterli IBAN (kontrol hanesi 2–9). Örnek müşterinin hesabı ve IBAN'ı sabit.
-
-**Alternatif hata (yedek):** KRTTBASV'de Gold kart gelir şartı `gelir >= 20000` yerine `gelir > 20000` yazılmış; geliri tam 20.000 TL olan müşteriler reddediliyor. Anlaşılması daha kolay, ama "sessizce etkilenen müşterileri bulma" etkisi daha zayıf.
+**Yedek senaryo:** Faiz parametresi güncellendiğinde 24 saat boyunca eski oranı kullanan önbellek. Daha etkileyici, ama anlatımı daha uzun.
 
 ---
 
@@ -305,7 +306,7 @@ Eyüp Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglard
 |---|---|---|---|---|
 | 1 | **A** — Hata mı, kural mı? (KRDTKULL) | Elif | ~45 sn | Probleme uygunluk, Kullanıcı deneyimi, İş değeri (çağrı önleme) |
 | 2a | **B** — Yaygın sorun, bilinen çözüm (ODMTFATR) | Mehmet (müşteri) → Zeynep (çağrı merkezi) → Eyüp | ~50 sn | Ürün çalışırlığı, İş değeri (mükerrer çağrı) |
-| 2b | **C** — AI kodu okur (HSPTVDSZ) | Elif → Eyüp | ~40 sn | Yenilikçilik, İş değeri (sessizce etkilenen 117 müşteri) |
+| 2b | **C** — Dış dünya değişti (ODMTFATR · İSKİ) | Elif → Eyüp | ~35 sn | Yenilikçilik, Ürün çalışırlığı |
 | 3 | **D** — Talepten plana + köprü (taksit hatırlatma) | Fatma (iş birimi) → Ayşe (analist) | ~45 sn | İş değeri, Yenilikçilik |
 | Yedek | E, F | — | video / S-C | — |
 
@@ -331,7 +332,7 @@ Eyüp Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglard
 |---|---|
 | Kapsam | Hedef kullanıcı: banka çalışanı ve teknoloji ekipleri. M1.1 girişi: ekran kodu çubuğundaki "Sorun yaşıyorum". Yeni değer: çağrı önleme ve mükerrer çağrı birleştirme. |
 | İş planı | Demo senaryosu (§5), karakterler (Elif, Mehmet, Zeynep, Eyüp, Fatma, Ayşe), kabul kriterleri |
-| Veri planı ve üretim rehberi | Log kaynağı olarak **Faz 5 üreticisi** (kendi log üreticimize gerek kalmıyor). Senaryo kayıtları: Başkentgaz artışı, HSPTVDSZ'de 117 hatalı IBAN'lı hesap (1.432 açılış içinde), gecikme konulu 186 çağrı (71'i hatırlatma), 2.340 müşterilik hedef grup ve iletişim izin dağılımı (%58 e-posta, %81 SMS), 5 benzer talep (adam-gün). Servis kataloğu (Kredi Kullandırım, Kredi Takip, Müşteri Yönetim, Fatura Ödeme, Kart Başvuru…) ve servis takvimleri; ücret/maliyet yok. |
+| Veri planı ve üretim rehberi | Log kaynağı olarak **Faz 5 üreticisi** (kendi log üreticimize gerek kalmıyor). Senaryo kayıtları: Başkentgaz artışı, İSKİ 13 haneli abone no doğrulama hataları (1 Ekim'den beri 412 deneme, 187 müşteri, 23 çağrı), kurum duyuruları arşivi, gecikme konulu 186 çağrı (71'i hatırlatma), 2.340 müşterilik hedef grup ve iletişim izin dağılımı (%58 e-posta, %81 SMS), 5 benzer talep (adam-gün). Servis kataloğu (Kredi Kullandırım, Kredi Takip, Müşteri Yönetim, Fatura Ödeme, Kart Başvuru…) ve servis takvimleri; ücret/maliyet yok. |
 | Uygulama rehberi ve prompt'lar | **Teknoloji:** Next.js 16 + FastAPI (uv) → React/Vite varsayımı güncellenir. Ekran kimlikleri → ekran kodları ve `data-tour` hedefleri. Mercek sohbet API'si (`/api/mercek/chat`). Joyride v3 hazır olduğu için M1.5 küçülür. **Dağıtım:** Next.js + FastAPI'nin App Service'e nasıl taşınacağına karar verilmeli. |
 | Sunum ve taslak ekranlar | Problem slaytı, demo slaytı, mockup'lar (iç uygulama ekranlarıyla yeniden) |
 | Takım anlatım cümleleri | 2. ve 3. cümle |
@@ -341,8 +342,8 @@ Eyüp Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglard
 ## 5. Onay gereken kararlar
 
 1. **Senaryo seti:** Önerim A + B + C + D canlı, E ve F yedek. Değişiklik var mı?
-2. ~~Sahne 2b'deki hata~~ **Karar verildi:** HSPTVDSZ IBAN kontrol hanesi hatası. KRTTBASV sınır değer hatası yedek.
-3. **Mercek'in incelediği kod:** `sample-codebase/` altındaki kopya (önerim, uygulama doğru kalır) mı, uygulamanın kendi kodu mu?
+2. ~~Sahne 2b'deki hata~~ **Karar verildi:** ODMTFATR · İSKİ abone numarası formatı değişikliği. Yedek: faiz parametresi önbellek senaryosu.
+3. ~~Mercek'in incelediği kod~~ **Karar verildi (senaryodan doğdu):** Mercek uygulamanın kendi kodunu okur. Kasıtlı hata gömülmüyor; 6–12 hane kuralı rebuild rehberinde zaten tanımlı.
 4. **Mercek'e giriş:** Ekran kodu çubuğunda "Sorun yaşıyorum" butonu ile bağlamlı yan panel + ayrı Mercek sohbet sayfası (önerim) mi, yalnızca sohbet sayfası mı?
 5. ~~Maliyet modeli~~ **Karar verildi:** Ücret hesaplanmaz; tahmin yalnızca **adam-gün** ve takvim. Teknoloji tarafı **servis** bazlı anlatılır (ana servis / etkileşimli servis).
 6. **Demo kullanıcıları:** Faz 3'teki Mehmet (müşteri), Eyüp (L2) ve Ayşe (analist) kullanılır; sahte kullanıcı listesine üç kişi eklenir: **Elif** (şube müşteri temsilcisi, Senaryo A), **Zeynep** (çağrı merkezi temsilcisi, Senaryo B) ve **Fatma** (Kredi Tahsilatları Bölüm Başkanlığı, Senaryo D). Uygun mu?

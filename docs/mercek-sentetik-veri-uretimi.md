@@ -1,351 +1,444 @@
 # Mercek — Sentetik Veri Üretim Rehberi
 
-`mercek-sentetik-veri-plani.md` **ne** üretileceğini, bu doküman **nasıl ve hangi değerlerle** üretileceğini anlatır. Tablolar ve alanlar `data/schema.sql` (görev A5-a) ile aynıdır.
+`mercek-sentetik-veri-plani.md` **hangi** verinin **neden** üretileceğini, bu doküman **nasıl ve hangi değerlerle** üretileceğini anlatır. Senaryolar: `mercek-demo-senaryo-onerileri.md`.
 
 ---
 
-## 1. Üretim yöntemi matrisi
+## 0. Genel kurallar
 
-| Varlık | Adet | Kaynak | Çıktı dosyası | Copilot prompt'u |
-|---|---|---|---|---|
-| Ekipler, servisler, bağımlılıklar | 5 / 12 / 10 | **Elle (bu doküman, §3)** | `data/seed/catalog.json` | A5-0 |
-| Ekranlar, ekran–servis, ekran öğeleri | 8 / 13 / 19 | **Elle (§3)** | `data/seed/catalog.json` | A5-0 |
-| Hata kodları | 15 | **Elle (§3)** | `data/seed/catalog.json` | A5-0 |
-| Senaryo kayıtları (S1–S4) | ~30 kayıt | **Elle (§4)** | `data/seed/scenarios.json` | A5-0 |
-| Alan standartları, soru bankası | 10 / 12 | **Elle** | `data/seed/field_standards.csv`, `questions.json` | M2.3-a |
-| Sentetik kod (S2) | 6 dosya | **Elle (Copilot)** | `sample-codebase/` | M1.4-d |
-| Doğal dil metinleri (çağrı, çözüm, talep) | ~200 / 60 / 100 | **Foundry modeli (§6)** | `data/seed/texts.json` | A5-c |
-| Loglar, geçmiş çağrılar, talepler, takvim | 3000 / 400 / 100 / 3 ay | **Betik + Faker (§5)** | `data/out/*.csv` | A5-b |
-| Embedding'ler + AI Search indeksleri | 3 indeks | **Betik (Foundry embedding)** | AI Search | A5-d |
+- **Tarih referansı:** Demo günü **17.10.2026**. Betikler `--today 2026-10-17` parametresi alır; "son 30/90 gün" bu tarihe göre hesaplanır. B senaryosunun "son 30 dakika" kayıtları ise `demo_reset.py` ile **demo saatine göre** yazılır.
+- **Sabit tarihler:**
+  - İSKİ duyurusu 12.09.2026, geçiş 01.10.2026
+  - ASKİ duyurusu 05.10.2026, geçiş 01.01.2027
+  - Afet tarihi 10.10.2026 (sentetik)
+- **Tekrarlanabilirlik:** Tüm rastgele üretim `seed=42`. Senaryo kayıtları rastgele üretimin **üzerine** yazılır; betikler senaryoyla çelişen kayıt üretmez (§0.1 yasak kurallar).
+- **Kişisel veri yok:** Gerçek TCKN, telefon, e-posta, IBAN yok. Faker (`tr_TR`) ad soyadları kurgusaldır. IBAN'lar simülasyon banka kodu `00999` ile üretilir (rebuild Faz 4). Telefon `+90 5xx 000 00 xx`, e-posta `@ornek.test`.
+- **Copilot büyük veri üretmez;** yalnızca betikleri yazar. Doğal dil metinleri Foundry modeli üretir.
 
-**Akış (1. gün 10:30–13:30):**
-```
-A5-a şema → A5-0 catalog.json + scenarios.json → A5-c metinler (Foundry) → A5-b generate.py → A5-d load.py → §7 doğrulama
-```
+### 0.1 Yasak kurallar (demoyu bozmamak için)
 
-**Kurallar**
-- Rastgele kısımlar `seed=42` ile tekrarlanabilir.
-- Senaryo kayıtları rastgele üretimin **üzerine** yazılır ve betik onlarla çelişen kayıt üretmez (§5'teki "yasak" kurallar).
-- Kişisel veri yok: ad soyad, TCKN, telefon, gerçek IBAN üretilmez. IBAN'lar her zaman maskeli: `TR** **** **** **** 4821`.
-- Büyük veri Copilot'a ürettirilmez (maliyet). Copilot yalnızca betik yazar; metinleri Foundry modeli üretir.
-
----
-
-## 2. Tarih referansı
-
-- **"Bugün" = 17.10.2026** (demo günü). Betik `--today 2026-10-17` parametresi alır; "son 30 gün" ve takvim hesapları buna göre yapılır.
-- Geçmiş çağrılar: 90 gün (19.07.2026–16.10.2026). Loglar: 45 gün. Geçmiş talepler: 18 ay.
-
----
-
-## 3. Referans katalogları (elle — `catalog.json`)
-
-### 3.1 Ekipler
-
-| team_id | name | daily_capacity_md |
-|---|---|---|
-| ODEME | Ödeme Sistemleri | 1.0 |
-| FATURA | Fatura Servisleri | 1.0 |
-| KANAL | Dijital Kanallar | 1.0 |
-| KIMLIK | Kimlik Yönetimi | 1.0 |
-| KART | Kart Sistemleri | 1.0 |
-
-> `daily_capacity_md = 1.0`: Takvim hesabı, yeni işe ekipten **bir geliştiricinin** ayrılacağını varsayar. Sunumda varsayım olarak söylenir.
-
-### 3.2 Servisler
-
-| service_id | name | team_id | description |
-|---|---|---|---|
-| TRANSFER_API | Transfer API | ODEME | EFT ve havale işlemlerini başlatır |
-| IBAN_VALIDATION | IBAN Doğrulama | ODEME | Alıcı IBAN'ını ve ad uyumunu doğrular |
-| EFT_GATEWAY | EFT Geçidi | ODEME | EFT mesajlarını dış sisteme iletir |
-| CUSTOMER_PROFILE | Müşteri Profil Servisi | KANAL | Müşteri bilgileri ve kayıtlı alıcılar |
-| ACCOUNT_SERVICE | Hesap Servisi | KANAL | Hesap listesi ve bakiye |
-| NOTIFICATION | Bildirim Servisi | KANAL | SMS ve push bildirimleri |
-| BILL_PAYMENT | Fatura Ödeme Servisi | FATURA | Fatura sorgulama ve ödeme |
-| BILLER_INTEGRATION | Kurum Entegrasyonu | FATURA | Fatura kurumlarıyla bağlantı |
-| AUTH_SERVICE | Kimlik Doğrulama | KIMLIK | Giriş ve oturum |
-| OTP_SERVICE | Tek Kullanımlık Şifre | KIMLIK | SMS OTP üretimi |
-| CARD_SERVICE | Kart Servisi | KART | Kart listesi ve limitler |
-| INVEST_SERVICE | Yatırım Servisi | KANAL | Fon ve hisse işlemleri |
-
-### 3.3 Servis bağımlılıkları
-
-| service_id | depends_on |
+| Kural | Neden |
 |---|---|
-| TRANSFER_API | IBAN_VALIDATION, EFT_GATEWAY, CUSTOMER_PROFILE, NOTIFICATION |
-| BILL_PAYMENT | BILLER_INTEGRATION, ACCOUNT_SERVICE, NOTIFICATION |
-| AUTH_SERVICE | OTP_SERVICE |
-| ACCOUNT_SERVICE | CUSTOMER_PROFILE |
-| CARD_SERVICE | ACCOUNT_SERVICE |
+| 01.10.2026 öncesine ait 13 haneli İSKİ abone numarası yok | C: "1 Ekim'den önce hiç yok" bulgusu |
+| Çözüm bilgi bankasında abone numarası uzunluğu / formatı konulu kayıt yok | C: eşleşme %35 kalmalı |
+| Taksit hatırlatma konulu geçmiş talep yalnızca D'nin 5 talebi | D: benzer talep listesi sabit kalmalı |
+| Taksit erteleme konulu geçmiş talep yalnızca E'nin 3 talebi | E: benzer talep listesi sabit kalmalı |
+| Ekran kataloğunda erteleme ekranı yok, `KRDTERTL` kodu boş | E: yeni ekran ve kod önerisi |
+| Generator'ın ODMTFATR `VALIDATION_ERROR` kayıtlarında `error.field = subscriber_no` yok (enjeksiyon dışında) | C: 412 sayısı kesin kalmalı |
+| Etkilenen 3 ilin adı arayüzde ve sunumda gösterilmez | E: hassasiyet |
 
-### 3.4 Ekranlar ve ekran–servis eşlemesi
+---
 
-| screen_id | name | module | servisler |
-|---|---|---|---|
-| LOGIN | Giriş | Kimlik | AUTH_SERVICE, OTP_SERVICE |
-| ACCOUNTS | Hesaplarım | Hesap | ACCOUNT_SERVICE |
-| TRANSFER | Para Transferi | Ödeme | TRANSFER_API, IBAN_VALIDATION, CUSTOMER_PROFILE |
-| BILL | Fatura Ödeme | Ödeme | BILL_PAYMENT, BILLER_INTEGRATION |
-| CARDS | Kartlarım | Kart | CARD_SERVICE |
-| LOANS | Kredilerim | Hesap | ACCOUNT_SERVICE |
-| INVEST | Yatırım | Yatırım | INVEST_SERVICE |
-| PROFILE | Profil ve Ayarlar | Hesap | CUSTOMER_PROFILE, NOTIFICATION |
+## 1. Üretim matrisi ve çalışma sırası
 
-> **Bilerek döviz ekranı yok.** S4'teki "Döviz Alarmı" talebinin **yeni ekran** olarak sınıflanması buna bağlı. Kataloğa döviz ekranı eklenirse S4 bozulur.
+| # | Adım | Komut / betik | Çıktı | Copilot prompt'u |
+|---|---|---|---|---|
+| 1 | Şema | `data/schema.sql` | Azure SQL tabloları | V1 |
+| 2 | Katalog ve elle veriler | `data/seed/catalog.json`, `announcements.json` | JSON | V2 |
+| 3 | Log üretimi | `python3 tools/generate_banking_logs.py --count 10000 --days 30 --seed 42 --format ndjson` | `tools/output/dalan-banking-logs.ndjson` | rebuild Faz 5 |
+| 4 | Log senaryo enjeksiyonu | `python3 -I tools/mercek_data/inject_log_scenarios.py` | `tools/output/mercek-logs.ndjson` | V3 |
+| 5 | Doğal dil metinleri | `python3 tools/mercek_data/generate_texts.py` | `data/seed/texts.json` (commit'lenir) | V4 |
+| 6 | Portföy | `python3 tools/mercek_data/generate_portfolio.py` | `data/out/customers.csv`, `loans.csv` | V5 |
+| 7 | Çağrılar ve çözümler | `python3 tools/mercek_data/generate_incidents.py` | `data/out/incidents.csv`, `solutions.csv` | V6 |
+| 8 | Talepler | `python3 tools/mercek_data/generate_requests.py` | `data/out/requests.csv` | V6 |
+| 9 | Yükleme | `python3 tools/mercek_data/load_all.py --sql --search` | SQL + AI Search | V7 |
+| 10 | Demo sıfırlama | `python3 tools/mercek_data/demo_reset.py --now` | B'nin canlı penceresi | V8 |
+| 11 | Doğrulama | `python3 tools/mercek_data/validate_scenarios.py` | Rapor (§12) | V8 |
 
-**TRANSFER `flow_definition`** (M2.2 için):
+Hedef: 1. gün **13:30'a kadar 1–9 bitmiş ve 11 yeşil** olmalı.
+
+---
+
+## 2. SQL şeması (`data/schema.sql`)
+
+| Tablo | Alanlar | Not |
+|---|---|---|
+| `services` | service_id, name | 6 servis (§3.3) |
+| `screens` | code, name, module, type (T/R), simulated (bit), description, flow_json, components_json | 5 simüle + 3 katalog (§3.2) |
+| `screen_services` | screen_code, service_id, role (`ana` / `etkilesimli`) | |
+| `error_rules` | screen_code, error_code, error_type (`business` / `technical`), service_id, open_incident (bit), explanation_hint | Servis ataması kuralları (§3.4) |
+| `service_calendar` | service_id, date_from, date_to, allocation_pct, note | §3.5 |
+| `scope_addons` | addon_id, name, effort_md, main_share, customer_mgmt_share | §3.5.1 |
+| `banking_logs` | log_id, ts, level, screen_code, event_action, outcome, error_code, error_type, error_field, customer_number, trace_id, channel, branch_code, employee_id, institution, subscriber_no, subscriber_no_len, amount, message, raw_json | Faz 5 ECS kayıtlarından düzleştirilmiş; indeks: (screen_code, ts), (trace_id), (customer_number, ts), (institution, ts) |
+| `customers` | customer_number, full_name, segment, city, district, region_affected (bit), address_changed_at, email, phone, perm_email, perm_sms, perm_phone | |
+| `loans` | loan_id, customer_number, product, principal, remaining_principal, monthly_rate, term, next_due_date, status (`normal` / `gecikmede`), delinquent_12m (bit), collection_account | |
+| `incidents` | incident_id, created_at, channel (`sube` / `cagri_merkezi` / `dijital`), screen_code, category, subcategory, note, customer_number, subscriber_no, trace_id, city, service_id, master_incident_id, status, solution_id, resolution_minutes, error_code, institution | |
+| `solutions` | solution_id, title, symptom, root_cause, steps, error_code, service_id | AI Search'e de yüklenir |
+| `announcements` | ann_id, institution, published_at, effective_at, title, body | AI Search'e de yüklenir |
+| `requests` | request_id, created_at, requester_unit, title, description, type, components_json, screens_json, services_json, effort_md, component_efforts_json, service_efforts_json, decisions, analysis_json, analyst, approved_by, scope_additions, status (`analiz` / `planli` / `tamamlandi`), planned_service_id, planned_from, planned_to | AI Search'e de yüklenir |
+| `mercek_events` | id, ts, kind (`prevented_call` / `linked_case` / `analysis`), screen_code, incident_id, duration_ms | Ölçümler (M1.6) |
+
+---
+
+## 3. Elle hazırlanan veriler (`data/seed/catalog.json`)
+
+### 3.1 Demo kullanıcıları (fake auth, `users.ts`'e eklenir)
+
+Rebuild Faz 3'teki kullanıcılar korunur; demo karakterleri eklenir. Şifre: `demo123`.
+
+| id | username | Ad | Rol / unvan | Not |
+|---|---|---|---|---|
+| u-3 | mehmet | Mehmet Yılmaz | (mevcut) | Demoda **banka müşterisi**; müşteri no 10000003 |
+| u-2 | ayse | Ayşe Kaya | Analist · Kıdemli İş Analisti | (mevcut) |
+| u-4 | elif | Elif Demir | Şube Müşteri Temsilcisi | **Aylık gelir 38.000 TL**, çünkü simülasyonda KRDTKULL formu giriş yapan kullanıcının verisiyle dolar (A) |
+| u-5 | zeynep | Zeynep Arslan | Çağrı Merkezi Temsilcisi | |
+| u-6 | kerem | Kerem Aydın | Platform Yöneticisi · L2 Destek | |
+| u-7 | fatma | Fatma Öztürk | Bölüm Başkanı · Kredi Tahsilatları | |
+| u-8 | hakan | Hakan Çelik | Bölüm Başkanı · Bireysel Krediler | |
+
+`Role` tipine "Şube Temsilcisi", "Çağrı Merkezi", "Bölüm Başkanı", "L2 Destek" eklenir.
+
+### 3.2 Ekran kataloğu
+
+| code | name | module | type | simulated | Ana bileşenler (components_json) |
+|---|---|---|---|---|---|
+| KRTTBASV | Kredi Kartı Başvurusu | KRT | T | 1 | kart seçimi, gelir, limit, kesim günü, onaylar |
+| KRDTKULL | Bireysel Kredi Kullandırım | KRD | T | 1 | tutar, vade, ödeme planı (`loanPlan`), uygunluk uyarısı, sözleşme onayı, sonuç |
+| ODMTFATR | Fatura Ödeme | ODM | T | 1 | tür/kurum, abone no (6–12 hane), sorgu, fatura listesi, hesap, öde |
+| MUSTGUNC | Müşteri Bilgi Güncelleme | MUS | T | 1 | iletişim, adres, gelir, iletişim izinleri |
+| HSPTVDSZ | Vadesiz Hesap Açılışı | HSP | T | 1 | müşteri özeti, döviz, şube, onaylar, IBAN |
+| KRDRTKSR | Kredi Taksit Sorgulama | KRD | R | 0 | müşteri no ile kredi ve taksit listesi (vade, tutar, durum) |
+| HSPRHRKT | Hesap Hareketleri Raporu | HSP | R | 0 | hesap, tarih aralığı, hareket listesi |
+| KRTRKRTL | Kart Listesi | KRT | R | 0 | müşterinin kartları ve limitleri |
+
+`components_json` ayrıca **kod dosya haritası** taşır (M1.4 kod analizi için), örnek ODMTFATR:
+
 ```json
-["Transfer türü seç (EFT/Havale)", "Alıcı IBAN gir", "Alıcı adı doğrula", "Tutar ve açıklama gir", "Özet ve onay", "Sonuç ve dekont"]
+{"frontend": ["frontend/src/app/(dashboard)/bankacilik/odmtfatr/page.tsx",
+              "frontend/src/app/(dashboard)/bankacilik/odmtfatr/bill-payment-form.tsx"],
+ "backend":  ["backend/app/api/odm.py"]}
 ```
-Diğer ekranlar için 3–5 adımlık benzer listeler.
 
-### 3.5 Ekran öğeleri (Joyride hedefleri — `contracts.md` ile birebir)
+### 3.3 Servisler ve ekran–servis ilişkisi
 
-| screen_id | element_id | label |
-|---|---|---|
-| LOGIN | login-username / login-password / login-submit | Kullanıcı adı / Şifre / Giriş |
-| ACCOUNTS | accounts-list / accounts-goto-transfer / accounts-goto-bill | Hesap listesi / Para gönder / Fatura öde |
-| TRANSFER | transfer-tab-eft / transfer-tab-havale | EFT sekmesi / Havale sekmesi |
-| TRANSFER | transfer-iban-input / transfer-amount-input / transfer-desc-input / transfer-submit | Alıcı IBAN / Tutar / Açıklama / Gönder |
-| BILL | bill-biller-select / bill-subscriber-input / bill-amount-input / bill-submit | Kurum / Abone no / Tutar / Öde |
-| (ortak) | nav-accounts / nav-transfer / nav-bill | Alt menü |
-
-### 3.6 Hata kodları
-
-| error_code | service_id | description | severity |
+| service_id | Servis | Ana olduğu ekranlar | Etkileşimli olduğu ekranlar |
 |---|---|---|---|
-| **IBN-504** | IBAN_VALIDATION | IBAN doğrulama zaman aşımı | HIGH |
-| IBN-400 | IBAN_VALIDATION | Geçersiz IBAN biçimi | LOW |
-| TRF-422 | IBAN_VALIDATION | Alıcı adı ile IBAN sahibi uyuşmuyor | MEDIUM |
-| TRF-409 | TRANSFER_API | Günlük transfer limiti aşıldı | MEDIUM |
-| EFT-503 | EFT_GATEWAY | EFT sistemi geçici olarak kapalı | MEDIUM |
-| **BIL-221** | BILL_PAYMENT | Ödenen tutar fatura tutarından düşük | MEDIUM |
-| BIL-404 | BILLER_INTEGRATION | Abone numarası bulunamadı | LOW |
-| BIL-502 | BILLER_INTEGRATION | Fatura kurumundan yanıt alınamadı | HIGH |
-| AUT-401 | AUTH_SERVICE | Hatalı şifre denemesi | LOW |
-| OTP-408 | OTP_SERVICE | SMS şifresi gecikmeli iletildi | MEDIUM |
-| ACC-500 | ACCOUNT_SERVICE | Bakiye bilgisi alınamadı | HIGH |
-| CRD-500 | CARD_SERVICE | Kart limiti görüntülenemedi | MEDIUM |
-| PRF-409 | CUSTOMER_PROFILE | Profil güncelleme çakışması | LOW |
-| INV-503 | INVEST_SERVICE | Fiyat servisi yanıt vermiyor | MEDIUM |
-| NTF-500 | NOTIFICATION | Bildirim gönderilemedi | LOW |
+| KREDI_KULLANDIRIM | Kredi Kullandırım Servisi | KRDTKULL | — |
+| KREDI_TAKIP | Kredi Takip Servisi | KRDRTKSR | — |
+| MUSTERI_YONETIM | Müşteri Yönetim Servisi | MUSTGUNC | KRDTKULL, KRDRTKSR, HSPTVDSZ, KRTTBASV |
+| FATURA_ODEME | Fatura Ödeme Servisi (kurum entegrasyonu dahil) | ODMTFATR | — |
+| HESAP_YONETIM | Hesap Yönetim Servisi | HSPTVDSZ, HSPRHRKT | ODMTFATR |
+| KART_BASVURU | Kart Başvuru Servisi | KRTTBASV, KRTRKRTL | — |
 
-### 3.7 Çağrı kategorileri ve öncelikler (enum — prompt şemalarıyla aynı)
+### 3.4 Hata–servis kuralları (`error_rules`)
 
-- Kategori: `PARA_TRANSFERI`, `FATURA`, `GIRIS`, `HESAP`, `KART`, `DIGER`
-- Öncelik: `DUSUK`, `ORTA`, `YUKSEK`, `KRITIK` (severity HIGH → YUKSEK, MEDIUM → ORTA, LOW → DUSUK; müşteri işlemi tamamlayamıyorsa bir üst seviye)
+| screen_code | error_code | error_type | service_id | open_incident | Açıklama ipucu |
+|---|---|---|---|---|---|
+| KRDTKULL | AFFORDABILITY_EXCEEDED | business | KREDI_KULLANDIRIM | 0 | Taksit gelirin %50'sini aşıyor; uygun tutar/vade önerilir |
+| KRTTBASV | INSUFFICIENT_INCOME | business | KART_BASVURU | 0 | Kart tipinin gelir şartı |
+| ODMTFATR | INSUFFICIENT_BALANCE | business | HESAP_YONETIM | 0 | Bakiye yetersiz |
+| ODMTFATR | INSTITUTION_TIMEOUT | business | FATURA_ODEME | 1 | Kurum entegrasyonu zaman aşımı |
+| ODMTFATR | VALIDATION_ERROR | business | FATURA_ODEME | 1 | Alan doğrulaması (`error_field`'a bakılır) |
+| * | KYC_CHECK_FAILED | business | MUSTERI_YONETIM | 1 | Kimlik doğrulama |
+| * | CORE_BANKING_TIMEOUT, SERVICE_UNAVAILABLE, DB_CONNECTION_ERROR | technical | ekranın ana servisi | 1 | Teknik hata |
+
+`open_incident = 0` olan kurallar, A'daki "çağrı açılmadı" davranışının kaynağıdır.
+
+### 3.5 Servis takvimi
+
+| service_id | date_from | date_to | allocation_pct | note |
+|---|---|---|---|---|
+| KREDI_TAKIP | 2026-10-12 | 2026-11-08 | 100 | Yıl sonu regülasyon işi |
+| KREDI_KULLANDIRIM | 2026-10-12 | 2026-10-30 | 50 | Kampanya parametreleri |
+| FATURA_ODEME | 2026-10-19 | 2026-10-23 | 40 | Kurum entegrasyon bakımı |
+
+Diğer servisler müsait. Resmî tatil takvimi sentetik veride yok; yalnızca hafta sonları atlanır.
+
+**Takvim kuralı (kod):**
+- Servis kapasitesi: **1 a/g / iş günü**, doluluk yüzdesi kadar düşülür.
+- Süre (iş günü) = ⌈ana servis payı × 1,2⌉ (%20 entegrasyon ve test tamponu). Etkileşimli servislerin işi bu süre içinde paralel yürür.
+- Başlangıç: ana servisin bugünden sonraki ilk boş iş günü.
+
+| Talep | Ana servis payı | Süre | Başlangıç → bitiş |
+|---|---|---|---|
+| D (ilk) | Kredi Takip 15 | 18 | 09.11 → 02.12 |
+| D (SMS eklenince) | Kredi Takip 16 | ⌈19,2⌉ = 20 | 09.11 → 04.12 |
+| E · öncelik ver (ilk) | Kredi Takip 8 | ⌈9,6⌉ = 10 | 19.10 → 30.10 |
+| E · öncelik ver (SMS eklenince) | Kredi Takip 9 | ⌈10,8⌉ = 11 | 19.10 → 02.11 |
+| E · sıraya koy | Kredi Takip 8 | 10 | 09.11 → 20.11 |
+
+Çatışma yan etkileri: "Öncelik ver" seçilirse regülasyon işi 10 iş günü kayar (bitiş 08.11 → 22.11) ve D 23.11'de başlar (bitiş 18.12). "Sıraya koy" seçilirse regülasyon işi etkilenmez, D yine E'den sonra 23.11'de başlar (bitiş 18.12).
+
+### 3.5.1 Kapsam ekleri (`scope_addons`)
+
+Köprü önerilerinin eforu geçmiş taleplerdeki "kanal ekleme" işlerinin medyanıdır ve katalogda sabittir:
+
+| addon_id | Ad | Efor | Servis payları |
+|---|---|---|---|
+| ADD-SMS | Mevcut bildirime SMS kanalı ekleme | 2 a/g | ana servis 1, Müşteri Yönetim 1 |
+| ADD-PROAKTIF-SMS | Hedef gruba tek seferlik proaktif SMS | 2 a/g | ana servis 1, Müşteri Yönetim 1 |
+
+### 3.6 Kurum duyuruları (`data/seed/announcements.json`)
+
+| ann_id | Kurum | Yayın | Geçerlilik | Başlık |
+|---|---|---|---|---|
+| DUY-0412 | İSKİ | 12.09.2026 | 01.10.2026 | Yeni abonelere 13 haneli abone numarası verilecektir |
+| DUY-0419 | ASKİ | 05.10.2026 | 01.01.2027 | Abone numaraları 13 haneye geçiyor |
+| DUY-0398 | Başkentgaz | 20.08.2026 | 01.09.2026 | Fatura sorgu servisinde bakım penceresi (gece 02:00–04:00) |
+| DUY-0401 | Enerjisa Başkent | 28.08.2026 | 15.09.2026 | Yeni fatura dönem kodu alanı |
+| DUY-0405 | İGDAŞ | 02.09.2026 | 02.09.2026 | Ödeme bildirim formatında değişiklik yok, bilgilendirme |
+| DUY-0408 | Turkcell | 07.09.2026 | 01.10.2026 | Kurumsal hatlar için ayrı fatura türü |
+| DUY-0415 | İZSU | 18.09.2026 | 01.11.2026 | Ödeme kanallarında saat sınırlaması kalkıyor |
+| DUY-0417 | Türk Telekom | 26.09.2026 | 26.09.2026 | Sertifika yenilemesi |
+
+Metin (`body`) 3–5 cümle, kurumsal duyuru dili; elle yazılır. İSKİ ve ASKİ metinlerinde "13 hane", "yeni aboneler", "mevcut numaralar değişmez" ifadeleri bulunur.
+
+### 3.7 Etkilenen bölge (E)
+
+- `config.affected_region`: rebuild Faz 5'teki 12 ilden İstanbul dışındaki **3 il** (`region_affected = 1`).
+- Arayüzde ve sunumda il adları gösterilmez; Mercek "etkilenen 3 il" der.
 
 ---
 
-## 4. Senaryo kayıtları (elle — `scenarios.json`)
+## 4. İşlem logları
 
-Bu değerler demo ve sunumdaki rakamların kaynağıdır. **Değiştirilirse sunum ve mockup'lar da güncellenmeli.**
+### 4.1 Üretim (rebuild Faz 5, değiştirmeden)
 
-### S1 — Eşleşmeli çağrı (IBN-504)
+```bash
+python3 tools/generate_banking_logs.py --count 10000 --days 30 --seed 42 --format ndjson
+```
 
-**Çözüm kaydı**
+Ekran ağırlıkları: ODMTFATR 35, HSPTVDSZ 18, KRTTBASV 16, KRDTKULL 16, MUSTGUNC 15. Seviye dağılımı: info %89, warn %9, error %2. İş reddi ve teknik hata kodları üreticideki gibidir.
 
-| alan | değer |
+### 4.2 Senaryo enjeksiyonu (`inject_log_scenarios.py`)
+
+Girdi Faz 5 çıktısıdır, çıktı `mercek-logs.ndjson`. Kurallar:
+
+1. **Normalizasyon:** Üreticinin ODMTFATR `VALIDATION_ERROR` kayıtlarına `error.field = "amount"` atanır (yasak kural). Her ODMTFATR kaydına `banking.bill.subscriber_no` yoksa kurum türüne uygun 10–12 haneli numara eklenir.
+2. **C · İSKİ (412 kayıt):**
+   - 01.10.2026 00:00 – 17.10.2026 09:00 arasında, gündüz ağırlıklı dağılımla.
+   - **400 kayıt:** `banking.bill.institution = "İSKİ"`, 13 haneli `subscriber_no`, `error.code = VALIDATION_ERROR`, `error.field = subscriber_no`, `log.level = warn`, mesaj `"ODMTFATR Abone numarası 6–12 haneli olmalıdır"`. **187 farklı müşteri** (bir müşteri 1–5 deneme). Kanal: İnternet Şube %55, Mobil %35, Şube %10.
+   - **12 kayıt:** Diğer kurumlar, abone no 4–5 hane veya harf içeren (gerçek kullanıcı hatası).
+   - 01.10 öncesinde İSKİ'ye ait 13 haneli kayıt **olmaz.**
+3. **B · Başkentgaz tarihçesi:** Geçmiş 30 güne dağılmış üretici kayıtları baz seviye olarak kalır (günde 1–2 `INSTITUTION_TIMEOUT`). Demo penceresi (46 kayıt) burada değil, `demo_reset.py`'de yazılır.
+4. **Mehmet (u-3, 10000003):** Son 30 günde 3 başarılı ODMTFATR ödemesi (Başkentgaz, abone 4012345678).
+5. Çıktı `banking_logs` tablosuna §2'deki sütunlara düzleştirilerek yüklenir (`raw_json` tam kayıt).
+
+### 4.3 Canlı olay logları (uygulama yazar)
+
+Demo sırasında uygulama aşağıdaki olayları `POST /api/logs` ile aynı ECS alanlarıyla yazar:
+
+| Senaryo | Olay | Alanlar |
+|---|---|---|
+| A | KRDTKULL uygunluk uyarısı gösterildi | `error.code = AFFORDABILITY_EXCEEDED`, `warn`, `banking.loan` (tutar, vade, taksit, gelir, oran), `trace.id`, `employee.id = u-4` |
+| B | ODMTFATR Başkentgaz sorgusu (demo modu) | `INSTITUTION_TIMEOUT`, `warn`, kurum, abone no, müşteri no 10000003, kanal İnternet Şube |
+| C | ODMTFATR İSKİ 13 haneli sorgu | `VALIDATION_ERROR`, `error.field = subscriber_no` |
+
+---
+
+## 5. Müşteri ve kredi portföyü (`generate_portfolio.py`)
+
+**Hacim:** 40.000 müşteri (`10000101` – `10040100`), bunların 26.000'i aktif bireysel ihtiyaç kredili, toplam 33.000 kredi.
+
+**Dağılımlar:** Segment ve il ağırlıkları Faz 5 üreticisiyle aynı. Kredi tutarı 10.000–500.000 (log-normal), vade 3–36 ay, oranlar KRDTKULL ile aynı.
+
+**D için kesin değerler (hedef grup):**
+- Aktif kredili **ve** son 12 ayda en az 1 taksiti ≥ 1 gün gecikmiş müşteri: **2.340**.
+- İzin dağılımı (hedef grup içinde):
+
+| e-posta | SMS | Müşteri |
+|---|---|---|
+| ✓ | ✓ | 1.169 |
+| ✓ | ✗ | 188 |
+| ✗ | ✓ | 726 |
+| ✗ | ✗ | 257 |
+
+→ E-posta %58 (1.357), SMS %81 (1.895), en az biri %89 (2.083).
+
+**E için kesin değerler (etkilenen bölge):**
+- 3 ilde adresi kayıtlı, aktif kredili müşteri: **4.870**; kredileri **6.215**; bunların **612'si** `gecikmede`.
+- Bu müşterilerden **37'sinin** `address_changed_at` değeri 10.10.2026'dan sonra (afet sonrası adres değişikliği).
+- Etkilenen bölgedeki müşterilerle D'nin hedef grubu kesişebilir; bu sayıları bozmaz.
+
+**Elif ve Mehmet:** Portföyde değil, kullanıcı kaydından gelir (simülasyon). Mehmet'in Başkentgaz aboneliği log ve çağrılarda geçer.
+
+---
+
+## 6. Çağrı kayıtları (`generate_incidents.py`)
+
+**Hacim:** Son 90 günde ~1.400 kayıt + demo anında oluşanlar. `incident_id`: `CAG-0001`'den tarih sırasıyla; demo öncesi en son numara **CAG-2050**.
+
+**Kategori dağılımı (temel):** Fatura ödeme %24, Kredi %22, Kart %16, Hesap %14, Müşteri bilgileri %12, Diğer %12.
+
+**Senaryo kayıtları (kesin):**
+
+| Senaryo | Kayıtlar |
 |---|---|
-| solution_id | SOL-014 |
-| error_code | IBN-504 |
-| symptom | EFT gönderiminde "İşleminiz şu an gerçekleştirilemiyor" hatası, IBAN doğrulama zaman aşımı |
-| root_cause | IBAN doğrulama istemcisinin bağlantı havuzu yoğun saatlerde doluyor; 5 sn zaman aşımı aşılıyor |
-| steps | 1) Son 15 dk havuz doluluğunu kontrol et 2) Havuz limitini 20 → 60, zaman aşımını 5 → 8 sn yap 3) Kalıcı çözüm: istemciye yeniden deneme politikası |
-| fix_effort_md | 3.0 |
+| **B** · geçmiş | 6 kapalı kurum zaman aşımı çağrısı (Başkentgaz 2, İGDAŞ 2, Enerjisa Başkent 1, CK Boğaziçi 1), `error_code = INSTITUTION_TIMEOUT`, `solution_id = SOL-031`, çözüm süresi 45–120 dk |
+| **B** · demo | CAG-2051 ana kayıt ve bağlı 11 vaka: **`demo_reset.py` yazar** (§11) |
+| **C** | 01.10 sonrası 23 çağrı: kategori Fatura ödeme, alt kategori "abone numarası kabul edilmiyor", kurum İSKİ, `status = acik`, `solution_id` boş |
+| **D** | Son 90 günde kategori "Kredi", alt kategori dağılımı: **"hatırlatma almadım / tarihi unuttum" 71**, "gecikme faizi itirazı" 64, "taksit tutarı / tarih sorusu" 51 → toplam **186** |
+| **E** | Son 5 günde (12–16.10) etkilenen 3 ilden **497** çağrı, **418'i** alt kategori "erteleme / ödeme güçlüğü". Önceki 30 günde aynı illerden günlük ortalama **16** çağrı (≈ 6 kat artış) |
 
-**6 çözülmüş geçmiş çağrı:** CAG-0871, CAG-0912, CAG-0955, CAG-0978, CAG-1003, CAG-1021 — hepsi `screen_id=TRANSFER`, `error_code=IBN-504`, `solution_id=SOL-014`, `team_id=ODEME`, `status=closed`, `resolution_minutes` 35–90. Metinleri §6.1 ile üretilir ama elle gözden geçirilir; hepsi "EFT gönderemedim / IBAN hatası / zaman aşımı" anlamında olmalı.
+`note` alanı temsilcinin yazdığı kısa nottur (Foundry, §9.1).
 
-**Demo anı:** CAG-1042 demoda canlı oluşur, veride önceden yoktur. Çağrı numarası sayacı 1042'den başlar.
+---
 
-### S2 — Eşleşmesiz çağrı (BIL-221)
+## 7. Çözüm bilgi bankası
 
-- CAG-1043 demoda canlı oluşur (Fatura Ödeme, 100,005 TL).
-- **Yasak kural:** Geçmiş çağrılarda `BIL-221` kodlu veya "eksik ödeme / kuruş / yuvarlama" içerikli **hiçbir kayıt olmayacak**. Ayrıca `solutions` içinde BIL-221 çözümü yok. Aksi halde eşleşme çıkar ve kod analizi demosu bozulur.
-- `sample-codebase/` içeriği: görev M1.4-d.
+- ~40 kayıt (`SOL-001`…). Hata kodu başına 2–5 çözüm, metinler Foundry'den (§9.2).
+- **SOL-031 (elle):**
+  - **Başlık:** Kurum entegrasyonu zaman aşımı
+  - **Belirti:** Fatura sorgu/ödeme `INSTITUTION_TIMEOUT`; aynı kurumda kısa sürede çok sayıda hata
+  - **Kök neden:** Kurum tarafı yavaşlığı / bakım
+  - **Adımlar:**
+    1. Kurum bazında son 30 dk hata sayısını kontrol et.
+    2. Kurumun bakım duyurusunu kontrol et.
+    3. Zaman aşımı eşiğini geçici artır ve istekleri kuyruğa al.
+    4. Kurum entegrasyon sorumlusuyla iletişime geç.
+    5. Müşteriye mükerrer ödeme yapmamasını söyle.
+- Yasak kural: abone numarası uzunluğu/formatı konulu çözüm yok.
 
-### S3 — Para Transferi'ne değişiklik talebi
+---
 
-**Son 30 gündeki TRANSFER çağrıları (18.09–17.10.2026): toplam 312**
+## 8. Geçmiş talepler (`generate_requests.py`)
 
-| error_code / kategori | adet | oran |
-|---|---|---|
-| IBN-504 | 128 | %41 |
-| TRF-422 | 72 | %23 |
-| TRF-409 | 44 | %14 |
-| EFT-503 | 34 | %11 |
-| kodsuz (DIGER) | 34 | %11 |
+**Hacim:** ~100 talep (`TLP-0500` – `TLP-1042`), son 24 ay. Tip dağılımı: mevcut ekran değişikliği %55, yeni ekran %20, batch işi %15, karma %10. Efor 3–40 a/g (log-normal, medyan ~12). `services_json` ana ve etkileşimli servisleri içerir. Uygulamadaki mevcut `TLP-1038…1042` kayıtları korunur.
 
-> 6 S1 çağrısı bu 128'in içinde olabilir (tarihleri son 30 gün içindeyse) — sayım toplamı 312'yi bozmamalı.
+**D'nin benzer talepleri (kesin):**
 
-**4 benzer geçmiş talep**
+| request_id | Başlık | Tip | Bileşen | Efor | Servis payları (`service_efforts_json`) | Kararlar (`decisions`) |
+|---|---|---|---|---|---|---|
+| TLP-0871 | Kredi kartı son ödeme tarihi SMS hatırlatması (segment bazlı, otomatik) | batch | otomatik | 14 | Kart Başvuru 12, Müşteri Yönetim 2 | Son ödeme tarihinden 3 gün önce; günde bir çalışır; aynı ekstre için tek gönderim |
+| TLP-0915 | Fatura son ödeme tarihi hatırlatma e-postası | batch | otomatik | 11 | Fatura Ödeme 9, Müşteri Yönetim 2 | E-postada tutar yer almaz |
+| TLP-0962 | Vadeli hesap vade sonu bildirim işi | batch | otomatik | 9 | Hesap Yönetim 8, Müşteri Yönetim 1 | Yalnızca iletişim izni olan müşteriler |
+| TLP-1004 | Kart ekstresini ekrandan müşteriye manuel gönderme | mevcut ekran değişikliği | manuel | 6 | Kart Başvuru 5, Müşteri Yönetim 1 | Şube ve çağrı merkezi temsilcileri gönderebilir; son gönderim satırda görünür |
+| TLP-1019 | Hesap hareket dökümünü şube ekranından e-posta ile iletme | mevcut ekran değişikliği | manuel | 8 | Hesap Yönetim 6, Müşteri Yönetim 2 | İzin yoksa buton pasif |
 
-| request_id | type | screen_id | title | effort_md |
+Kontrol (kod): otomatik medyan 11 (9–14), manuel medyan 7 (6–8), toplam 18. Müşteri Yönetim payı oranlarının medyanı 0,167 → 18 × 0,167 = **3**, Kredi Takip = 18 − 3 = **15**.
+
+**E'nin benzer talepleri (kesin):**
+
+| request_id | Başlık | Tip | Efor | Servisler |
 |---|---|---|---|---|
-| TLP-0142 | existing_change | BILL | Fatura ödemede kayıtlı faturaları listeleme | 15 |
-| TLP-0156 | existing_change | TRANSFER | Havale ekranında son alıcılar listesi | 17 |
-| TLP-0171 | existing_change | TRANSFER | EFT'de alıcıyı kaydetme seçeneği | 19 |
-| TLP-0188 | existing_change | ACCOUNTS | Hesaplarım'da favori hesap sıralama | 22 |
+| TLP-0588 | Salgın döneminde kredi taksit erteleme ekranı | yeni ekran | 15 | Kredi Takip 8, Kredi Kullandırım 3, Müşteri Yönetim 4 |
+| TLP-0712 | Kredi kartı borcu taksitlendirme ekranı | yeni ekran | 13 | Kart Başvuru 9, Müşteri Yönetim 4 |
+| TLP-0846 | Kredi vade değişikliği (iç operasyon ekranı) | yeni ekran | 17 | Kredi Takip 13, Kredi Kullandırım 4 |
 
-→ medyan 18, aralık 15–22.
+Kontrol (kod): medyan 15 (13–17). Müşteri Yönetim oran medyanı (0,267; 0,308) = 0,287 → **4**; Kredi Kullandırım (0,200; 0,235) = 0,218 → **3**; Kredi Takip = 15 − 4 − 3 = **8**.
 
-- **Yasak kural:** Diğer 96 geçmiş talepte "favori / kayıtlı alıcı / son alıcılar" içeren başka talep olmayacak; olursa ilk 5 değişir.
+**Planlı talep (E'nin çatışma analizi için):** E demosu D'den sonra oynatılacaksa, D'nin canlıda oluşan talebi (TLP-1043) Kredi Takip takviminde 09.11–04.12 planlı olarak durur. E ayrı oynatılacaksa `demo_reset.py --with-d-plan` bu kaydı ekler.
 
-**ODEME ekip takvimi**
-
-| team_id | date_from | date_to | allocation_pct | note |
-|---|---|---|---|---|
-| ODEME | 2026-10-12 | 2026-11-08 | 100 | Yıl sonu regülasyon projesi |
-| ODEME | 2026-11-09 | 2027-01-31 | 8 | Rutin destek |
-
-**Doğrulama hesabı** (bir geliştirici × %92 boş = 0,92 adam-gün/iş günü, hafta sonu hariç):
-- 18 adam-gün → 20. iş günü → **9 Kasım – 4 Aralık 2026** ✔
-- 18 + 3 (IBN-504 kalıcı çözümü) = 21 adam-gün → 23. iş günü → **bitiş 9 Aralık 2026** ✔
-
-**Etki analizi beklentisi:** Transfer API (yüksek), Müşteri Profil Servisi (orta), IBAN Doğrulama (düşük).
-
-### S4 — Yeni ekran: Döviz Alarmı
-
-- Katalogda döviz ekranı yok (§3.4).
-- `field_standards` içinde **Kur**, **Döviz Kodu**, **Müşteri No**, **Alarm Geçerlilik** mutlaka olacak (M2.3-a).
-- Geçmiş taleplerde "döviz alarmı" yok.
+**Benzerlik değerleri** (%90, %84…) AI Search skorlarından gelir. Demo öncesi bir kez kalibre edilir: D ve E'nin talep metinleriyle arama yapılır, sıralama ve yüzdeler senaryo dokümanıyla karşılaştırılır.
 
 ---
 
-## 5. Betikle üretilecek veriler (`generate.py` — Faker tr_TR, seed 42)
+## 9. Foundry ile doğal dil metinleri (`generate_texts.py`)
 
-### 5.1 Loglar (~3000, son 45 gün)
-- Seviye dağılımı: INFO %80, WARN %12, ERROR %8.
-- Her satır: rastgele `session_id` (uuid), ekran (ağırlık: TRANSFER %30, ACCOUNTS %25, BILL %15, LOGIN %15, diğerleri %15), ekranın servislerinden biri.
-- WARN/ERROR satırlarında hata kodu, servisle uyumlu (§3.6); INFO'da kod yok.
-- Mesaj şablonları kodda: `"{service} timeout after {ms}ms"`, `"{service} returned {code}"`, `"Request completed in {ms}ms"`.
-- Son 30 günde TRANSFER için IBN-504 ERROR logları yoğun olsun (S3 hikâyesiyle tutarlı).
-- **Yasak:** BIL-221 log satırı üretme (demo sırasında canlı oluşacak).
+**Ayarlar:**
+- Foundry'deki `chat` deploy'u, temperature 0.8, JSON şemalı çıktı, 20'şerli partiler.
+- Sonuç `data/seed/texts.json`'a yazılır ve commit'lenir; tekrar üretilmez.
+- Üretim sonrası otomatik kontrol: yasak kelimeler, 10+ haneli rakam dizisi, `@` (e-posta deseni hariç), `+90` ve tekrarlar ayıklanır. Atılan metin %20'yi geçerse parti yeniden üretilir.
 
-### 5.2 Geçmiş çağrılar (~400, son 90 gün)
-- Önce S3'ün 312 TRANSFER çağrısı (son 30 gün, §4 dağılımıyla), sonra S1'in 6 kaydı (sabit numaralar), sonra kalan ~80 çağrı diğer ekranlara.
-- Her çağrı: `user_text` (texts.json'dan, kategori ve hata koduna uygun olanı seç), `category`, `priority`, `service_id`, `team_id`, `error_code`, `solution_id` (varsa), `resolution_minutes` (lognormal, 20–600), `status=closed`.
-- `incident_id`: CAG-0001'den başlayıp tarih sırasıyla; S1 numaralarını koru; son numara < 1042.
-- **Yasak:** BIL-221 veya yuvarlama/kuruş içerikli çağrı.
-
-### 5.3 Çözüm bilgi bankası (~60)
-- SOL-014 sabit (S1). Diğerleri her hata kodu için 2–5 çözüm, metinler texts.json'dan.
-- `fix_effort_md`: 1–8 arası.
-- BIL-221 için çözüm **yok**.
-
-### 5.4 Geçmiş talepler (~100, son 18 ay)
-- S3'ün 4 talebi sabit. Diğer 96: tip dağılımı existing_change %70 / new_screen %30; ekranlar katalogdan; efor 3–60 adam-gün (lognormal, medyan ~15); `affected_services` ekranın servislerinden 1–3'ü; başlangıç/bitiş tarihleri tutarlı.
-- **Yasak:** favori/kayıtlı alıcı ve döviz alarmı içerikli talep.
-
-### 5.5 Ekip takvimi (bugünden itibaren 3 ay)
-- ODEME §4'teki gibi sabit.
-- Diğer ekipler: 2–4 dönem, %20–%100 arası doluluk, rastgele.
-
----
-
-## 6. Foundry ile metin üretimi (`generate_texts.py`)
-
-**Ayarlar:** Foundry'deki `chat` deploy'u · temperature 0.8 (çeşitlilik için; uygulamadaki 0.1'den farklı) · JSON şemalı çıktı · 20'şerli partiler · sonuç `data/seed/texts.json` (commit'lenir, tekrar üretilmez).
-
-**Tahmini maliyet:** ~360 metin, birkaç bin token/parti → ihmal edilebilir; Copilot bütçesine yazılmaz.
-
-### 6.1 Prompt: `gen-cagri-metni` (müşteri ağzından çağrı metinleri)
+### 9.1 Prompt `gen-cagri-notu` (temsilci çağrı notları)
 
 ```
 ## system
-Sen bir bankanın mobil uygulama destek kayıtları için sentetik test verisi üreten bir yardımcısın.
-Üreteceğin metinler gerçek kişi, kurum, telefon, TCKN, IBAN, kart numarası veya adres İÇERMEZ.
-Metinler müşterinin "Sorun yaşıyorum" ekranına yazdığı kısa, doğal Türkçe cümlelerdir:
-- 3–20 kelime, günlük dil, bazen yazım hatası, bazen büyük harf/ünlem, bazen aciliyet ("acil", "maaşım yattı mı").
-- Teknik terim kullanmaz (IBAN hariç), hata kodunu bilmez.
-- Aynı partideki metinler birbirini tekrar etmez; farklı durum ve tonlar kullan.
+Bir bankanın şube ve çağrı merkezi temsilcilerinin çağrı kayıtlarına yazdığı kısa notlar için
+sentetik test verisi üretiyorsun. Notlar gerçek kişi, kurum çalışanı, telefon, TCKN, IBAN, kart
+numarası veya adres İÇERMEZ.
+- 10–35 kelime, temsilci dili ("Müşteri ... belirtti", "Müşteri ... soruyor"), üçüncü şahıs.
+- Teknik hata kodu yazma; müşterinin anlattığını ve temsilcinin gözlemini yaz.
+- Aynı partide tekrar yok; farklı durum ve tonlar kullan.
 
 ## user
-Ekran: {{screen_name}}
-Sorunun teknik karşılığı (müşteri bunu bilmez): {{error_description}}
-Kategori: {{category}}
+Kategori: {{category}} · Alt kategori: {{subcategory}}
+Ekran (temsilci bilmeyebilir): {{screen_name}} · Kurum (varsa): {{institution}}
 Adet: {{count}}
-Örnekler (bu tarzda ama bunları tekrar etme):
-- "para gönderemiyorum sürekli hata veriyor"
-- "eft yaptım işlem gerçekleştirilemiyor diyor acil kira ödemem lazım"
-
-Çıktı şeması: {"items": [{"text": string}]}
+Yasak konular: {{forbidden_topics}}
+Çıktı şeması: {"items": [{"note": string}]}
 ```
 
-**Çağırma planı:** Her (ekran, hata kodu) çifti için 8–15 metin; kodsuz kategoriler (DIGER) için genel şikâyetler. Toplam ~200 farklı metin; betik bunları 400 çağrıya tekrar dağıtır.
-**Hariç:** BIL-221 için metin üretme.
+Çağırma planı: Her (kategori, alt kategori) için 10–20 not; D'nin üç alt kategorisi ve E'nin "erteleme" alt kategorisi için 30'ar not. C'nin "abone numarası kabul edilmiyor" notları elle yazılan 5 örnekten çoğaltılır.
 
-### 6.2 Prompt: `gen-cozum-metni` (çözüm bilgi bankası)
+### 9.2 Prompt `gen-cozum`
 
 ```
 ## system
-Bankacılık uygulaması için sentetik bir çözüm bilgi bankası kaydı üretiyorsun.
-Kayıtlar L2 destek ve geliştirme ekipleri içindir; kısa, teknik ve uygulanabilir olmalıdır.
-Gerçek ürün, kurum veya kişi adı kullanma. Sunucu adı, IP, şifre gibi bilgiler uydurma; genel ifade kullan
-("ilgili servis", "uygulama sunucusu").
+Bankacılık uygulaması için sentetik çözüm bilgi bankası kaydı üretiyorsun. Kayıtlar L2 destek
+ve geliştirme ekipleri içindir: kısa, teknik, uygulanabilir. Sunucu adı, IP, şifre uydurma.
+Abone numarası uzunluğu veya formatıyla ilgili kayıt ÜRETME.
 
 ## user
-Hata kodu: {{error_code}} — {{error_description}}
-Servis: {{service_name}} ({{service_description}})
-Farklı kök nedenlere dayanan {{count}} çözüm kaydı üret.
-
-Çıktı şeması:
-{"items": [{"symptom": string (≤ 25 kelime),
-            "root_cause": string (≤ 30 kelime),
-            "steps": [string] (2–4 adım, her biri ≤ 20 kelime),
-            "fix_effort_md": number (1–8, kalıcı çözüm eforu)}]}
+Hata kodu: {{error_code}} · Servis: {{service_name}} · Ekran: {{screen_code}}
+Farklı kök nedenlere dayanan {{count}} kayıt üret.
+Çıktı şeması: {"items": [{"title": string, "symptom": string, "root_cause": string,
+                          "steps": [string]}]}
 ```
 
-**Çağırma planı:** Her hata kodu için 2–5 kayıt (IBN-504 için 2 ek kayıt; ana kayıt SOL-014 elle). **Hariç:** BIL-221.
-
-### 6.3 Prompt: `gen-talep-metni` (geçmiş geliştirme talepleri)
+### 9.3 Prompt `gen-talep`
 
 ```
 ## system
-Bir bankanın dijital kanallar birimi için sentetik geliştirme talepleri üretiyorsun.
-Talepler iş biriminin ağzından, 1–2 cümle, net bir ihtiyaç tarif eder.
-Gerçek ürün/kurum/kişi adı kullanma. Aşağıdaki konularda talep ÜRETME:
-favori alıcı, kayıtlı alıcı, son alıcılar listesi, döviz alarmı, kur alarmı.
+Bir bankanın iş birimlerinden (bölüm başkanlıkları) teknolojiye gelen sentetik geliştirme
+talepleri üretiyorsun. Talepler iş biriminin ağzından, 1–3 cümle, net bir ihtiyaç tarif eder.
+Gerçek kişi veya kurum adı kullanma. Şu konularda talep ÜRETME: taksit hatırlatma,
+ödeme hatırlatma, taksit erteleme, kredi erteleme.
 
 ## user
-Ekran: {{screen_name}} (yoksa "Yeni ekran")
-Talep türü: {{type}}  (existing_change: mevcut ekranda değişiklik / new_screen: yeni ekran)
+Modül: {{module}} · İlgili ekran: {{screen_name}} (yoksa "yeni ekran") · Tip: {{type}}
 Adet: {{count}}
-
-Çıktı şeması: {"items": [{"title": string (≤ 10 kelime), "description": string (1–2 cümle)}]}
+Çıktı şeması: {"items": [{"title": string (≤ 12 kelime), "description": string}]}
 ```
-
-**Çağırma planı:** Her ekran için 8–10 existing_change, ek olarak 25–30 new_screen talebi. Toplam ~100.
-
-### 6.4 Üretim sonrası kontrol (betik içinde, otomatik)
-- Yasak kelime listesi (`favori`, `kayıtlı alıcı`, `son alıcı`, `döviz alarm`, `kur alarm`, `kuruş`, `yuvarla`, `eksik ödeme`) geçen metinler atılır ve loglanır.
-- Rakam dizisi 10+ hane (IBAN/TCKN benzeri), `@` (e-posta) veya `+90` içeren metinler atılır.
-- Aynı metnin tekrarı atılır.
-- Atılan metin sayısı > %20 ise partiyi yeniden üret.
 
 ---
 
-## 7. Doğrulama (yükleme sonrası, 1. gün öğle öncesi)
+## 10. Yükleme (`load_all.py`)
 
-| Kontrol | Sorgu / yöntem | Beklenen |
+**Azure SQL:**
+1. `schema.sql` uygulanır.
+2. `catalog.json` ve `announcements.json` yüklenir.
+3. `mercek-logs.ndjson` → `banking_logs` (toplu ekleme, parametreli).
+4. CSV'ler: customers, loans, incidents, solutions, requests.
+
+**Azure AI Search indeksleri:**
+
+| İndeks | Alanlar | Vektör alanı |
 |---|---|---|
-| Hacimler | `SELECT COUNT(*)` her tablo | logs ~3000, incidents ~400, solutions ~60, requests ~100 |
-| S1 kaynakları | `incidents WHERE solution_id='SOL-014'` | 6 kayıt (CAG-0871…1021) |
-| S2 temizliği | `incidents/solutions/logs WHERE error_code='BIL-221'` | 0 kayıt |
-| S3 çağrı sayısı | TRANSFER, son 30 gün, `GROUP BY error_code` | 312 = 128/72/44/34/34 |
-| S3 talepler | AI Search `requests`: "Para Transferi ekranında kayıtlı alıcıları favori olarak seçebilelim" | ilk 4: TLP-0171, 0156, 0142, 0188 (sıra değişebilir) |
-| S3 takvim | `schedule(18, …)` ve `schedule(21, …)` | 09.11–04.12 ve bitiş 09.12 |
-| S4 | `screens` içinde döviz ekranı | yok |
-| Eşleşme kalibrasyonu | M1.4-a ile S1 ve S2 sorguları | S1 ≥ 0,90 · S2 < 0,75 |
-| Kişisel veri | `texts.json` üzerinde regex taraması | 0 eşleşme |
+| `solutions` | id, title, symptom, root_cause, steps, error_code (filtre), service_id (filtre) | `content_vector` |
+| `requests` | id, title, description, type (filtre), components, services, effort_md | `content_vector` |
+| `announcements` | id, institution (filtre), published_at, effective_at, title, body | `content_vector` |
 
-Bu tablo `docs/demo-scenarios.md` (Q2) ile birlikte senaryo testi olarak kullanılır.
+Embedding'ler Foundry'deki `embedding` deploy'u ile 50'şerli partilerle üretilir. Türkçe analizör kullanılır (`tr.microsoft`).
 
 ---
 
-## 8. Bugün (kod yazmadan) yapılabilecekler
+## 11. Demo sıfırlama (`demo_reset.py`)
 
-- §3 ve §4 tablolarını analist gözüyle gözden geçirmek: isimler, hata kodları, kategoriler gerçekçi mi?
-- §6 prompt'larını Foundry yerine herhangi bir sohbet aracında **2–3 örnekle** denemek (çıktı tarzını görmek için; üretilen metinler yarın kullanılmaz, yarın Foundry ile yeniden üretilir).
-- Soru bankası ve alan standartlarını (M2.3-a) metin olarak hazırlamak.
+Her prova ve gerçek demodan **hemen önce** çalıştırılır:
+
+1. Önceki provalarda canlı oluşan kayıtları siler: `CAG-2052` ve sonrası, `TLP-1043` ve sonrası, son 2 saatin canlı olay logları.
+2. **B penceresi:**
+   - `now − 30 dk` ile `now − 1 dk` arasına **46** Başkentgaz `INSTITUTION_TIMEOUT` logu yazar. Kanallar: İnternet Şube, Mobil, Şube; farklı müşteriler.
+   - **CAG-2051** ana kaydı: `now − 24 dk`, kategori Fatura ödeme, kurum Başkentgaz, `service_id = FATURA_ODEME`.
+   - Ana kayda bağlı **11 vaka** (`master_incident_id = CAG-2051`), `now − 22 dk` … `now − 2 dk`.
+3. `--with-d-plan` verilirse D'nin talebini (TLP-1043, 20 a/g, Kredi Takip 09.11–04.12) planlı olarak ekler (E'yi tek başına oynatmak için).
+4. `mercek_events` sayaçlarını sıfırlar.
+
+---
+
+## 12. Doğrulama (`validate_scenarios.py`)
+
+| Senaryo | Kontrol | Beklenen |
+|---|---|---|
+| Genel | Kayıt sayıları | logs ≈ 10.400, customers 40.000, loans 33.000, incidents ≈ 1.400, requests ≈ 100, announcements 8 |
+| A | `users` içinde elif geliri | 38.000 |
+| A | `loanPlan` Python portu ile 400.000/3 ay ve 36 ay taksit; 36 ayda azami tutar | 144.185,92 · 22.754,17 · ≈ 334.004 |
+| B | Son 30 dk Başkentgaz `INSTITUTION_TIMEOUT` (`demo_reset` sonrası) | 46 |
+| B | CAG-2051'e bağlı vaka | 11 |
+| B | AI Search `solutions`'ta "Başkentgaz fatura ödeme kurumdan yanıt alınamadı" | İlk sonuç SOL-031, skor ≥ eşik |
+| C | 01.10 sonrası `error_field = subscriber_no` ve ODMTFATR | 412; İSKİ 400 (%97); İSKİ'de `subscriber_no_len = 13` hepsi; farklı müşteri 187 |
+| C | 01.10 öncesi İSKİ 13 hane | 0 |
+| C | C çağrıları | 23 |
+| C | `solutions`'ta "İSKİ abone numarası 13 hane kabul edilmiyor" | En yüksek skor eşiğin altında (≈ %35) |
+| C | `announcements`'ta aynı sorgu | İlk sonuç DUY-0412; ASKİ DUY-0419 da döner |
+| D | Son 90 gün "Kredi" kategorisi alt kategoriler | 71 / 64 / 51 = 186 |
+| D | Hedef grup ve izinler | 2.340 · e-posta 1.357 · SMS 1.895 · en az biri 2.083 |
+| D | `requests` araması (D talep metni) | İlk 5: TLP-0871, 0915, 0962, 1004, 1019 |
+| D | Servis payları ve takvim (§3.5) | Kredi Takip 15 / Müşteri Yönetim 3; 09.11 → 02.12; SMS ile 16 / 4, 04.12 |
+| E | Etkilenen bölge | 4.870 müşteri · 6.215 kredi · 612 gecikmede · 37 adres değişikliği |
+| E | Son 5 gün çağrı | 497 (418 erteleme); önceki 30 gün günlük ort. 16 |
+| E | `requests` araması (E talep metni) | İlk 3: TLP-0588, 0712, 0846 |
+| E | Servis payları ve takvim (§3.5) | Kredi Takip 8 / Kredi Kullandırım 3 / Müşteri Yönetim 4; öncelik 19.10 → 30.10 (SMS ile 02.11); sıraya koy 09.11 → 20.11 |
+| E | Katalogda `KRDTERTL` | yok |
+| F | Bugün en çok warn/error alan ekran | ODMTFATR |

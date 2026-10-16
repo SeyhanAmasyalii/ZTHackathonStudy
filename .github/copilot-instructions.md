@@ -1,6 +1,13 @@
 # Copilot Talimatları — Ziraat Teknoloji YZ Hackathonu
 
-Bu repo Ziraat Teknoloji Yapay Zeka Hackathonu projesidir. Çözüm AstreAI (otomatik, %30) ve jüri (%70) tarafından puanlanır. Ayrıntılı kurallar: `docs/hackathon-teknik-kilavuz.md`. Yanıtlar Türkçe, kod ve kod yorumları İngilizce olsun.
+Bu repo Ziraat Teknoloji Yapay Zeka Hackathonu projesidir. Çözüm AstreAI (otomatik, %30) ve jüri (%70) tarafından puanlanır. Ayrıntılı kurallar: `docs/hackathon-teknik-kilavuz.md`. Yanıtlar Türkçe olsun. Arayüz metinleri, yorumlar ve kullanıcıya dönük mesajlar Türkçe; kod tanımlayıcıları İngilizce.
+
+## Teknoloji ve proje dokümanları
+- Frontend: Next.js 16 (App Router, TypeScript, Tailwind v4, `src/`, `@/*`), npm. Next.js 16 API'leri eğitim verisindekinden farklı olabilir; kod yazmadan önce `frontend/node_modules/next/dist/docs/` altındaki ilgili rehberi oku. `cacheComponents: true` açık: `cookies()`/`searchParams` okuyan her şey `<Suspense>` içinde olmalı. Middleware dosyası `src/proxy.ts`.
+- Backend: Python 3.12, FastAPI, uv. Router'lar `/api` önekiyle; katmanlar `api` → `services` → `repositories` / `clients`.
+- Temel uygulama `docs/COPILOT_REBUILD_GUIDE.md` fazlarıyla kurulur. API, tablo ve klasör adları `docs/contracts.md`'deki sözleşmeye uyar.
+- Her değişiklikten sonra: `npm run build`, `npx tsc --noEmit`, `npm run lint` (frontend); `uv run pytest`, `uv run ruff check .` (backend).
+- Hesaplar (rakamlar, eşikler, servis ataması, efor, takvim) deterministik kodda; AI yalnızca açıklar, çıkarır, sınıflandırır.
 
 ## Kesin yasaklar
 - `.github/workflows/` altındaki organizasyon **CodeQL workflow dosyasını** asla düzenleme, silme, taşıma, yeniden adlandırma veya kopyalama; ikinci bir CodeQL taraması tanımlama; `.gitignore` ile `.github/` klasörünü dışlama.
@@ -26,7 +33,7 @@ Bu repo Ziraat Teknoloji Yapay Zeka Hackathonu projesidir. Çözüm AstreAI (oto
 
 ## Azure (15 puan)
 - Kaynaklar yalnızca takımın resource group'unda.
-- App Service bir sağlık endpoint'i (ör. `/health`) üzerinden HTTP 200 dönmeli.
+- İki App Service (aynı plan): `mercek-web` (Next.js standalone, `node server.js`) ve `mercek-api` (FastAPI, gunicorn + uvicorn worker). Backend sağlık endpoint'i `/api/health` HTTP 200 dönmeli.
 - LLM çağrıları Azure AI Foundry'de deploy edilmiş model üzerinden yapılır.
 - Yalnızca gerçekten gereken destek servislerini (AI Search, Storage vb.) öner.
 

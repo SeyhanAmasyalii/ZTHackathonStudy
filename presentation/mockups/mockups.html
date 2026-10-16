@@ -2,282 +2,322 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8">
+<!-- Mercek taslak ekranları. Her .desk bir PNG'ye dönüştürülür (render-mockups.js). -->
 <style>
   :root{
-    --ink:#17202A; --muted:#5B6673; --line:#DDE2E8; --bg:#F4F6F8; --card:#FFFFFF;
-    --amber:#E8A33D; --teal:#2A9D8F; --coral:#E76F51; --red:#C8424B; --green:#2E8B57; --indigo:#2B3A67;
+    --ink:#16181d; --muted:#6b7180; --line:#e3e5ea; --bg:#f6f7f9; --card:#fff; --soft:#f1f2f5;
+    --violet:#7c3aed; --violet-soft:#f3edff; --emerald:#059669; --emerald-soft:#e7f6f0;
+    --amber:#d97706; --amber-soft:#fff6e6; --red:#c8424b; --red-soft:#fdecec; --blue:#2563eb; --blue-soft:#e8f0fe;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:"Segoe UI",Arial,Helvetica,sans-serif;color:var(--ink);background:#ccc;padding:20px;display:flex;flex-direction:column;gap:40px;align-items:flex-start}
-  .badge-draft{position:absolute;top:10px;right:10px;background:rgba(23,32,42,.82);color:#fff;font-size:11px;font-weight:700;letter-spacing:.06em;padding:4px 8px;border-radius:6px;z-index:50}
-  /* ---------- phone ---------- */
-  .phone{position:relative;width:390px;height:800px;background:#111;border-radius:46px;padding:14px;}
-  .screen{position:relative;width:100%;height:100%;background:var(--bg);border-radius:34px;overflow:hidden;display:flex;flex-direction:column}
-  .status{height:34px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;font-size:13px;font-weight:600}
-  .appbar{background:var(--indigo);color:#fff;padding:14px 18px 16px}
-  .appbar .brand{font-size:12px;opacity:.75;letter-spacing:.08em;text-transform:uppercase}
-  .appbar h2{font-size:20px;margin-top:2px}
-  .content{padding:16px;display:flex;flex-direction:column;gap:12px;flex:1}
-  .tabs{display:flex;background:#E4E8ED;border-radius:12px;padding:4px}
-  .tab{flex:1;text-align:center;padding:9px;border-radius:9px;font-size:14px;font-weight:600;color:var(--muted)}
-  .tab.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
-  .field{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px}
-  .field label{font-size:11px;color:var(--muted);display:block}
-  .field div{font-size:16px;margin-top:2px;font-weight:600}
-  .btn{background:var(--indigo);color:#fff;text-align:center;padding:14px;border-radius:12px;font-weight:700;font-size:15px}
-  .error{background:#FDECEC;border:1px solid #F3B9B9;color:#9B2C2C;border-radius:12px;padding:10px 12px;font-size:13px;font-weight:600}
-  .navbar{display:flex;justify-content:space-around;border-top:1px solid var(--line);background:#fff;padding:10px 0 18px;font-size:11px;color:var(--muted)}
-  .navbar .on{color:var(--indigo);font-weight:700}
-  .fab{position:absolute;right:16px;bottom:78px;background:var(--amber);color:var(--ink);font-weight:700;font-size:13px;padding:10px 14px;border-radius:22px;box-shadow:0 4px 12px rgba(0,0,0,.2)}
-  .scrim{position:absolute;inset:0;background:rgba(10,15,20,.45)}
-  .sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:24px 24px 0 0;padding:18px 18px 22px;display:flex;flex-direction:column;gap:12px;box-shadow:0 -6px 24px rgba(0,0,0,.2)}
-  .sheet .handle{width:44px;height:5px;background:#D5DAE0;border-radius:3px;align-self:center}
-  .sheet h3{font-size:16px;display:flex;align-items:center;gap:8px}
-  .lens{width:22px;height:22px;border-radius:50%;border:3px solid var(--amber);display:inline-flex;align-items:center;justify-content:center}
-  .lens:after{content:"";width:8px;height:8px;border-radius:50%;background:var(--amber)}
-  .cause{background:#FFF7EA;border:1px solid #F2D29E;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
-  .chip{display:inline-block;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px}
-  .chip.amber{background:var(--amber);color:var(--ink)}
-  .chip.teal{background:#D8F0EC;color:#1B6B61}
-  .chip.coral{background:#FBE1D9;color:#9A3B22}
-  .chip.gray{background:#E8ECF0;color:#3B4652}
-  .chip.indigo{background:#E1E6F5;color:var(--indigo)}
-  .cause p{font-size:14px;line-height:1.4}
-  .cause .alt{font-size:13px;color:#5A4520}
-  .row{display:flex;gap:8px}
-  .btn2{flex:1;text-align:center;padding:11px;border-radius:12px;font-weight:700;font-size:14px}
-  .btn2.pri{background:var(--amber);color:var(--ink)}
-  .btn2.sec{background:#EEF1F4;color:var(--ink)}
-  .msg{align-self:flex-end;background:var(--indigo);color:#fff;font-size:14px;padding:9px 12px;border-radius:14px 14px 4px 14px;max-width:80%}
-  .msg.bot{align-self:flex-start;background:#EEF1F4;color:var(--ink);border-radius:14px 14px 14px 4px}
-  /* joyride */
-  .spot{position:absolute;border-radius:10px;box-shadow:0 0 0 2000px rgba(10,15,20,.55);border:3px solid var(--amber)}
-  .tip{position:absolute;background:#fff;border-radius:14px;padding:14px;width:250px;box-shadow:0 8px 24px rgba(0,0,0,.3);font-size:14px;line-height:1.4}
-  .tip .step{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px}
-  .tip .nav{display:flex;justify-content:space-between;margin-top:10px;font-size:13px;font-weight:700}
-  .tip .nav span:last-child{background:var(--amber);padding:6px 12px;border-radius:8px}
-  .tip:before{content:"";position:absolute;top:-8px;left:150px;border:8px solid transparent;border-top:0;border-bottom-color:#fff}
-  /* ---------- desktop ---------- */
-  .desk{position:relative;width:1280px;height:760px;background:var(--bg);border-radius:14px;overflow:hidden;border:1px solid #BFC6CE;display:flex;flex-direction:column}
-  .chrome{height:38px;background:#E3E7EC;display:flex;align-items:center;gap:8px;padding:0 14px}
-  .dot{width:12px;height:12px;border-radius:50%;background:#C4CAD1}
-  .url{margin-left:14px;background:#fff;border-radius:8px;height:24px;flex:0 0 420px;font-size:12px;color:var(--muted);display:flex;align-items:center;padding:0 10px}
-  .top{height:56px;background:var(--ink);color:#fff;display:flex;align-items:center;gap:12px;padding:0 22px}
-  .top .lens{border-color:var(--amber)}
-  .top b{font-size:18px;letter-spacing:.02em}
-  .top .sub{opacity:.7;font-size:14px}
-  .top .nav{margin-left:auto;display:flex;gap:18px;font-size:14px;opacity:.85}
-  .top .nav .on{color:var(--amber);font-weight:700;opacity:1}
-  .main{flex:1;display:flex;min-height:0}
-  .side{width:300px;background:#fff;border-right:1px solid var(--line);padding:14px;display:flex;flex-direction:column;gap:8px}
-  .side h4{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:4px}
-  .inc{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px;display:flex;flex-direction:column;gap:4px}
-  .inc.on{border-color:var(--amber);background:#FFF9EF}
-  .inc .t{font-weight:700}
-  .inc .m{color:var(--muted);font-size:12px;display:flex;gap:6px;align-items:center}
-  .pane{flex:1;padding:18px 22px;display:flex;flex-direction:column;gap:14px;overflow:hidden}
-  .ph{display:flex;align-items:center;gap:10px}
+  .desk{position:relative;width:1280px;background:var(--bg);border-radius:14px;overflow:hidden;border:1px solid #bfc6ce;display:flex;flex-direction:column}
+  .badge-draft{position:absolute;top:8px;right:12px;background:rgba(22,24,29,.82);color:#fff;font-size:11px;font-weight:700;letter-spacing:.06em;padding:4px 8px;border-radius:6px;z-index:50}
+  .chrome{height:36px;background:#e3e7ec;display:flex;align-items:center;gap:8px;padding:0 14px}
+  .dot{width:12px;height:12px;border-radius:50%;background:#c4cad1}
+  .url{margin-left:14px;background:#fff;border-radius:8px;height:22px;flex:0 0 440px;font-size:12px;color:var(--muted);display:flex;align-items:center;padding:0 10px}
+  .app{display:flex;min-height:720px}
+  .side{width:220px;background:#fff;border-right:1px solid var(--line);padding:16px 12px;display:flex;flex-direction:column;gap:4px;font-size:14px}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .logo{width:30px;height:30px;border-radius:8px;background:var(--ink);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .brand small{display:block;color:var(--muted);font-size:11px}
+  .nav{padding:8px 10px;border-radius:8px;color:#3b4250;display:flex;align-items:center;gap:8px}
+  .nav.on{background:var(--soft);font-weight:700;color:var(--ink)}
+  .ico{width:18px;height:18px;border-radius:5px;display:inline-block}
+  .sub{margin-left:18px;border-left:2px solid var(--line);padding-left:10px;display:flex;flex-direction:column;gap:2px;margin-bottom:4px}
+  .sub span{font-size:12px;color:var(--muted);padding:3px 0;font-family:Consolas,monospace}
+  .sub span.on{color:var(--emerald);font-weight:700}
+  .user{margin-top:auto;display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);padding-top:12px;font-size:13px}
+  .av{width:30px;height:30px;border-radius:50%;background:var(--violet-soft);color:var(--violet);font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center}
+  .user small{display:block;color:var(--muted);font-size:11px}
+  .main{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
+  .codebar{height:52px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 20px;font-size:13px}
+  .crumb{color:var(--muted)} .crumb b{color:var(--ink)}
+  .codein{margin-left:auto;display:flex;align-items:center;gap:6px}
+  .codein .in{border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-family:Consolas,monospace;font-weight:700;width:110px}
+  .btnsm{border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-weight:600;background:#fff}
+  .btnsm.v{background:var(--violet);border-color:var(--violet);color:#fff}
+  .page{padding:20px 24px;display:flex;flex-direction:column;gap:14px}
+  .ph{display:flex;align-items:center;gap:12px}
   .ph h1{font-size:22px}
-  .grid2{display:grid;grid-template-columns:1fr 1.55fr;gap:14px}
-  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
-  .card h5{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-  .quote{font-size:20px;font-style:italic;color:#3B4652;padding:10px 0}
-  .kv{display:grid;grid-template-columns:120px 1fr;row-gap:7px;font-size:14px}
-  .kv span:nth-child(odd){color:var(--muted)}
-  .bar{height:10px;background:#E8ECF0;border-radius:6px;overflow:hidden}
-  .bar i{display:block;height:100%;background:var(--teal)}
-  .bar.coral i{background:var(--coral)}
-  ol.steps{padding-left:20px;font-size:14px;line-height:1.55}
-  .src{display:flex;gap:6px;flex-wrap:wrap}
-  .code{font-family:Consolas,"Courier New",monospace;font-size:13px;background:#0F1720;color:#D8DEE6;border-radius:10px;padding:10px 0;line-height:1.6}
-  .code div{padding:0 14px;white-space:pre}
-  .code .ln{color:#6B7785;display:inline-block;width:34px}
-  .code .del{background:rgba(231,111,81,.25)}
-  .code .add{background:rgba(42,157,143,.28)}
-  .code .hl{background:rgba(232,163,61,.18)}
-  .big{font-size:30px;font-weight:800}
+  .code{font-family:Consolas,monospace;font-size:12px;font-weight:700;background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:2px 7px}
   .muted{color:var(--muted);font-size:13px}
-  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
-  .svc{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:6px 0;border-bottom:1px solid #EEF1F4}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+  .card h5{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  .grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+  .field label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}
+  .field .v{border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:15px;font-weight:600;background:#fff}
+  .stat{background:var(--soft);border-radius:10px;padding:10px 12px}
+  .stat small{display:block;color:var(--muted);font-size:11px}
+  .stat b{font-size:18px}
+  .warn{background:var(--amber-soft);border:1px solid #f2d29e;color:#7a4b06;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600}
+  .btn{background:var(--emerald);color:#fff;font-weight:700;border-radius:10px;padding:10px 16px;font-size:14px;align-self:flex-start}
+  .btn.off{background:#b9c2cc}
+  .chip{display:inline-block;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px}
+  .chip.amber{background:var(--amber-soft);color:#8a5200;border:1px solid #f2d29e}
+  .chip.blue{background:var(--blue-soft);color:#1d4ed8}
+  .chip.red{background:var(--red-soft);color:#9b2c2c}
+  .chip.gray{background:#e8ecf0;color:#3b4652}
+  .chip.violet{background:var(--violet-soft);color:var(--violet)}
+  .chip.green{background:var(--emerald-soft);color:#05664a}
+  /* panel */
+  .scrim{position:absolute;inset:0;background:rgba(10,15,20,.28)}
+  .panel{position:absolute;top:0;right:0;bottom:0;width:440px;background:#fff;border-left:1px solid var(--line);box-shadow:-8px 0 24px rgba(0,0,0,.12);display:flex;flex-direction:column}
+  .panel .hd{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);font-weight:700}
+  .lens{width:22px;height:22px;border-radius:50%;border:3px solid var(--violet);display:inline-flex;align-items:center;justify-content:center}
+  .lens:after{content:"";width:7px;height:7px;border-radius:50%;background:var(--violet)}
+  .panel .bd{padding:16px;display:flex;flex-direction:column;gap:12px;flex:1}
+  .assist{border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+  .assist h4{font-size:16px}
+  .assist p{font-size:13.5px;line-height:1.45;color:#2d3340}
+  .say{background:var(--blue-soft);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.45}
+  .say b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#1d4ed8;margin-bottom:4px}
+  .inc{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;background:var(--soft);border-radius:10px;padding:8px 10px}
+  .row{display:flex;gap:8px}
+  .b2{flex:1;text-align:center;padding:10px;border-radius:10px;font-weight:700;font-size:13px;border:1px solid var(--line)}
+  .b2.v{background:var(--violet);color:#fff;border-color:var(--violet)}
+  .typing{border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--muted);font-size:13px;margin:0 16px 16px}
+  /* chat */
+  .tabs{display:flex;gap:4px;background:var(--soft);border-radius:10px;padding:4px;align-self:flex-start}
+  .tab{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:600;color:var(--muted)}
+  .tab.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+  .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .msg{align-self:flex-end;background:var(--ink);color:#fff;font-size:14px;padding:10px 14px;border-radius:14px 14px 4px 14px;max-width:70%}
+  .chatcol{display:flex;flex-direction:column;gap:12px;max-width:860px}
+  /* incidents */
+  .split{display:grid;grid-template-columns:300px 1fr;gap:14px}
+  .incl{display:flex;flex-direction:column;gap:8px}
+  .it{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;font-size:13px;display:flex;flex-direction:column;gap:4px}
+  .it.on{border-color:var(--violet);background:#faf7ff}
+  .it .t{font-weight:700}
+  .it .m{color:var(--muted);font-size:12px}
+  .bar{height:9px;background:#e8ecf0;border-radius:6px;overflow:hidden;position:relative}
+  .bar i{display:block;height:100%;background:var(--red)}
+  .bar.ok i{background:var(--emerald)}
+  .bar .th{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink)}
+  .pre{font-family:Consolas,"Courier New",monospace;font-size:12px;background:#0f1720;color:#d8dee6;border-radius:10px;padding:8px 0;line-height:1.6}
+  .pre div{padding:0 12px;white-space:pre}
+  .pre .ln{color:#6b7785;display:inline-block;width:30px}
+  .pre .del{background:rgba(200,66,75,.28)}
+  .pre .add{background:rgba(5,150,105,.3)}
+  .path{font-family:Consolas,monospace;font-size:12px;color:#3b4250}
+  .pro{background:var(--amber-soft);border:1px solid #f2d29e;border-radius:12px;padding:10px 12px;font-size:13px}
+  /* request */
+  .input{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.45;display:flex;gap:14px;align-items:flex-start}
+  .input .go{background:var(--ink);color:#fff;font-weight:700;font-size:13px;padding:8px 14px;border-radius:9px;white-space:nowrap}
+  .svc{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;border-bottom:1px solid #eef1f4}
   .svc:last-child{border-bottom:0}
-  .timeline{position:relative;height:34px;background:#EEF1F4;border-radius:8px;overflow:hidden}
-  .timeline .busy{position:absolute;top:0;bottom:0;background:#C9D0D8}
-  .timeline .new{position:absolute;top:6px;bottom:6px;background:var(--teal);border-radius:6px}
+  .big{font-size:28px;font-weight:800}
+  .was{color:var(--muted);text-decoration:line-through;font-size:15px;font-weight:600;margin-left:6px}
+  .timeline{position:relative;height:30px;background:#eef1f4;border-radius:8px;overflow:hidden}
+  .timeline .busy{position:absolute;top:0;bottom:0;background:#c9d0d8}
+  .timeline .new{position:absolute;top:6px;bottom:6px;background:var(--emerald);border-radius:6px}
   .timeline .ext{position:absolute;top:6px;bottom:6px;background:var(--amber);border-radius:0 6px 6px 0}
-  .stat-row{display:flex;align-items:center;gap:10px;font-size:13px}
-  .stat-row .lbl{width:230px}
-  .stat-row .bar{flex:1}
-  .chk{display:flex;margin-top:4px;align-items:center;gap:8px;font-size:14px;background:#FFF7EA;border:1px solid #F2D29E;border-radius:10px;padding:8px 10px}
-  .box{width:18px;height:18px;border-radius:5px;background:var(--amber);color:var(--ink);font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center}
-  .input{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:16px;display:flex;justify-content:space-between;align-items:center}
-  .input .go{background:var(--ink);color:#fff;font-weight:700;font-size:14px;padding:8px 14px;border-radius:9px}
+  .srow{display:flex;align-items:center;gap:10px;font-size:13px}
+  .srow .lbl{width:150px}
+  .srow .bar{flex:1}
+  .chk{display:flex;align-items:center;gap:8px;font-size:13px;background:var(--amber-soft);border:1px solid #f2d29e;border-radius:10px;padding:8px 10px}
+  .box{width:18px;height:18px;border-radius:5px;background:var(--amber);color:#fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center}
 </style>
 </head>
 <body>
 
-<!-- 1: Sahne 1 — olası neden kartı -->
-<div class="phone" id="m-bank-issue"><div class="screen">
+<!-- ============ A · KRDTKULL + Mercek paneli ============ -->
+<div class="desk" id="m-a-panel">
   <span class="badge-draft">TASLAK GÖRSEL</span>
-  <div class="status"><span>09:41</span><span>●●●</span></div>
-  <div class="appbar"><div class="brand">Demo Bank</div><h2>Para Transferi</h2></div>
-  <div class="content">
-    <div class="tabs"><div class="tab on">EFT</div><div class="tab">Havale</div></div>
-    <div class="field"><label>Alıcı IBAN</label><div>TR** **** **** **** 4821</div></div>
-    <div class="field"><label>Tutar</label><div>2.500,00 TL</div></div>
-    <div class="field"><label>Açıklama</label><div>Ekim kirası</div></div>
-    <div class="error">İşleminiz şu an gerçekleştirilemiyor.</div>
-    <div class="btn">Gönder</div>
-  </div>
-  <div class="navbar"><span>Hesaplarım</span><span class="on">Transfer</span><span>Ödemeler</span><span>Profil</span></div>
-  <div class="scrim"></div>
-  <div class="sheet">
-    <div class="handle"></div>
-    <h3><span class="lens"></span> Mercek Asistan</h3>
-    <div class="cause">
-      <div><span class="chip amber">Tespit edildi</span></div>
-      <p>Para Transferi ekranındaki son işleminizde <b>IBAN doğrulama servisinde gecikme</b> görüyoruz. Ekibimiz konudan haberdar.</p>
-      <p class="alt">Şu an <b>Havale</b> ile gönderebilirsiniz.</p>
-    </div>
-    <div class="msg">kira ödemem lazım acil</div>
-    <div class="msg bot">Kaydınızı <b>CAG-1042</b> numarasıyla açtık. Size havale adımlarını göstereyim mi?</div>
-    <div class="row"><div class="btn2 pri">Bana göster</div><div class="btn2 sec">Çağrıyı gör</div></div>
-  </div>
-</div></div>
-
-<!-- 2: Sahne 1 — Joyride turu -->
-<div class="phone" id="m-bank-tour"><div class="screen">
-  <span class="badge-draft">TASLAK GÖRSEL</span>
-  <div class="status"><span>09:42</span><span>●●●</span></div>
-  <div class="appbar"><div class="brand">Demo Bank</div><h2>Para Transferi</h2></div>
-  <div class="content">
-    <div class="tabs"><div class="tab">EFT</div><div class="tab on">Havale</div></div>
-    <div class="field"><label>Alıcı IBAN</label><div>TR** **** **** **** 4821</div></div>
-    <div class="field"><label>Tutar</label><div>2.500,00 TL</div></div>
-    <div class="field"><label>Açıklama</label><div>Ekim kirası</div></div>
-    <div class="btn">Gönder</div>
-  </div>
-  <div class="navbar"><span>Hesaplarım</span><span class="on">Transfer</span><span>Ödemeler</span><span>Profil</span></div>
-  <div class="spot" style="left:179px;top:121px;width:166px;height:43px"></div>
-  <div class="tip" style="left:96px;top:180px">
-    <div class="step">ADIM 1 / 3</div>
-    <b>Havale</b> sekmesine geçin. Havale, IBAN doğrulama servisini kullanmadığı için şu an sorunsuz çalışıyor.
-    <div class="nav"><span>Atla</span><span>İleri</span></div>
-  </div>
-</div></div>
-
-<!-- 3: Sahne 2 — Destek Konsolu, eşleşme -->
-<div class="desk" id="m-console-match" style="height:auto">
-  <span class="badge-draft">TASLAK GÖRSEL</span>
-  <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">mercek-app.azurewebsites.net/support/CAG-1042</span></div>
-  <div class="top"><span class="lens"></span><b>Mercek</b><span class="sub">Destek Konsolu</span>
-    <div class="nav"><span class="on">Çağrılar</span><span>Talepler</span><span>Banka simülasyonu</span></div></div>
-  <div class="main">
+  <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">mercek-web.azurewebsites.net/bankacilik/krdtkull</span></div>
+  <div class="app">
     <div class="side">
-      <h4>Açık çağrılar</h4>
-      <div class="inc on"><span class="t">CAG-1042 · EFT gönderilemiyor</span><span class="m"><span class="chip coral">Yüksek</span>Ödeme Sistemleri · 1 dk önce</span></div>
-      <div class="inc"><span class="t">CAG-1043 · Fatura eksik ödendi</span><span class="m"><span class="chip gray">Orta</span>Fatura Servisleri · 3 dk önce</span></div>
-      <div class="inc"><span class="t">CAG-1039 · Kart limiti görünmüyor</span><span class="m"><span class="chip gray">Orta</span>Kart Sistemleri · 18 dk önce</span></div>
-      <div class="inc"><span class="t">CAG-1036 · Giriş SMS'i gelmiyor</span><span class="m"><span class="chip gray">Düşük</span>Kimlik Yönetimi · 42 dk önce</span></div>
+      <div class="brand"><span class="logo">K</span><div><b>Kontrol Paneli</b><small>İç bankacılık</small></div></div>
+      <span class="nav"><i class="ico" style="background:#e2e8f0"></i>Genel Bakış</span>
+      <span class="nav on"><i class="ico" style="background:var(--emerald-soft)"></i>Bankacılık</span>
+      <div class="sub"><span>KRTTBASV</span><span class="on">KRDTKULL</span><span>ODMTFATR</span><span>MUSTGUNC</span><span>HSPTVDSZ</span></div>
+      <span class="nav"><i class="ico" style="background:var(--violet-soft)"></i>Mercek</span>
+      <span class="nav"><i class="ico" style="background:var(--amber-soft)"></i>Talep Yönlendirme</span>
+      <div class="user"><span class="av">ED</span><div><b>Elif Demir</b><small>Şube Müşteri Temsilcisi</small></div></div>
     </div>
-    <div class="pane">
-      <div class="ph"><h1>CAG-1042 · EFT gönderiminde IBAN doğrulama zaman aşımı</h1></div>
-      <div class="grid2">
-        <div class="card"><h5>Kullanıcının yazdığı</h5><div class="quote">“kira ödemem lazım acil”</div><div class="muted">Ekran: Para Transferi · Oturum son 5 adım otomatik eklendi</div></div>
-        <div class="card"><h5>Mercek'in oluşturduğu</h5>
-          <div class="kv">
-            <span>Kategori</span><span>Para Transferi / Teknik</span>
-            <span>Öncelik</span><span><span class="chip coral">Yüksek</span> müşteri işlemi tamamlayamıyor</span>
-            <span>Ekip</span><span>Ödeme Sistemleri <span class="chip indigo">Kural</span></span>
-            <span>Log</span><span>IBN-504 × 2 · IbanValidationService timeout 5000 ms</span>
-            <span>Adımlar</span><span>EFT sekmesi → 2.500 TL → Gönder → hata</span>
-          </div></div>
+    <div class="main">
+      <div class="codebar"><span class="crumb">Bankacılık › <b>Bireysel Kredi Kullandırım</b></span>
+        <div class="codein"><span class="muted">Ekran kodu</span><span class="in">KRDTKULL</span><span class="btnsm">Senaryolar</span><span class="btnsm v">Sorun yaşıyorum</span></div></div>
+      <div class="page">
+        <div class="ph"><h1>Bireysel Kredi Kullandırım</h1><span class="code">KRDTKULL</span></div>
+        <div class="muted">Krediler · İşlem · İhtiyaç kredisi kullandırım ve ödeme planı</div>
+        <div class="card">
+          <div class="grid3">
+            <div class="field"><label>Kredi tutarı</label><div class="v">400.000 TL</div></div>
+            <div class="field"><label>Vade</label><div class="v">3 ay</div></div>
+            <div class="field"><label>Alacak hesabı</label><div class="v">Ana Hesap · Vadesiz</div></div>
+          </div>
+          <div class="grid4">
+            <div class="stat"><small>Aylık taksit</small><b>144.185,92 TL</b></div>
+            <div class="stat"><small>Toplam geri ödeme</small><b>432.557,77 TL</b></div>
+            <div class="stat"><small>Aylık faiz</small><b>%3,09</b></div>
+            <div class="stat"><small>Aylık gelir</small><b>38.000 TL</b></div>
+          </div>
+          <div class="warn">Taksit tutarı aylık gelirin %50'sini (19.000 TL) aşıyor. Kredi kullandırılamaz.</div>
+          <span class="btn off">Kullandır</span>
+        </div>
       </div>
-      <div class="card"><h5>Çözüm önerisi</h5>
-        <div style="display:flex;align-items:center;gap:14px"><span class="big">%93</span><div style="flex:1"><div class="bar"><i style="width:93%"></i></div><div class="muted" style="margin-top:4px">6 benzer geçmiş çağrı · eşik %75</div></div></div>
-        <ol class="steps">
-          <li>IBAN doğrulama servisinin bağlantı havuzu doluluğunu kontrol edin (son 15 dk).</li>
-          <li>Havuz limitini 20 → 60'a çıkarın ve zaman aşımını 5 sn → 8 sn yapın.</li>
-          <li>Kalıcı çözüm talebi açın: servis istemcisine yeniden deneme politikası.</li>
-        </ol>
-        <div class="src"><span class="muted">Kaynak:</span><span class="chip gray">CAG-0871</span><span class="chip gray">CAG-0912</span><span class="chip gray">CAG-0955</span><span class="chip gray">+3</span></div>
+      <div class="scrim"></div>
+      <div class="panel">
+        <div class="hd"><span class="lens"></span>Mercek · <span class="code">KRDTKULL</span></div>
+        <div class="bd">
+          <div class="assist">
+            <div><span class="chip amber">İş kuralı</span></div>
+            <h4>Bu bir sistem hatası değil, iş kuralı</h4>
+            <p>Taksit, müşterinin gelirinin %50'sini aşıyor. En uzun vade olan 36 ayda bile taksit sınırın üstünde kalıyor; 36 ayda kullandırılabilecek en yüksek tutar yaklaşık 334.000 TL.</p>
+            <div class="grid2">
+              <div class="stat"><small>Taksit (3 ay)</small><b>144.186 TL</b></div>
+              <div class="stat"><small>Gelirin %50'si</small><b>19.000 TL</b></div>
+              <div class="stat"><small>Taksit (36 ay)</small><b>22.754 TL</b></div>
+              <div class="stat"><small>36 ayda en yüksek tutar</small><b>~334.000 TL</b></div>
+            </div>
+            <div class="inc"><span class="chip green">✓</span>Çağrı açılmadı · önlenen çağrı</div>
+            <div class="row"><span class="b2 v">Bana göster · 330.000 TL / 36 ay</span><span class="b2">Kaynak loglar</span></div>
+          </div>
+        </div>
+        <div class="typing">Mercek'e yazın…</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- 4: Sahne 2 — kod analizi -->
-<div class="desk" id="m-console-code" style="height:auto">
+<!-- ============ B · Çağrı merkezi sohbeti ============ -->
+<div class="desk" id="m-b-callcenter">
   <span class="badge-draft">TASLAK GÖRSEL</span>
-  <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">mercek-app.azurewebsites.net/support/CAG-1043</span></div>
-  <div class="top"><span class="lens"></span><b>Mercek</b><span class="sub">Destek Konsolu</span>
-    <div class="nav"><span class="on">Çağrılar</span><span>Talepler</span><span>Banka simülasyonu</span></div></div>
-  <div class="main">
+  <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">mercek-web.azurewebsites.net/mercek</span></div>
+  <div class="app">
     <div class="side">
-      <h4>Açık çağrılar</h4>
-      <div class="inc"><span class="t">CAG-1042 · EFT gönderilemiyor</span><span class="m"><span class="chip coral">Yüksek</span>Ödeme Sistemleri · 4 dk önce</span></div>
-      <div class="inc on"><span class="t">CAG-1043 · Fatura eksik ödendi</span><span class="m"><span class="chip gray">Orta</span>Fatura Servisleri · 3 dk önce</span></div>
-      <div class="inc"><span class="t">CAG-1039 · Kart limiti görünmüyor</span><span class="m"><span class="chip gray">Orta</span>Kart Sistemleri · 21 dk önce</span></div>
+      <div class="brand"><span class="logo">K</span><div><b>Kontrol Paneli</b><small>İç bankacılık</small></div></div>
+      <span class="nav"><i class="ico" style="background:#e2e8f0"></i>Genel Bakış</span>
+      <span class="nav"><i class="ico" style="background:var(--emerald-soft)"></i>Bankacılık</span>
+      <span class="nav on"><i class="ico" style="background:var(--violet-soft)"></i>Mercek</span>
+      <span class="nav"><i class="ico" style="background:var(--amber-soft)"></i>Talep Yönlendirme</span>
+      <div class="user"><span class="av">ZA</span><div><b>Zeynep Arslan</b><small>Çağrı Merkezi Temsilcisi</small></div></div>
     </div>
-    <div class="pane">
-      <div class="ph"><h1>CAG-1043 · Fatura tutarı eksik ödeniyor</h1></div>
-      <div class="card" style="flex-direction:row;align-items:center;gap:16px">
-        <span class="big" style="color:var(--coral)">%41</span>
-        <div style="flex:1"><div class="bar coral"><i style="width:41%"></i></div><div class="muted" style="margin-top:4px">Geçmişte benzer kayıt bulunamadı (eşik %75) → Mercek ilgili kodu inceledi</div></div>
-        <span class="chip gray">Öneridir, uygulanmadı</span>
-      </div>
-      <div class="card"><h5>Kod analizi · sample-codebase/sp_FaturaTutarHesapla.sql · satır 27</h5>
-        <div class="code">
-          <div><span class="ln">25</span>  DECLARE @OdenecekTutar DECIMAL(18,2);</div>
-          <div><span class="ln">26</span>  -- Fatura tutarı iki haneye getirilir</div>
-          <div class="del"><span class="ln">27</span>- SET @OdenecekTutar = ROUND(@FaturaTutari, 2, 1);</div>
-          <div class="add"><span class="ln">27</span>+ SET @OdenecekTutar = ROUND(@FaturaTutari, 2);</div>
-          <div><span class="ln">28</span>  IF @OdenecekTutar &lt; @FaturaTutari</div>
-          <div><span class="ln">29</span>      EXEC sp_EksikOdemeUyarisi @AboneNo, @OdenecekTutar;</div>
+    <div class="main">
+      <div class="page">
+        <div class="ph"><span class="lens"></span><h1>Mercek</h1><div class="tabs" style="margin-left:14px"><span class="tab on">Sohbet</span><span class="tab">Çağrılar</span></div></div>
+        <div class="metrics">
+          <div class="stat"><small>Önlenen çağrı (bugün)</small><b>1</b></div>
+          <div class="stat"><small>Ana kayda bağlanan vaka</small><b>12</b></div>
+          <div class="stat"><small>Ortalama analiz süresi</small><b>— sn</b></div>
         </div>
-        <div class="kv" style="grid-template-columns:120px 1fr">
-          <span>Kök neden</span><span>ROUND'un üçüncü parametresi (1) yuvarlama yerine <b>kesme</b> yapıyor: 100,005 → 100,00.</span>
-          <span>Test önerisi</span><span>100,005 → 100,01 ve 100,004 → 100,00 için birim testi.</span>
-          <span>Güven</span><span>%86</span>
+        <div class="chatcol">
+          <div class="msg">Doğalgaz Başkentgaz, abone 4012345678, fatura ödemede sorun yaşıyor.</div>
+          <div class="assist" style="background:#fff">
+            <div style="display:flex;gap:6px"><span class="chip blue">Kurum kaynaklı</span><span class="code">ODMTFATR</span><span class="chip gray">Başkentgaz</span></div>
+            <h4>Ödeme alınmadı, hesaptan para çekilmedi</h4>
+            <p>Müşterinin 3 dakika önceki ödemesi tamamlanmadı. Neden müşteriyle ilgili değil: son 30 dakikada Başkentgaz'a giden <b>47 ödeme isteği</b> tüm kanallarda zaman aşımına düştü. Konu Fatura Ödeme Servisi'nin kurum entegrasyonunda.</p>
+            <div class="grid4">
+              <div class="stat"><small>Son 30 dk</small><b>47 istek</b></div>
+              <div class="stat"><small>Kanal</small><b>3</b></div>
+              <div class="stat"><small>İlk hata</small><b>30 dk önce</b></div>
+              <div class="stat"><small>Servis</small><b style="font-size:14px">Fatura Ödeme</b></div>
+            </div>
+            <div class="say"><b>Müşteriye söyleyebileceğiniz</b>"Ödemeniz alınmadı, hesabınızdan para çekilmedi. Kurum kaynaklı geçici bir sorun var; sorun giderilince SMS ile bilgilendirileceksiniz. Son ödeme tarihine kadar gecikme faizi oluşmaz."</div>
+            <div class="inc"><span class="chip violet">Bağlandı</span>Ana kayıt CAG-2051'e bağlandı · bağlı vaka: 12</div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- 5: Sahne 3 — Talep Asistanı -->
-<div class="desk" id="m-request" style="height:auto">
+<!-- ============ C · L2 analiz: duyuru + kod ============ -->
+<div class="desk" id="m-c-code">
   <span class="badge-draft">TASLAK GÖRSEL</span>
-  <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">mercek-app.azurewebsites.net/requests/TLP-0217</span></div>
-  <div class="top"><span class="lens"></span><b>Mercek</b><span class="sub">Talep Asistanı</span>
-    <div class="nav"><span>Çağrılar</span><span class="on">Talepler</span><span>Banka simülasyonu</span></div></div>
-  <div class="pane">
-    <div class="input"><span>Para Transferi ekranında kayıtlı alıcıları favori olarak seçebilelim.</span><span class="go">Analiz et</span></div>
-    <div style="display:flex;gap:8px;align-items:center"><span class="chip indigo">Mevcut ekran değişikliği</span><span class="chip gray">Para Transferi</span><span class="muted">güven %91</span></div>
-    <div class="grid3">
-      <div class="card"><h5>Etkilenen servisler</h5>
-        <div class="svc"><span>Transfer API</span><span class="chip coral">Yüksek</span></div>
-        <div class="svc"><span>Müşteri Profil Servisi</span><span class="chip amber">Orta</span></div>
-        <div class="svc"><span>IBAN Doğrulama</span><span class="chip gray">Düşük</span></div>
-        <div class="muted">Ana ekip: Ödeme Sistemleri</div>
-      </div>
-      <div class="card"><h5>Tahmin</h5>
-        <div class="big">15–22 <span style="font-size:16px;font-weight:600">adam-gün</span></div>
-        <div class="muted">Medyan 18 · 4 benzer geçmiş talep</div>
-        <div class="kv" style="grid-template-columns:90px 1fr">
-          <span>Maliyet</span><span>18 × günlük maliyet <span class="chip gray">varsayım</span></span>
-          <span>Takvim</span><span><b>9 Kasım → 9 Aralık</b> <span class="muted">(önce 4 Aralık)</span></span>
+  <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">mercek-web.azurewebsites.net/mercek?tab=cagrilar&amp;id=CAG-2052</span></div>
+  <div class="app">
+    <div class="side">
+      <div class="brand"><span class="logo">K</span><div><b>Kontrol Paneli</b><small>İç bankacılık</small></div></div>
+      <span class="nav"><i class="ico" style="background:#e2e8f0"></i>Genel Bakış</span>
+      <span class="nav"><i class="ico" style="background:var(--emerald-soft)"></i>Bankacılık</span>
+      <span class="nav on"><i class="ico" style="background:var(--violet-soft)"></i>Mercek</span>
+      <span class="nav"><i class="ico" style="background:var(--amber-soft)"></i>Talep Yönlendirme</span>
+      <div class="user"><span class="av">KA</span><div><b>Kerem Aydın</b><small>Platform Yöneticisi · L2</small></div></div>
+    </div>
+    <div class="main">
+      <div class="page">
+        <div class="ph"><span class="lens"></span><h1>Mercek</h1><div class="tabs" style="margin-left:14px"><span class="tab">Sohbet</span><span class="tab on">Çağrılar</span></div></div>
+        <div class="split">
+          <div class="incl">
+            <div class="it on"><span class="t">CAG-2052 · İSKİ abone numarası kabul edilmiyor</span><span class="m">Fatura Ödeme Servisi · 23 ilişkili çağrı</span></div>
+            <div class="it"><span class="t">CAG-2051 · Başkentgaz ödeme zaman aşımı</span><span class="m">Fatura Ödeme Servisi · bağlı vaka 12</span></div>
+            <div class="it"><span class="t">CAG-2047 · Kart başvurusunda kimlik doğrulama</span><span class="m">Müşteri Yönetim Servisi</span></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div class="card" style="flex-direction:row;align-items:center;gap:14px">
+              <span class="big" style="color:var(--red)">%35</span>
+              <div style="flex:1"><div class="bar"><i style="width:35%"></i><span class="th" style="left:75%"></span></div><div class="muted" style="margin-top:4px">Geçmişte benzer kayıt yok (eşik %75) → kurum duyuruları ve kod incelendi</div></div>
+              <span class="chip gray">Öneridir, uygulanmadı</span>
+            </div>
+            <div class="grid2">
+              <div class="card"><h5>Örüntü · 1 Ekim'den beri</h5>
+                <div class="grid2"><div class="stat"><small>Doğrulama hatası</small><b>412</b></div><div class="stat"><small>İSKİ payı</small><b>%97</b></div>
+                <div class="stat"><small>Numara uzunluğu</small><b>13 hane</b></div><div class="stat"><small>Etkilenen müşteri</small><b>187</b></div></div></div>
+              <div class="card"><h5>Kurum duyurusu · DUY-0412</h5>
+                <div style="font-size:13px;line-height:1.45"><b>İSKİ · 12 Eylül 2026</b><br>"1 Ekim 2026 itibarıyla yeni abonelere 13 haneli abone numarası verilecektir. Mevcut numaralar değişmez."</div>
+                <div class="pro"><b>Proaktif bulgu:</b> ASKİ 1 Ocak 2027'de aynı geçişi yapacak.</div></div>
+            </div>
+            <div class="card"><h5>Kod analizi · kural iki yerde sabit</h5>
+              <div class="path">frontend/src/app/(dashboard)/bankacilik/odmtfatr/bill-payment-form.tsx</div>
+              <div class="pre"><div class="del"><span class="ln">18</span>- const ABONE_NO_PATTERN = /^\d{6,12}$/;</div><div class="add"><span class="ln">18</span>+ const ABONE_NO_PATTERN = /^\d{6,13}$/;</div></div>
+              <div class="path">backend/app/api/odm.py</div>
+              <div class="pre"><div class="del"><span class="ln">9</span>- SUBSCRIBER_NO_PATTERN = re.compile(r"^\d{6,12}$")</div><div class="add"><span class="ln">9</span>+ SUBSCRIBER_NO_PATTERN = re.compile(r"^\d{6,13}$")</div></div>
+              <div style="font-size:13px"><b>Kalıcı öneri:</b> Abone numarası uzunluğu kurum bazında parametre olsun. <b>Test:</b> İSKİ 13 hane geçer, 14 hane reddedilir.</div>
+            </div>
+          </div>
         </div>
-        <div class="timeline"><span class="busy" style="left:0;width:22%"></span><span class="new" style="left:22%;width:56%"></span><span class="ext" style="left:78%;width:9%"></span></div>
-      </div>
-      <div class="card"><h5>Bu ekranın çağrı geçmişi</h5>
-        <div><span class="big">312</span> <span class="muted">çağrı · son 30 gün</span></div>
-        <div class="stat-row"><span class="lbl">IBAN doğrulama zaman aşımı</span><div class="bar coral"><i style="width:41%"></i></div><span>%41</span></div>
-        <div class="stat-row"><span class="lbl">Alıcı adı uyuşmazlığı</span><div class="bar"><i style="width:23%"></i></div><span>%23</span></div>
-        <div class="stat-row"><span class="lbl">Limit aşımı uyarısı</span><div class="bar"><i style="width:14%"></i></div><span>%14</span></div>
-        <div class="chk"><span class="box">✓</span><span>Kalıcı çözüm kapsamda</span><b style="margin-left:auto;white-space:nowrap">+3 adam-gün</b></div>
       </div>
     </div>
-    <div class="card"><h5>Gerekçe</h5><div style="font-size:14px;line-height:1.5">Tahmin, aynı ekranda yapılmış 4 benzer değişikliğin efor dağılımına dayanır (15, 17, 19, 22 adam-gün). Ödeme Sistemleri ekibi 8 Kasım'a kadar dolu olduğu için başlangıç 9 Kasım'dır. Hesap kurallarla yapılır; AI yalnızca açıklar.</div></div>
+  </div>
+</div>
+
+<!-- ============ D · Talep Yönlendirme ============ -->
+<div class="desk" id="m-d-request">
+  <span class="badge-draft">TASLAK GÖRSEL</span>
+  <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">mercek-web.azurewebsites.net/talep-yonlendirme/TLP-1043</span></div>
+  <div class="app">
+    <div class="side">
+      <div class="brand"><span class="logo">K</span><div><b>Kontrol Paneli</b><small>İç bankacılık</small></div></div>
+      <span class="nav"><i class="ico" style="background:#e2e8f0"></i>Genel Bakış</span>
+      <span class="nav"><i class="ico" style="background:var(--emerald-soft)"></i>Bankacılık</span>
+      <span class="nav"><i class="ico" style="background:var(--violet-soft)"></i>Mercek</span>
+      <span class="nav on"><i class="ico" style="background:var(--amber-soft)"></i>Talep Yönlendirme</span>
+      <div class="user"><span class="av">FÖ</span><div><b>Fatma Öztürk</b><small>Bölüm Başkanı · Kredi Tahsilatları</small></div></div>
+    </div>
+    <div class="main">
+      <div class="page">
+        <div class="ph"><h1>TLP-1043 · Taksit hatırlatma</h1><span class="chip amber">Analiz: Ayşe Kaya</span></div>
+        <div class="input"><span>Daha önce gecikme yapmış müşterilere, taksit ödeme tarihinden birkaç gün önce otomatik hatırlatma e-postası gönderilsin. Temsilcilerimiz ilgili ekrandan seçtikleri müşteriye anında hatırlatma gönderebilsin.</span><span class="go">Analiz et</span></div>
+        <div style="display:flex;gap:8px;align-items:center"><span class="chip violet">Batch işi + mevcut ekran değişikliği</span><span class="code">KRDRTKSR</span><span class="muted">"Hatırlatma gönder" butonu · güven %90</span></div>
+        <div class="grid3">
+          <div class="card"><h5>Etkilenen servisler</h5>
+            <div class="svc"><span><b>Kredi Takip</b> · ana</span><span>16 a/g</span></div>
+            <div class="svc"><span><b>Müşteri Yönetim</b> · etkileşimli</span><span>4 a/g</span></div>
+            <div class="muted">5 benzer talep · en yakın TLP-0871 (%90)</div>
+          </div>
+          <div class="card"><h5>Efor ve takvim</h5>
+            <div><span class="big">20 a/g</span><span class="was">18</span></div>
+            <div class="muted">Otomatik 11 · Manuel 7 · SMS kanalı +2</div>
+            <div style="font-size:14px"><b>9 Kasım → 4 Aralık</b> <span class="muted">(önce 2 Aralık)</span></div>
+            <div class="timeline"><span class="busy" style="left:0;width:28%"></span><span class="new" style="left:28%;width:52%"></span><span class="ext" style="left:80%;width:6%"></span></div>
+            <div class="muted">Kredi Takip 8 Kasım'a kadar dolu</div>
+          </div>
+          <div class="card"><h5>Köprü · veriden kapsam</h5>
+            <div><span class="big">71</span> <span class="muted">/ 186 çağrı: "hatırlatma almadım"</span></div>
+            <div class="srow"><span class="lbl">E-posta izni</span><div class="bar"><i style="width:58%;background:var(--red)"></i></div><span>%58</span></div>
+            <div class="srow"><span class="lbl">E-posta + SMS</span><div class="bar ok"><i style="width:89%"></i></div><span>%89</span></div>
+            <div class="muted">Hedef grup 2.340 müşteri · 983'üne e-postayla ulaşılamaz</div>
+            <div class="chk"><span class="box">✓</span><span>SMS kanalı kapsamda</span><b style="margin-left:auto">+2 a/g</b></div>
+          </div>
+        </div>
+        <div class="card"><h5>Gerekçe</h5><div style="font-size:13.5px;line-height:1.5">Otomatik bileşen için en yakın örnek TLP-0871: o talepte de segment bazlı, zamanlanmış bir hatırlatma yapılmıştı, ama kanal SMS'ti. Manuel bileşen, mevcut bir ekrana gönderim butonu ekleyen iki taleple (TLP-1004, TLP-1019) neredeyse aynı. Hesap kurallarla yapıldı; Mercek yalnızca açıklıyor.</div></div>
+      </div>
+    </div>
   </div>
 </div>
 

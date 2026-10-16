@@ -45,80 +45,84 @@
     <div class="lens"><i></i></div>
     <div>
       <h1>Mercek · Doküman Haritası</h1>
-      <div class="sub">Hackathon hazırlığında ne var, ne işe yarar, ne zaman açılır — tek bakışta</div>
+      <div class="sub">Hackathon boyunca ne var, ne işe yarar, ne zaman açılır — tek bakışta</div>
     </div>
     <div class="right"><b>AI Overflow</b> · Ziraat Teknoloji YZ Hackathonu<br>16–17 Ekim 2026 · Tema 2<br>Başlangıç noktası: <b>README.md</b></div>
   </header>
 
   <div class="flow">
-    <!-- Sütun 1: Ne ve neden -->
     <div class="col">
       <div class="lane-title">1 · Ne yapıyoruz, hangi kurallarla</div>
       <div class="card c-coral"><div class="num">1</div><div>
         <h3>Teknik Kılavuz Özeti</h3><div class="file">docs/hackathon-teknik-kilavuz.md</div>
-        <p>Puanlama (%30 AstreAI + %70 jüri), GHAS ve CodeQL kuralları, 20 $ Copilot hedefi, sunum kuralları, teslim listesi.</p>
-        <div class="chips"><span class="chip t">Bugün</span><span class="chip">Herkes</span></div></div></div>
-      <div class="arrow">↓</div>
+        <p>Puanlama (%30 AstreAI + %70 jüri), GHAS ve CodeQL kuralları, 20 $ Copilot hedefi, sunum kuralları.</p>
+        <div class="chips"><span class="chip t">08:00–10:30</span><span class="chip">Herkes</span></div></div></div>
       <div class="card c-indigo"><div class="num">2</div><div>
         <h3>Kapsam</h3><div class="file">docs/mercek-kapsam.md</div>
-        <p>Mercek nedir, iki modül (çağrı + talep), MoSCoW öncelikleri, kapsam dışı, resmi takvime göre zaman planı.</p>
-        <div class="chips"><span class="chip t">Bugün</span><span class="chip">Herkes</span></div></div></div>
-      <div class="arrow">↓</div>
+        <p>Mercek nedir, iki modül, MoSCoW, sunum ve demo yaklaşımı, zaman planı.</p>
+        <div class="chips"><span class="chip t">08:00–10:30</span><span class="chip">Herkes</span></div></div></div>
       <div class="card c-indigo"><div class="num">3</div><div>
+        <h3>Demo Senaryoları</h3><div class="file">docs/mercek-demo-senaryo-onerileri.md</div>
+        <p>A–F: Elif, Mehmet, Zeynep, Kerem, Fatma, Hakan. Önce yönetici özetleri, sonra detaylar.</p>
+        <div class="chips"><span class="chip t">Her iki gün</span><span class="chip">Herkes</span></div></div></div>
+      <div class="card c-indigo"><div class="num">4</div><div>
         <h3>İş Planı</h3><div class="file">docs/mercek-is-plani.md</div>
-        <p>19 maddelik sorumluluk listesi (herkes kendi seçer), görevler ve kabul kriterleri, demo senaryosu: Ayşe, Mert, Zeynep.</p>
-        <div class="chips"><span class="chip t">Bugün</span><span class="chip t">Her iki gün</span><span class="chip">Herkes</span></div></div></div>
+        <p>19 sorumluluk, görevler ve kabul kriterleri, zaman × odak, sunum ve 12:00 canlı demo kararı.</p>
+        <div class="chips"><span class="chip t">Her iki gün</span><span class="chip">Herkes</span></div></div></div>
     </div>
-
-    <!-- Sütun 2: Nasıl -->
     <div class="col">
       <div class="lane-title">2 · Nasıl yapıyoruz</div>
-      <div class="card c-teal"><div class="num">4</div><div>
-        <h3>Uygulama Rehberi</h3><div class="file">docs/mercek-uygulama-rehberi.md</div>
-        <p>Her görevin teknik adımları; Azure servisleri ve puan bağlantısı; yetki yoksa yedek yollar.</p>
-        <div class="chips"><span class="chip t">1. ve 2. gün</span><span class="chip">Geliştiriciler</span></div></div></div>
-      <div class="arrow">↓ aynı görev kodu (A1, M1.2-b …)</div>
       <div class="card c-teal"><div class="num">5</div><div>
-        <h3>Copilot Prompt Kütüphanesi</h3><div class="file">docs/mercek-copilot-promptlari.md</div>
-        <p>Her görev için kopyala-yapıştır prompt, önerilen ucuz/orta model, ortak API sözleşmeleri.</p>
-        <div class="chips"><span class="chip t">1. ve 2. gün</span><span class="chip">Geliştiriciler</span></div></div></div>
+        <h3>Rebuild Rehberi</h3><div class="file">docs/COPILOT_REBUILD_GUIDE.md</div>
+        <p>Temel uygulama: Next.js + FastAPI, 5 işlem ekranı, sahte giriş, log üretici, Joyride (Faz 1–7).</p>
+        <div class="chips"><span class="chip t">10:30'dan itibaren</span><span class="chip">Geliştiriciler</span></div></div></div>
       <div class="card c-teal"><div class="num">6</div><div>
+        <h3>Uygulama Rehberi</h3><div class="file">docs/mercek-uygulama-rehberi.md</div>
+        <p>Her görevin teknik adımları; iki App Service, Foundry, SQL, AI Search; yedek yollar.</p>
+        <div class="chips"><span class="chip t">1. ve 2. gün</span><span class="chip">Geliştiriciler</span></div></div></div>
+      <div class="arrow">↓ aynı görev kodu (A2, M1.2-b …)</div>
+      <div class="card c-teal"><div class="num">7</div><div>
+        <h3>Copilot Prompt Kütüphanesi</h3><div class="file">docs/mercek-copilot-promptlari.md</div>
+        <p>Kopyala-yapıştır prompt'lar, model sınıfı, ortak sözleşmeler (contracts.md).</p>
+        <div class="chips"><span class="chip t">1. ve 2. gün</span><span class="chip">Geliştiriciler</span></div></div></div>
+      <div class="card c-teal"><div class="num">8</div><div>
         <h3>Copilot Talimat Dosyası</h3><div class="file">.github/copilot-instructions.md</div>
-        <p>Copilot'un her istekte otomatik okuduğu kısa kurallar: güvenlik, test, maliyet.</p>
-        <div class="chips"><span class="chip t">Takım reposuna kopyala</span><span class="chip">Copilot</span></div></div></div>
+        <p>Copilot'un her istekte okuduğu kurallar: güvenlik, teknoloji, test, maliyet.</p>
+        <div class="chips"><span class="chip t">Takım reposuna</span><span class="chip">Copilot</span></div></div></div>
     </div>
-
-    <!-- Sütun 3: Veri ve sunum -->
     <div class="col">
       <div class="lane-title">3 · Demo verisi ve sunum</div>
-      <div class="card c-amber"><div class="num">7</div><div>
-        <h3>Sentetik Veri Planı</h3><div class="file">docs/mercek-sentetik-veri-plani.md</div>
-        <p>Hangi veriler, ne kadar ve neden: senaryoyu taşıyan veri ilkesi.</p>
-        <div class="chips"><span class="chip t">Bugün</span><span class="chip">Veri, analist</span></div></div></div>
-      <div class="arrow">↓</div>
-      <div class="card c-amber"><div class="num">8</div><div>
-        <h3>Sentetik Veri Üretim Rehberi</h3><div class="file">docs/mercek-sentetik-veri-uretimi.md</div>
-        <p>Kataloglar, senaryo rakamları (312 çağrı, 15–22 adam-gün), Foundry metin prompt'ları, doğrulama sorguları.</p>
-        <div class="chips"><span class="chip t">1. gün sabah</span><span class="chip">Veri, analist</span></div></div></div>
       <div class="card c-amber"><div class="num">9</div><div>
+        <h3>Sentetik Veri Planı</h3><div class="file">docs/mercek-sentetik-veri-plani.md</div>
+        <p>Hangi veri, neden; senaryoların veride taşıması gerekenler.</p>
+        <div class="chips"><span class="chip t">10:30–13:30</span><span class="chip">Veri, analist</span></div></div></div>
+      <div class="card c-amber"><div class="num">10</div><div>
+        <h3>Sentetik Veri Üretim Rehberi</h3><div class="file">docs/mercek-sentetik-veri-uretimi.md</div>
+        <p>Katalog, senaryo rakamları (412 hata, 2.340 müşteri…), betikler, Foundry prompt'ları, doğrulama.</p>
+        <div class="chips"><span class="chip t">10:30–13:30</span><span class="chip">Veri, analist</span></div></div></div>
+      <div class="card c-amber"><div class="num">11</div><div>
         <h3>Sunum Taslağı</h3><div class="file">presentation/Mercek_AI_Overflow_Sunum.pptx</div>
-        <p>11 slayt, konuşmacı notları, taslak ekranlar — 2. gün gerçek görüntülerle değişecek.</p>
+        <p>11 slayt: altı senaryo tek slaytta, canlı demo dört sahne, konuşmacı notları.</p>
         <div class="chips"><span class="chip t">2. gün</span><span class="chip">Sunum, herkes</span></div></div></div>
+      <div class="card c-amber"><div class="num">12</div><div>
+        <h3>Takım Anlatım Cümleleri</h3><div class="file">docs/mercek-takim-anlatim-cumleleri.md</div>
+        <p>Her dokümanın ana fikri tek cümlede ve akılda kalacak rakamlar.</p>
+        <div class="chips"><span class="chip t">Açılış</span><span class="chip">Herkes</span></div></div></div>
     </div>
   </div>
 
   <div class="timeline">
-    <div class="phase p1"><h4>Bugün · 15 Ekim</h4><div class="when">Okuma, karar, pratik (kod yok)</div>
-      <ul><li>1, 2, 3'ü oku</li><li>Sorumluluğunu seç (İş Planı §2)</li><li>Kendi görevlerini 4'te oku</li><li>Analist: 8'deki tabloları gözden geçir</li></ul></div>
-    <div class="phase p2"><h4>1. gün · 16 Ekim</h4><div class="when">10:30'da kodlama başlar</div>
-      <ul><li>Altyapı: 4 + 5 (A görevleri)</li><li>Veri: 8 ile üret ve doğrula</li><li>Must özellikler: 4 → 5 döngüsü</li></ul></div>
-    <div class="phase p3"><h4>2. gün · 17 Ekim</h4><div class="when">12:00 kod dondurma · 13:00 teknik değerlendirme</div>
-      <ul><li>Should özellikler, entegrasyon</li><li>9'u gerçek ekranlarla tamamla</li><li>15:00 sunum (5 dakika)</li></ul></div>
-    <div class="phase p4"><h4>Sonrası</h4><div class="when">Kapanış</div>
-      <ul><li>Retrospektif</li><li>Jüri ve AstreAI geri bildirimleri</li><li>Azure kaynaklarını kapat</li></ul></div>
+    <div class="phase p1"><h4>1. gün · 08:00–10:30</h4><div class="when">Kayıt, açılış (kod yok)</div>
+      <ul><li>12 ile toplantı</li><li>Sorumluluk seçimi (4 · §2)</li><li>Kendi görevlerini 6'da oku</li><li>VDI, Azure, GitHub girişleri</li></ul></div>
+    <div class="phase p2"><h4>1. gün · 10:30–gece</h4><div class="when">Kodlama</div>
+      <ul><li>Altyapı: 5 + 6 + 7 (A görevleri)</li><li>Veri: 10 ile üret, doğrula</li><li>A ve B, sonra D ve C</li></ul></div>
+    <div class="phase p3"><h4>2. gün · 09:30–12:00</h4><div class="when">Should'lar, ekran görüntüleri, videolar</div>
+      <ul><li>Joyride, ölçüm, E ve F</li><li>Her senaryo için görüntü ve video</li><li>12:00 kod dondurma, canlı demo kararı</li></ul></div>
+    <div class="phase p4"><h4>2. gün · 12:00–17:20</h4><div class="when">13:00 teknik değerlendirme</div>
+      <ul><li>11'i gerçek görüntülerle tamamla</li><li>İki prova</li><li>15:00 sunum (5 dakika)</li></ul></div>
   </div>
 
-  <footer><span>Görev kodları (A1, M1.2-b, Q6…) ve sorumluluk numaraları [1]–[19] tüm dokümanlarda aynı.</span><span><b>Soruna odaklanır, çözümü netleştirir.</b></span></footer>
+  <footer><span>Görev kodları (A1, V3, M1.2-b, Q9…) ve sorumluluk numaraları [1]–[19] tüm dokümanlarda aynı.</span><span><b>Soruna odaklanır, çözümü netleştirir.</b></span></footer>
 </div>
 </body>
 </html>

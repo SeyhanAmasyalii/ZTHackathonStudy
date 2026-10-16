@@ -404,7 +404,7 @@ Ayşe öneriyi Fatma'ya iletiyor. Gecikme yapan müşterilerin önemli bir kısm
 | TLP-0712 | Kredi kartı borcu taksitlendirme ekranı | 13 a/g | %79 |
 | TLP-0846 | Kredi vade değişikliği (iç operasyon ekranı) | 17 a/g | %76 |
 
-**Tahmin: 15 a/g** (medyan; aralık 13–17). Kredi Takip 10, Müşteri Yönetim 3, Kredi Kullandırım 2.
+**Tahmin: 15 a/g** (medyan; aralık 13–17). Kredi Takip 8, Müşteri Yönetim 4, Kredi Kullandırım 3. Süre ana servis payından hesaplanır (%20 entegrasyon ve test tamponuyla 10 iş günü).
 
 **g) Takvim ve kapasite çatışması**
 
@@ -413,7 +413,7 @@ Ayşe öneriyi Fatma'ya iletiyor. Gecikme yapan müşterilerin önemli bir kısm
 | Seçenek | Erteleme ekranı | Yan etkisi |
 |---|---|---|
 | **A. Öncelik ver** (regülasyon işinden 2 hafta kapasite kaydır) | **19 Ekim → 30 Ekim** (hedef tutar) | Regülasyon işi 8 → 22 Kasım'a kayar. Yasal bir son tarihi varsa bu seçenek uygulanamaz. Senaryo D'deki hatırlatma talebi 4 → 18 Aralık'a kayar. |
-| **B. Sıraya koy** | **9 Kasım → 20 Kasım** (hedef kaçar, ~3 hafta geç) | Regülasyon işi etkilenmez. Senaryo D'deki talep 21 Aralık'a kayar. |
+| **B. Sıraya koy** | **9 Kasım → 20 Kasım** (hedef kaçar, ~3 hafta geç) | Regülasyon işi etkilenmez. Senaryo D'deki talep E'den sonra başlar ve 18 Aralık'a kayar. |
 
 Ayşe iki seçeneği Hakan'a ve servis sahiplerine sunuyor. Afet aciliyeti nedeniyle **A** seçiliyor; regülasyon işinin son tarihi olmadığı teyit ediliyor.
 
@@ -431,7 +431,7 @@ Ayşe iki seçeneği Hakan'a ve servis sahiplerine sunuyor. Afet aciliyeti neden
 > *Kapsama eklensin mi?*
 
 Hakan **"Evet"** diyor. Tahmin kartı güncelleniyor:
-- **15 → 17 a/g**
+- **15 → 17 a/g** (Kredi Takip 9, Müşteri Yönetim 5, Kredi Kullandırım 3)
 - **Seçenek A ile bitiş: 30 Ekim → 2 Kasım**
 
 **Kanıtladığı:**
@@ -454,7 +454,9 @@ Kerem Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglard
 
 ---
 
-## 3. Demo kurgusu (≈ 2,5 dakika)
+## 3. Demo kurgusu (≈ 3 dakika)
+
+Sunumda altı senaryonun tamamı tek bir "Kullanım senaryoları" slaytında yer alır. Canlı demoda yalnızca 2. gün 12:00'de çalışır durumda olanlar gösterilir (hazırlık önceliği A → B → D → C); hazır olmayanlar ekran görüntüsü veya kısa videoyla anlatılır. Karar kuralları: `mercek-is-plani.md` §5.
 
 | Sahne | Senaryo | Kim | Süre | Jüri kriteri |
 |---|---|---|---|---|

@@ -2,7 +2,7 @@
 
 Bu doküman, Mercek'in kullandığı her sentetik verinin **nereden geldiğini** üç gruba ayırır: elle yazılanlar, betikle üretilenler ve uygulamanın çalışırken ürettikleri. Her betik ve uygulama parçası için ne yaptığı, girdisi, çıktısı ve çalıştırma komutu yazılıdır.
 
-Değerlerin ayrıntısı: `mercek-sentetik-veri-uretimi.md`. Neden bu veri: `mercek-sentetik-veri-plani.md`.
+Değerlerin ayrıntısı: `mercek-sentetik-veri-uretimi.md`. Neden bu veri: `mercek-sentetik-veri-plani.md`. Adetler: `mercek-sentetik-veri-sayilari.md`.
 
 **Durum işaretleri:** ✅ hazır (repoda) · 🔧 hackathonda Copilot ile yazılacak
 

@@ -207,7 +207,7 @@ Etiket: **"Öneridir, uygulanmadı."**
 >   1. Daha önce gecikme yapmış müşterilere, taksit ödeme tarihinden birkaç gün önce **otomatik hatırlatma e-postası** gönderilsin.
 >   2. Temsilciler, ilgili ekrandan seçtikleri bir müşteriye o taksit için **anında hatırlatma e-postası** gönderebilsin.
 > - **Mercek nasıl yönlendirdi:**
->   - Taksit hatırlatma talebini otomatik ve manuel bileşenlere ayırdı; yeni ekran (`KRDTTKIP`) önerdi.
+>   - Talebi iki bileşene ayırdı: günlük çalışan bir **batch işi** ve mevcut Kredi Taksit Sorgulama ekranına (`KRDRTKSR`) eklenecek bir **"Hatırlatma gönder" butonu**.
 >   - Ana ve etkileşimli servisleri belirledi; benzer taleplerden 18 a/g ve takvim çıkardı.
 >   - Çağrı verisiyle talebin değerini gösterdi (71 "hatırlatma almadım" çağrısı).
 >   - Hedef grubun %42'sine e-postayla ulaşılamayacağını fark edip SMS'i kapsama önerdi.
@@ -227,8 +227,8 @@ Talep, teknoloji tarafında analizi yürüten **Ayşe (Kıdemli İş Analisti)**
 **2. Mercek'in talep analizi** (ekranda kartlar halinde)
 
 **a) Talep özeti** (Mercek talebi iki bileşene ayırıyor)
-1. **Otomatik hatırlatma:** Her gün çalışan bir iş, ödeme tarihine X gün kalan taksitleri bulur. Bunlardan "daha önce gecikme yapmış" müşterilere ait olanlara hatırlatma e-postası gönderir.
-2. **Manuel hatırlatma:** Şube veya çağrı merkezi temsilcisi, bir müşterinin kredi taksitlerini görüntülediği ekrandan, seçtiği taksit için anında hatırlatma gönderir.
+1. **Otomatik hatırlatma (batch):** Her gün çalışan bir iş, ödeme tarihine X gün kalan taksitleri bulur. Bunlardan "daha önce gecikme yapmış" müşterilere ait olanlara hatırlatma e-postası gönderir.
+2. **Manuel hatırlatma:** Şube veya çağrı merkezi temsilcisi, müşterinin kredi taksitlerini zaten görüntülediği **Kredi Taksit Sorgulama** ekranından (`KRDRTKSR`), seçtiği taksit için bir butonla anında hatırlatma gönderir.
 
 Her iki durumda da gönderim yalnızca müşterinin e-posta iletişim izni varsa yapılır ve kaydı tutulur.
 
@@ -236,16 +236,24 @@ Her iki durumda da gönderim yalnızca müşterinin e-posta iletişim izni varsa
 
 | Alan | Değer |
 |---|---|
-| Talep tipi | Yeni geliştirme: **arka plan işi + yeni ekran** |
-| İlgili mevcut ekranlar | `KRDTKULL` (taksit planının kaynağı), `MUSTGUNC` (e-posta adresi ve iletişim izinleri) |
-| Yeni ekran önerisi | **`KRDTTKIP` · Kredi Taksit Takip.** Kod kurala (`[A-Z]{3}[TR][A-Z0-9]{4}`) uygun, mevcut kodlarla çakışmıyor. |
-| Güven | %88 |
-| Gerekçe | Ekran kataloğunda müşterinin kredilerini ve taksitlerini listeleyen bir ekran yok. Manuel gönderim için böyle bir ekran gerekiyor. |
+| Talep tipi | **Yeni batch işi + mevcut ekran değişikliği** |
+| Değişecek ekran | `KRDRTKSR` · Kredi Taksit Sorgulama ("Hatırlatma gönder" butonu) |
+| İlgili ekran | `MUSTGUNC` (e-posta adresi ve iletişim izinlerinin kaynağı; değişmiyor) |
+| Güven | %90 |
+| Gerekçe | Temsilciler müşterinin taksitlerini zaten Kredi Taksit Sorgulama ekranında görüyor; manuel gönderim bu ekrana eklenecek bir buton. Otomatik gönderim ekran gerektirmiyor, günlük çalışan bir batch işi. |
 
-**c) Yeni ekran taslağı: `KRDTTKIP`**
-- **Arama:** Müşteri no ile. Aktif krediler ve her kredinin taksit listesi: vade tarihi, tutar, durum (ödendi / bekliyor / gecikmede).
-- **Taksit satırında "Hatırlatma gönder" butonu.** Müşterinin e-posta izni yoksa buton pasif olur ve "İletişim izni için MUSTGUNC" yönlendirmesi gösterilir.
-- **Gönderim geçmişi:** Bu taksit için daha önce gönderilen hatırlatmalar (otomatik veya manuel), tarih ve gönderen.
+**c) Değişiklik önerisi**
+
+*Batch işi (otomatik hatırlatma)*
+- Her gün sabah çalışır, ödeme tarihine X gün kalan ve henüz ödenmemiş taksitleri bulur.
+- Yalnızca hedef gruptaki müşterileri seçer ("daha önce gecikme yapmış").
+- E-posta izni olan müşterilere gönderir; aynı taksit için ikinci kez otomatik gönderim yapmaz.
+- Her gönderimi kaydeder (taksit, müşteri, kanal, zaman, sonuç).
+
+*Ekran değişikliği: `KRDRTKSR` · Kredi Taksit Sorgulama*
+- Bekleyen veya gecikmedeki her taksit satırına **"Hatırlatma gönder"** butonu eklenir.
+- Müşterinin e-posta izni yoksa buton pasif olur ve "İletişim izni için MUSTGUNC" yönlendirmesi gösterilir.
+- Satırda o taksit için son gönderilen hatırlatma görünür (otomatik/manuel, tarih, gönderen); mükerrer gönderimin önüne geçer.
 
 **d) Etkilenen servisler**
 
@@ -282,8 +290,8 @@ Dayandığı benzer geçmiş talepler:
 
 | Bileşen | Tahmin |
 |---|---|
-| Otomatik hatırlatma işi | 11 a/g (medyan; aralık 9–14) |
-| Yeni ekran ve manuel gönderim (`KRDTTKIP`) | 7 a/g (medyan; aralık 6–8) |
+| Otomatik hatırlatma (batch işi) | 11 a/g (medyan; aralık 9–14) |
+| Ekrana buton ve manuel gönderim (`KRDRTKSR`) | 7 a/g (medyan; aralık 6–8) |
 
 | Servis | Pay |
 |---|---|
@@ -295,7 +303,7 @@ Dayandığı benzer geçmiş talepler:
 - **Plan: 9 Kasım → 2 Aralık.** Müşteri Yönetim Servisi işi ilk hafta paralel yürür.
 
 **h) Gerekçe** (Mercek'in açıklaması)
-> *"Otomatik bileşen için en yakın örnek TLP-0871: o talepte de segment bazlı, zamanlanmış bir hatırlatma yapılmıştı, ama kanal SMS'ti. Manuel bileşen, ekrandan doküman gönderen iki taleple benzer. Bu talepte ek olarak yeni bir ekran gerekiyor. Hesap kurallarla yapıldı; ben yalnızca açıklıyorum."*
+> *"Otomatik bileşen için en yakın örnek TLP-0871: o talepte de segment bazlı, zamanlanmış bir hatırlatma yapılmıştı, ama kanal SMS'ti. Manuel bileşen, mevcut bir ekrana gönderim butonu ekleyen iki taleple (TLP-1004, TLP-1019) neredeyse aynı. Hesap kurallarla yapıldı; ben yalnızca açıklıyorum."*
 
 **3. Köprü: çağrı ve müşteri verisi** (Mercek kendiliğinden ekliyor)
 
@@ -321,8 +329,8 @@ Ayşe öneriyi Fatma'ya iletiyor. Gecikme yapan müşterilerin önemli bir kısm
 - Talep kaydında "veriden eklenen kapsam" olarak işaretleniyor; onaylayan: Fatma, analiz: Ayşe.
 
 **Kanıtladığı:**
-- M2.1 sınıflandırma: karma talebi (arka plan işi + yeni ekran) ayırıyor.
-- M2.3 yeni ekran kapsamı: ekran kodu önerisi, taslak, netleştirilecek sorular.
+- M2.1 sınıflandırma: karma talebi (batch işi + mevcut ekran değişikliği) ayırıyor ve doğru ekranı buluyor.
+- M2.2 mevcut ekrana değişiklik önerisi ve netleştirilecek sorular.
 - M2.4 servis bazlı etki analizi.
 - M2.5 bileşen ve servis bazlı adam-gün tahmini ve takvim.
 - M2.6 köprü: çağrı verisiyle talebin değerini kanıtlıyor, müşteri verisiyle kapsam riskini yakalıyor.
@@ -331,7 +339,7 @@ Ayşe öneriyi Fatma'ya iletiyor. Gecikme yapan müşterilerin önemli bir kısm
 
 **Hesap ile AI ayrımı:**
 - **Kod:** Benzer talep eforlarının medyanı, servis payları, takvim, hedef grup büyüklüğü ve izin oranları, çağrı sayıları.
-- **AI:** Talebi bileşenlere ayırma, sınıflandırma gerekçesi, ekran taslağı, netleştirilecek sorular ve açıklama metinleri.
+- **AI:** Talebi bileşenlere ayırma, sınıflandırma gerekçesi, değişiklik önerisi, netleştirilecek sorular ve açıklama metinleri.
 
 ---
 
@@ -342,7 +350,7 @@ Ayşe öneriyi Fatma'ya iletiyor. Gecikme yapan müşterilerin önemli bir kısm
 > - **Kim:** Kartlar iş birimi → iş analisti
 > - **Mercek nasıl yönlendirdi:** Birkaç soruyla kapsamı netleştirdi. Kurala uygun ekran kodu (`KRTTLMAR`) ve mevcut standartlardan türetilmiş alan listesi önerdi.
 > - **Sonuç:** Standartlara uygun ekran taslağı ilk günden hazır.
-> - **Not:** Senaryo D artık yeni ekran önerisini de içerdiği için bu senaryo çıkarılabilir.
+> - **Not:** Yeni ekran (M2.3) örneği yalnızca bu senaryoda var; yedek olarak kalmalı.
 
 **Ayrıntılar**
 

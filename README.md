@@ -24,6 +24,7 @@ Bu doküman, hackathon hazırlığında üretilen tüm dokümanları (hepsi bu r
 | 9 | [`presentation/Mercek_AI_Overflow_Sunum.pptx`](presentation/Mercek_AI_Overflow_Sunum.pptx) | 11 slaytlık sunum taslağı, konuşmacı notları ve taslak ekran görüntüleriyle | Sunum sorumlusu, herkes | Repo |
 | 10 | [`presentation/build-deck.js`](presentation/build-deck.js), [`presentation/mockups/`](presentation/mockups) | Sunumu ve taslak ekranları yeniden üreten betik ve HTML kaynağı | Sunum sorumlusu | Repo |
 | 11 | [`docs/mercek-takim-anlatim-cumleleri.md`](docs/mercek-takim-anlatim-cumleleri.md) | Her dokümanın ana fikrini tek cümleyle veren takım anlatım özeti ve akılda kalacak rakamlar | Toplantıyı yöneten, herkes | Repo, Claude projesi |
+| 12 | [`docs/mercek-demo-senaryo-onerileri.md`](docs/mercek-demo-senaryo-onerileri.md) | **Güncel demo senaryoları** (iç bankacılık ekranları bağlamında): önce yönetici özetleri, sonra her senaryonun detayı. Diğer dokümanlar bu senaryolara göre güncellenecek. | Herkes | Repo, Claude projesi |
 
 **Dokümanlar arası ilişki**
 

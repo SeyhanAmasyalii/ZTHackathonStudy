@@ -2,8 +2,8 @@
 const path = require("path");
 const sharp = require("sharp");
 (async () => {
-  const src = path.join(__dirname, "mercek-logo.svg");
-  await sharp(src, { density: 400 }).resize(1200, 1200).png().toFile(path.join(__dirname, "mercek-logo.png"));
-  await sharp(src, { density: 200 }).resize(256, 256).png().toFile(path.join(__dirname, "mercek-logo-small.png"));
+  const p = (f) => path.join(__dirname, f);
+  await sharp(p("mercek-logo.svg"), { density: 400 }).trim().resize(1000).png().toFile(p("mercek-logo.png"));
+  await sharp(p("mercek-logo-kucuk.svg"), { density: 300 }).resize(400, 400).png().toFile(p("mercek-logo-kucuk.png"));
   console.log("ok");
 })();

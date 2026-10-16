@@ -18,6 +18,7 @@ TEMPLATE = HERE / "sablon" / "ziraat-sunum-sablonu-2025.pptx"
 OUT = HERE / "Mercek_AI_Overflow_Sunum.pptx"
 MOCK = HERE / "mockups"
 ICON = HERE / "assets" / "icons"
+LOGO = HERE / "assets" / "logo"
 
 # Şablondaki renkler
 RED, RED2, RED3 = RGBColor(0xE1, 0x05, 0x14), RGBColor(0xB9, 0x0F, 0x0A), RGBColor(0x87, 0x0F, 0x00)
@@ -138,34 +139,16 @@ def line(s, x1, y1, x2, y2, color=G3):
 
 
 
-def ring(s, cx, cy, r, color, width):
-    o = box(s, cx - r, cy - r, 2 * r, 2 * r, fill=None, shape=MSO_SHAPE.OVAL)
-    o.line.color.rgb = color
-    o.line.width = Pt(width)
-    return o
-
-
-def lens(s, cx, cy, r, handle=True):
-    """Mercek logosu: dış halka (kırmızı), iç halka (gri), merkez (kırmızı), sap."""
-    if handle:
-        k = r * 0.7071
-        h = s.shapes.add_connector(1, Inches(cx + k * 1.02), Inches(cy + k * 1.02), Inches(cx + k * 1.75), Inches(cy + k * 1.75))
-        h.line.color.rgb = RED3
-        h.line.width = Pt(r * 15)
-        ln = h.line._get_or_add_ln()
-        ln.set("cap", "rnd")
-        st = h._element.find(qn("p:style"))
-        if st is not None:
-            h._element.remove(st)
-    ring(s, cx, cy, r, RED, r * 7)
-    ring(s, cx, cy, r * 0.62, G2, r * 3.5)
-    box(s, cx - r * 0.22, cy - r * 0.22, r * 0.44, r * 0.44, fill=RED, shape=MSO_SHAPE.OVAL)
-
-
 def wordmark(s, x, y, size=1.0):
-    """Küçük logo: mercek + MERCEK yazısı."""
-    lens(s, x + 0.32 * size, y + 0.32 * size, 0.26 * size, handle=False)
-    text(s, x + 0.75 * size, y, 3 * size, 0.64 * size, [("MERCEK", {"size": int(26 * size), "bold": True})], anchor=MSO_ANCHOR.MIDDLE)
+    """Köşe logosu: sade mercek + MERCEK yazısı."""
+    d = 0.64 * size
+    s.shapes.add_picture(str(LOGO / "mercek-logo-kucuk.png"), Inches(x), Inches(y), Inches(d), Inches(d))
+    text(s, x + d + 0.12 * size, y, 3 * size, d, [("MERCEK", {"size": int(26 * size), "bold": True})], anchor=MSO_ANCHOR.MIDDLE)
+
+
+def logo(s, x, y, w):
+    """Büyük logo: saplı mercek, log satırı odakta."""
+    s.shapes.add_picture(str(LOGO / "mercek-logo.png"), Inches(x), Inches(y), Inches(w), Inches(w))
 
 def draft_note(s, x, y):
     text(s, x, y, 7, 0.28, [("Taslak görsel — gerçek ekran görüntüsüyle değiştirilecek", {"size": 11, "italic": True, "color": G3})])
@@ -182,7 +165,7 @@ text(s, 1.0, 2.0, 6.8, 1.3, [("MERCEK", {"size": 72, "bold": True})])
 box(s, 1.05, 3.35, 1.2, 0.07, fill=RED, shape=MSO_SHAPE.RECTANGLE)
 text(s, 1.0, 3.6, 6.8, 0.6, [("Soruna odaklanır, çözümü netleştirir.", {"size": 26, "italic": True, "color": RED2})])
 text(s, 1.0, 4.75, 6.8, 0.9, [("AI Overflow Takımı", {"size": 20, "bold": True}), ("17 Ekim 2026", {"size": 16, "color": G3})], space=4)
-lens(s, 9.55, 3.25, 1.75)
+logo(s, 7.75, 1.0, 4.6)
 notes(s, "0:00–0:10 · Merhaba, biz AI Overflow. Projemizin adı Mercek: soruna odaklanır, çözümü netleştirir.")
 
 # ---------- 2. Takım ----------
@@ -379,7 +362,7 @@ for i, (ic, h1, v) in enumerate([("github-w.png", "GitHub repository", "[repo ba
     y = 1.5 + i * 1.2
     circle(s, 0.6, y, 0.8, RED2, icon=ic)
     text(s, 1.65, y - 0.02, 5.5, 0.85, [(h1, {"size": 18, "bold": True}), (v, {"size": 16, "color": RED})], anchor=MSO_ANCHOR.MIDDLE, space=2)
-lens(s, 9.6, 2.85, 1.25)
+logo(s, 8.45, 1.25, 3.3)
 text(s, 7.6, 4.85, 5.0, 1.0, [("MERCEK", {"size": 32, "bold": True}), ("Soruna odaklanır, çözümü netleştirir.", {"size": 18, "italic": True, "color": RED2})], align=PP_ALIGN.CENTER, space=4)
 text(s, 0.6, 5.4, 12, 0.5, [("Teşekkürler · AI Overflow", {"size": 20, "bold": True, "color": RED2})])
 notes(s, "4:55–5:00 · Sloganla kapatın. Bağlantıları sunumdan önce doldurun; şifre, anahtar veya gerçek müşteri verisi görünmediğini kontrol edin.")

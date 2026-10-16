@@ -58,7 +58,7 @@
 | **B** · ODMTFATR | Kurum sorunu; her müşteri ayrı çağrı | Müşteriye hazır açıklama, ana kayda bağlama, %93 eşleşen çözüm | Onlarca çağrı tek kayıtta |
 | **C** · ODMTFATR | Kurum numara formatını değiştirdi, ekran eskide kaldı | Log örüntüsü + kurum duyurusu + kod; düzeltme ve kalıcı öneri | 187 müşteri bulundu, sonraki olay önlendi |
 | **D** · Talep Yönlendirme | İş birimi taksit hatırlatması istiyor (otomatik + ekrandan manuel); servis, efor ve erişim geç fark ediliyor | Bileşen ve servis analizi, a/g tahmini, çağrı ve izin verisiyle kapsam düzeltme | Gerekçeli plan: 20 a/g |
-| E · yedek | Hesap kapama için yeni ekran isteniyor; kapamada bağlı ürünler gözden kaçıyor | Kurala uygun ekran kodu, mevcut bileşenlerden taslak; çağrı geçmişinden bağlı ürün kontrolü | Bağımlılıkları baştan görülmüş plan: 16 a/g |
+| E · yedek | Afet sonrası acil taksit erteleme kararı; ekran yok, süre iki hafta | Yeni ekran ve kodu, etkilenen müşteri sayısı, riskli sorular, kapasite çatışması seçenekleri, proaktif SMS | Aynı gün karar verilebilir plan: 17 a/g |
 | F · yedek | Durum görmek Kibana bilgisi istiyor | Sohbetle günlük özet | Herkes için durum görünürlüğü |
 
 ### Senaryo A — "Hata mı, kural mı?" (KRDTKULL · iş kuralı reddi) ⭐ önerilen açılış
@@ -343,23 +343,24 @@ Ayşe öneriyi Fatma'ya iletiyor. Gecikme yapan müşterilerin önemli bir kısm
 
 ---
 
-### Senaryo E — Yeni ekran: "Vadesiz hesap kapama" (HSP · yeni ekran) · yedek
+### Senaryo E — Acil yeni ekran: "Afet bölgesi taksit erteleme başvurusu" (KRD · yeni ekran) · yedek
 
 > **Yönetici özeti**
-> - **Problem:** Şubelerde vadesiz hesap kapama talepleri bugün kâğıt formla operasyona gönderiliyor ve 2–3 gün sürüyor. Kapamadan sonra o hesaba bağlı ürünlerde (kredi taksit tahsilatı, fatura ödeme talimatı, banka kartı) sorunlar çıkıyor.
-> - **Kim:** Serkan (Mevduat ve Hesap Ürünleri Bölüm Başkanlığı) → Ayşe (iş analisti)
-> - **Serkan'ın talebi:** Şubeler vadesiz hesap kapama işlemini kâğıt form yerine sistem üzerinden, tek ekrandan yapabilsin.
+> - **Problem:** Bir doğal afetin ardından banka yönetimi, etkilenen illerdeki müşterilerin bireysel kredi taksitlerini 3 ay ertelemeye karar veriyor ve uygulamanın **iki hafta içinde** devreye girmesini istiyor. Erteleme başvurusu alıp yeni ödeme planı üreten bir ekran yok.
+> - **Kim:** Hakan (Bireysel Krediler Bölüm Başkanlığı) → Ayşe (iş analisti)
+> - **Hakan'ın talebi:** Etkilenen illerdeki müşteriler şubeden ve çağrı merkezinden taksit erteleme başvurusu yapabilsin; erteleme sonrası yeni ödeme planı müşteriye gösterilsin.
 > - **Mercek nasıl yönlendirdi:**
->   - Katalogda kapama ekranı olmadığını tespit edip talebi **yeni ekran** olarak sınıflandırdı; kurala uygun kod önerdi (`HSPTKAPA`).
->   - Ekran taslağını mevcut HSPTVDSZ ekranının bileşenlerinden ve alan standartlarından türetti; netleştirilecek soruları varsayılan önerileriyle çıkardı.
->   - Servisleri ve benzer taleplerden 12 a/g tahmini çıkardı.
->   - Çağrı geçmişinden "hesabımı kapattım, sonra taksitim/faturam ödenmedi" sorunlarını bulup **bağlı ürün kontrolünü** kapsama önerdi; etkilenen servis sayısı 2'den 5'e çıktı.
-> - **Sonuç:** Kurum standartlarına uygun, bağımlılıkları baştan görülmüş bir ekran planı: **16 a/g, 2 Kasım – 23 Kasım.**
+>   - Talebi **yeni ekran** olarak sınıflandırdı, kurala uygun kod önerdi (`KRDTERTL`); ödeme planı hesabını KRDTKULL'den yeniden kullanan bir taslak çıkardı.
+>   - Etkilenen müşteri sayısını hemen hesapladı: **4.870 müşteri, 6.215 kredi.**
+>   - Kimsenin sormadığı kritik soruları getirdi: uygunlukta afet tarihinden sonra değiştirilen adresler, ve Senaryo D'de planlanan hatırlatma işinin ertelenen taksitler için mesaj göndermemesi.
+>   - **Kapasite çatışmasını yakaladı:** Ana servis 8 Kasım'a kadar regülasyon işiyle dolu; "iki hafta" hedefi ancak öncelik kararıyla tutuyor. İki seçeneği sonuçlarıyla birlikte sundu.
+>   - Çağrı verisinden etkilenen illerdeki çağrı artışını görüp müşterilere **proaktif SMS bilgilendirmesi** önerdi.
+> - **Sonuç:** Acil bir yönetim kararı, aynı gün içinde etkisi, riski ve takvim seçenekleri ortaya konmuş bir plana dönüştü: **17 a/g**; öncelik verilirse **19 Ekim – 2 Kasım.**
 
 **Ayrıntılar**
 
-**1. Talep girişi.** **Serkan (Mevduat ve Hesap Ürünleri Bölüm Başkanlığı)** Talep Yönlendirme'ye yazıyor:
-> *"Şubelerimiz vadesiz hesap kapama taleplerini hâlâ kâğıt formla operasyona gönderiyor, işlem 2–3 gün sürüyor. Hesap kapama şubeden sistem üzerinden, tek ekranda yapılabilsin."*
+**1. Talep girişi.** **Hakan (Bireysel Krediler Bölüm Başkanlığı)** Talep Yönlendirme'ye yazıyor:
+> *"Yönetim, doğal afetten etkilenen 3 ildeki müşterilerimizin bireysel kredi taksitlerinin 3 ay ertelenmesine karar verdi. Erteleme başvurusu şubelerden ve çağrı merkezinden alınabilsin, müşteriye ertelemeden sonraki yeni ödeme planı gösterilsin. Uygulamanın iki hafta içinde devreye girmesi gerekiyor."*
 
 **2. Mercek'in talep analizi**
 
@@ -367,75 +368,93 @@ Ayşe öneriyi Fatma'ya iletiyor. Gecikme yapan müşterilerin önemli bir kısm
 
 | Alan | Değer |
 |---|---|
-| Talep tipi | **Yeni ekran** |
-| Gerekçe | Ekran kataloğunda hesap kapama ekranı yok. En yakın mevcut ekran `HSPTVDSZ` (Vadesiz Hesap Açılışı); aynı modülde, aynı müşteri ve hesap bileşenleri. |
-| Ekran kodu önerisi | **`HSPTKAPA`** · Vadesiz Hesap Kapama (HSP = Hesaplar, T = İşlem, KAPA = kapama). `[A-Z]{3}[TR][A-Z0-9]{4}` kuralına uygun, mevcut kodlarla çakışmıyor. |
-| Güven | %93 |
+| Talep tipi | **Yeni ekran** (acil) |
+| Gerekçe | Ekran kataloğunda mevcut bir kredinin ödeme planını değiştiren ya da erteleme başvurusu alan bir ekran yok. KRDTKULL yalnızca yeni kredi kullandırıyor; ödeme planı hesabı oradan yeniden kullanılabilir. |
+| Ekran kodu önerisi | **`KRDTERTL`** · Kredi Taksit Erteleme Başvurusu (KRD = Krediler, T = İşlem, ERTL = erteleme). Kurala uygun, mevcut kodlarla çakışmıyor. |
+| Güven | %94 |
 
-**b) Ekran taslağı** (mevcut bileşen ve standartlardan)
+**b) Etkilenen müşteri büyüklüğü** (kod, veriden)
+- Etkilenen 3 ilde adresi kayıtlı ve aktif bireysel kredisi olan **4.870 müşteri**, toplam **6.215 kredi.**
+- Bu kredilerin **612'si** şu anda gecikmede.
+
+**c) Ekran taslağı**
 
 | Bölüm | İçerik | Kaynak |
 |---|---|---|
-| Müşteri özeti | Ad soyad, müşteri no, şube | HSPTVDSZ'deki müşteri özeti kartı (yeniden kullanım) |
-| Kapatılacak hesap | Müşterinin vadesiz hesapları: hesap no, IBAN, döviz, bakiye | HSPTVDSZ hesap ve döviz alanları |
-| Kalan bakiye | Başka bir hesaba aktarım (IBAN) veya şubeden nakit | IBAN alanı ve doğrulaması (mevcut standart) |
-| Kapama nedeni | Liste: taşınma, başka banka, kullanmıyorum, diğer | Yeni |
-| Onaylar | Sözleşme feshi bilgilendirmesi | HSPTVDSZ onay bileşeni |
-| Sonuç | Referans no, kapama tarihi | Ortak `ResultPanel` |
+| Müşteri ve uygunluk | Müşteri no ile arama; adres afet bölgesinde mi ve **afet tarihinden önce mi kayıtlı** kontrolü | MUSTGUNC adres bilgisi ve adres değişiklik tarihi |
+| Aktif krediler | Kredi listesi: kalan anapara, sıradaki taksit tarihi, gecikme durumu | Kredi Takip Servisi |
+| Erteleme seçimi | Ertelenecek kredi(ler); süre (karar gereği 3 ay, parametre) | Yeni |
+| Yeni ödeme planı önizleme | Ertelenen taksitlerin vade sonuna eklendiği plan; eski ve yeni plan yan yana | KRDTKULL ödeme planı hesabı (yeniden kullanım) |
+| Bilgilendirme ve onay | Müşteri bilgilendirme metni, onay | KRDTKULL onay bileşeni |
+| Sonuç | Referans no, yeni ilk taksit tarihi | Ortak `ResultPanel` |
 
-Mercek ayrıca Joyride senaryoları için `data-tour` hedeflerini öneriyor: `hsp-kapa-account`, `hsp-kapa-balance`, `hsp-kapa-reason`, `hsp-kapa-submit`, `hsp-kapa-result`.
-
-**c) Netleştirilecek sorular** (Mercek'in varsayılan önerileriyle)
+**d) Netleştirilecek sorular** (Mercek'in varsayılan önerileriyle)
 
 | Soru | Mercek'in önerisi |
 |---|---|
-| Bakiyesi olan hesap kapanabilir mi? | Evet, ama kalan bakiyenin aktarımı ya da nakit ödemesi zorunlu |
-| Döviz ve altın hesapları kapsamda mı? | İlk fazda yalnızca TRY; döviz ve altın ikinci fazda |
-| Kapamayı kim onaylar? | Şube yetkilisinin ikinci onayı (dört göz) |
-| Dijital kanallardan da yapılabilsin mi? | İlk fazda yalnızca şube |
+| Uygunluk adrese göre mi belirlenecek? Afet sonrası adres değiştirenler ne olacak? | Afet tarihinden **önce** kayıtlı adres esas alınsın; sonradan değişen adresler şube yetkilisi onayına düşsün (kötüye kullanım riski). |
+| Erteleme süresince faiz işletilecek mi? | Yönetim kararına göre; ekranda veya kodda sabit değil, **ürün parametresi** olarak tanımlansın. |
+| Şu an gecikmede olan taksitler kapsamda mı? Gecikme faizi silinecek mi? | Kapsamda olsun; gecikme faizi kararı iş birimine ait (**açık soru**). |
+| Hangi kredi türleri kapsamda? | İlk fazda bireysel ihtiyaç kredileri (KRDTKULL ile kullandırılanlar). |
+| Planlanan diğer işlerle çakışma var mı? | **Var:** Senaryo D'de planlanan taksit hatırlatma işi, ertelenen taksitler için hatırlatma göndermemeli. İki talebe de not düşüldü. |
 
-**d) Etkilenen servisler (ilk analiz)**
+**e) Etkilenen servisler**
 
 | Servis | Rol | Neden etkileniyor |
 |---|---|---|
-| **Hesap Yönetim Servisi** | Ana servis | Hesap kapama işlemi, bakiye aktarımı, kapama kaydı |
-| **Müşteri Yönetim Servisi** | Etkileşimli servis | Müşteri özeti için okuma; değişiklik yok |
+| **Kredi Takip Servisi** | Ana servis | Taksit planının değiştirilmesi, erteleme kaydı, gecikme durumunun güncellenmesi |
+| **Kredi Kullandırım Servisi** | Etkileşimli servis | Ödeme planı hesaplama bileşeni yeniden kullanılıyor |
+| **Müşteri Yönetim Servisi** | Etkileşimli servis | Adres ve adres değişiklik tarihi okunuyor (uygunluk kontrolü) |
 
-**e) Efor tahmini (adam-gün)**
+**f) Efor tahmini (adam-gün)**
 
 | Talep | Başlık | Efor | Benzerlik |
 |---|---|---|---|
-| TLP-0734 | Vadeli hesap kapama ekranı | 12 a/g | %86 |
-| TLP-0899 | Vadesiz hesap açılış ekranı yenileme (HSPTVDSZ) | 14 a/g | %78 |
-| TLP-0655 | Kredi kartı iptal ekranı | 11 a/g | %74 |
+| TLP-0588 | Salgın döneminde kredi taksit erteleme ekranı | 15 a/g | %87 |
+| TLP-0712 | Kredi kartı borcu taksitlendirme ekranı | 13 a/g | %79 |
+| TLP-0846 | Kredi vade değişikliği (iç operasyon ekranı) | 17 a/g | %76 |
 
-**Tahmin: 12 a/g** (medyan; aralık 11–14). Hesap Yönetim 10, Müşteri Yönetim 2. Hesap Yönetim Servisi 2 Kasım'da müsait; **plan: 2 Kasım → 17 Kasım.**
+**Tahmin: 15 a/g** (medyan; aralık 13–17). Kredi Takip 10, Müşteri Yönetim 3, Kredi Kullandırım 2.
 
-**3. Köprü: çağrı geçmişi**
+**g) Takvim ve kapasite çatışması**
 
-> **Hesap kapama ile ilgili çağrılar · son 6 ay**
-> - **64 çağrı:** "Hesabımı kapattım, sonra kredi taksitim tahsil edilmedi / fatura talimatım çalışmadı / kartım kullanılamaz oldu."
-> - Bunların **29'unda** müşteri gecikmeye düşmüş. Ortalama çözüm süresi 2 gün.
-> - Ortak neden: Kapatılan hesap, başka ürünlerin tahsilat veya bağlı hesabıymış ve bu kâğıt formda kontrol edilmemiş.
+> *"İki haftalık hedef, ana servis olan Kredi Takip Servisi'ne bağlı. Bu servis 8 Kasım'a kadar yıl sonu regülasyon işiyle dolu. Karar gerekiyor:"*
+
+| Seçenek | Erteleme ekranı | Yan etkisi |
+|---|---|---|
+| **A. Öncelik ver** (regülasyon işinden 2 hafta kapasite kaydır) | **19 Ekim → 30 Ekim** (hedef tutar) | Regülasyon işi 8 → 22 Kasım'a kayar. Yasal bir son tarihi varsa bu seçenek uygulanamaz. Senaryo D'deki hatırlatma talebi 4 → 18 Aralık'a kayar. |
+| **B. Sıraya koy** | **9 Kasım → 20 Kasım** (hedef kaçar, ~3 hafta geç) | Regülasyon işi etkilenmez. Senaryo D'deki talep 21 Aralık'a kayar. |
+
+Ayşe iki seçeneği Hakan'a ve servis sahiplerine sunuyor. Afet aciliyeti nedeniyle **A** seçiliyor; regülasyon işinin son tarihi olmadığı teyit ediliyor.
+
+**3. Köprü: çağrı verisi**
+
+> **Etkilenen 3 il · son 5 gün**
+> - Bu illerden gelen çağrılar normalin **6 katı.**
+> - En sık konu: *"Taksitimi ödeyemeyeceğim, erteleme var mı?"* (**418 çağrı**).
 >
-> **Öneri:** Ekrana **bağlı ürün kontrolü** eklensin. Kapatılacak hesaptan tahsil edilen kredi taksitleri, fatura ödeme talimatları ve bağlı banka kartı listelensin. Her biri için "başka hesaba taşı" veya "iptal et" kararı verilmeden kapama tamamlanamasın.
-> - Yeni etkilenen servisler: **Kredi Takip Servisi** (taksit tahsil hesabı), **Fatura Ödeme Servisi** (talimatlar), **Kart Servisi** (bağlı kart).
-> - Ek efor: **+4 a/g** (Kredi Takip 2, Fatura Ödeme 1, Kart 1)
+> **Öneri:** Erteleme hakkı olan 4.870 müşteriye **proaktif SMS bilgilendirmesi** gönderilsin: hak, başvuru kanalları, son başvuru tarihi. Hem müşteri hakkından haberdar olur, hem de çağrı merkezine gelen bilgi amaçlı aramalar azalır.
+> - İletişim izni olan müşterilere gönderilir (Müşteri Yönetim Servisi).
+> - Gönderim, Senaryo D'de planlanan gönderim altyapısıyla aynı yaklaşımı kullanır.
+> - Ek efor: **+2 a/g** (Kredi Takip 1, Müşteri Yönetim 1)
 >
 > *Kapsama eklensin mi?*
 
-Ayşe öneriyi Serkan'a iletiyor, Serkan **"Evet"** diyor. Tahmin kartı güncelleniyor:
-- **12 → 16 a/g**
-- **Etkilenen servis: 2 → 5**
-- **Bitiş: 17 Kasım → 23 Kasım**
+Hakan **"Evet"** diyor. Tahmin kartı güncelleniyor:
+- **15 → 17 a/g**
+- **Seçenek A ile bitiş: 30 Ekim → 2 Kasım**
 
 **Kanıtladığı:**
-- M2.1 yeni ekran tespiti ve kurala uygun ekran kodu önerisi.
-- M2.3 kapsam olgunlaştırma: mevcut bileşenlerin yeniden kullanımı, alan standartları, netleştirilecek sorular.
-- M2.4 etki analizi: köprüyle 2'den 5 servise genişliyor.
-- M2.5 adam-gün tahmini ve takvim; M2.6 çağrı verisinden kapsam.
+- M2.1 yeni ekran tespiti ve kurala uygun ekran kodu.
+- M2.3 kapsam olgunlaştırma: yeniden kullanım ve kimsenin sormadığı riskli sorular (adres değiştirme, D ile çakışma).
+- M2.4 servis etki analizi; M2.5 tahmin ve **kapasite çatışmasının seçenekleriyle görünür kılınması**.
+- M2.6 köprü: çağrı artışından proaktif bilgilendirme kapsamı.
 
-**Neden gerçekçi:** Hesap kapama bankalarda sık yapılan, çoğu yerde hâlâ form ve operasyon onayıyla yürüyen bir işlem. "Kapatılan hesaba bağlı ürünlerin unutulması" da bilinen, can sıkıcı bir sonuç. Jüri bunu kolayca tanır.
+**Neden gerçekçi:** Afet sonrası taksit erteleme Türkiye'de bankaların gerçekten yaşadığı, çok kısa sürede devreye alınması gereken bir ihtiyaç. Bu tür acil talepler mevcut işlerle çatışır; o çatışmayı ilk gün görmek planlamanın en değerli kısmıdır.
+
+**Sunum notu (hassasiyet):**
+- Gerçek bir afet, il adı veya tarih kullanılmaz; veride "etkilenen 3 il" sentetik tanımlanır.
+- Mercek'in mesajları sade ve saygılı bir dille yazılır; görsel olarak afet imgesi kullanılmaz.
 
 ---
 

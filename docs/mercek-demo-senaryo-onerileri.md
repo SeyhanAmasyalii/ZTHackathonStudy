@@ -14,7 +14,7 @@
 
 ### Simüle edilen uygulama (rebuild rehberinden)
 
-**Ana modüller (Faz 2):** Bankacılık · **Mercek** (sohbet arayüzü) · **Talep Yönlendirme** (ekip önerisi ve maliyet tahmini)
+**Ana modüller (Faz 2):** Bankacılık · **Mercek** (sohbet arayüzü) · **Talep Yönlendirme** (talep analizi ve efor tahmini)
 
 **İşlem ekranları (Faz 4):**
 
@@ -33,7 +33,7 @@
   - **Ayşe Kaya:** Kıdemli İş Analisti.
 - **Sentetik log üretici (Faz 5):** Her log kaydında ekran kodu, müşteri, `trace.id` ve hata kodu var. İş reddi kodları: `INSUFFICIENT_INCOME`, `AFFORDABILITY_EXCEEDED`, `INSTITUTION_TIMEOUT` vb. Teknik hata kodları: `CORE_BANKING_TIMEOUT`, `SERVICE_UNAVAILABLE`, `DB_CONNECTION_ERROR`. Mercek'in okuyacağı log kaynağı hazır.
 - **Joyride senaryoları (Faz 7):** `krd-gelir-orani`, `odm-dogalgaz`, `krt-gold-onay` gibi senaryolar hazır. Mercek'in "Bana göster" çözümleri bunların üzerine kurulabilir.
-- **Talep Yönlendirme (Faz 2):** Ekip ve saatlik ücret tablosu (Altyapı 1.450 ₺, Yazılım Geliştirme 1.650 ₺, Veri & Analitik 1.800 ₺, Güvenlik 2.100 ₺, Destek 950 ₺), öncelik katsayısı ve `TLP-…` talepleri mevcut. Şu anki anahtar kelime tabanlı yönlendirmenin yerine Mercek'in AI tabanlı analizi gelecek.
+- **Talep Yönlendirme (Faz 2):** Talep listesi ve `TLP-…` talepleri mevcut. Şu anki anahtar kelimeyle ekip önerme ve ücret hesabı yerine Mercek'in **servis bazlı etki analizi ve adam-gün tahmini** gelecek. Teknoloji tarafında ekip yerine **servis** dili kullanılır: Kredi Kullandırım Servisi, Kredi Takip Servisi, Müşteri Yönetim Servisi vb.
 
 ### Kullanıcılar ve Mercek'e giriş noktaları
 
@@ -43,7 +43,7 @@
 | **Mehmet** (banka müşterisi) | İnternet şubesi (ODMTFATR) | Mercek'i kullanmaz; sorun yaşayınca çağrı merkezini arar. |
 | **Zeynep** (çağrı merkezi temsilcisi) | Mercek sohbet | Müşterinin anlattığını serbest metinle yazar; Mercek logları, ana kaydı ve müşteriye söylenecekleri getirir. |
 | **Eyüp** (Platform Yöneticisi / L2 destek) | Mercek sayfası | Sohbet + çağrı listesi: zenginleştirilmiş kayıtlar, loglar, eşleşmeler, kod analizi |
-| **Ayşe** (Kıdemli İş Analisti) | Talep Yönlendirme | Talep metni → sınıflandırma, etki, maliyet, takvim, köprü |
+| **Ayşe** (Kıdemli İş Analisti) | Talep Yönlendirme | Talep metni → sınıflandırma, servis etki analizi, adam-gün tahmini, takvim, köprü |
 
 ---
 
@@ -77,19 +77,19 @@
 3. **Çağrı merkezi temsilcisi Zeynep**, Mercek'e yazıyor:
    > *"Doğalgaz Başkentgaz, abone 4012345678, fatura ödemede sorun yaşıyor."*
 4. Mercek serbest metinden ekran (`ODMTFATR`), kurum (Başkentgaz) ve abone no'yu çıkarıyor. Loglarda Mehmet'in 3 dakika önceki başarısız işlemini buluyor ve genel tabloyu görüyor:
-   > *"Müşterinin ödemesi tamamlanmadı ve hesabından tahsilat yapılmadı. Neden müşteriyle ilgili değil: son 30 dakikada Başkentgaz'a giden 47 ödeme isteği tüm kanallarda `INSTITUTION_TIMEOUT` ile düştü. Konu Altyapı ekibinde.*
+   > *"Müşterinin ödemesi tamamlanmadı ve hesabından tahsilat yapılmadı. Neden müşteriyle ilgili değil: son 30 dakikada Başkentgaz'a giden 47 ödeme isteği tüm kanallarda `INSTITUTION_TIMEOUT` ile düştü. Konu Fatura Ödeme Servisi'nin kurum entegrasyonunda.*
    > *Müşteriye söyleyebileceğiniz: 'Ödemeniz alınmadı, hesabınızdan para çekilmedi. Kurum kaynaklı geçici bir sorun var; sorun giderilince SMS ile bilgilendirileceksiniz. Son ödeme tarihine kadar gecikme faizi oluşmaz.'"*
 5. **Mükerrer çağrı birleştirme:** Aynı dakikalarda başka müşteriler de aynı sorun için çağrı merkezini arıyor ve başka temsilciler de Mercek'e yazıyor. Mercek ilk vakada **ana çağrı kaydını** (CAG-2051) açmış. Her yeni vakayı yeni çağrı açmadan bu kayda bağlıyor: müşteri no, abone no, `trace.id`. Zeynep'in ekranında *"Ana kayıt CAG-2051'e bağlandı · bağlı vaka: 12"* görünüyor; sayaç demo sırasında artmaya devam ediyor.
 6. **Eyüp (L2)**, Mercek sayfasında CAG-2051'i açıyor:
    - Zenginleştirilmiş kayıt: ekran, kurum, hata kodu, ilk görülme zamanı, etkilenen müşteri sayısı, kanal dağılımı, örnek `trace.id`'ler, bağlı 12 vaka.
-   - Ekip ataması kuralla: kurum entegrasyonu hatası → Altyapı.
+   - Servis ataması kuralla: `INSTITUTION_TIMEOUT` + ODMTFATR → Fatura Ödeme Servisi (kurum entegrasyonu).
    - **%93 eşleşme:** geçmişte 6 benzer kurum zaman aşımı olayı ve kaynaklarıyla birlikte uyarlanmış çözüm (kurum zaman aşımı eşiği, istek kuyruklama, kurumla iletişim adımları).
    - Sorun kapanınca bağlı 12 müşteriye toplu bilgilendirme (opsiyonel, Could).
 
 **Kanıtladığı:**
 - M1.1 bağlam yakalama: burada ekran kodundan değil, temsilcinin serbest metninden.
 - M1.2 log inceleme: müşterinin kendi işlemi ve genel tablo.
-- M1.3 zenginleştirme ve ekip ataması.
+- M1.3 zenginleştirme ve servis ataması.
 - M1.4 geçmiş çözüm eşleştirme.
 - Ek değerler: **mükerrer çağrı birleştirme** ve **temsilciye hazır müşteri açıklaması**.
 
@@ -119,21 +119,100 @@
 
 ### Senaryo D — "Talepten plana, sorundan kapsama" (Talep Yönlendirme · KRDTKULL) ⭐ önerilen kapanış
 
-**Problem:** Yeni geliştirme talepleri, aynı ekranda yaşanan sorunlardan habersiz kapsamlanıyor ve tahminleniyor.
+**Senaryo tek cümleyle:** Bir iş analisti yeni bir özellik istiyor. Mercek talebi hangi ekranı ve hangi servisleri etkilediğine göre çözümlüyor, benzer geçmiş taleplerden adam-gün tahmini ve takvim çıkarıyor. Sonra aynı ekranın sorun geçmişine bakıp *"bu ekranda zaten şöyle bir sorun var, bunu da çözelim mi?"* diye kapsamı büyütmeyi öneriyor.
+
+**Problem:** Bugün yeni geliştirme talepleri, aynı ekranda yaşanan sorunlardan habersiz kapsamlanıyor ve tahminleniyor. Talep sahibi neyin etkileneceğini bilmiyor, tahmin toplantılarda elle yapılıyor. Ekranın çağrı geçmişi kapsam konuşmasına hiç girmiyor.
 
 **Akış**
-1. Ayşe, Talep Yönlendirme'ye yazıyor: *"Kredi kullandırım ekranından ödeme planını müşteriye e-posta ile gönderebilelim."*
-2. Mercek'in çıktısı:
-   - **Tip:** Mevcut ekran değişikliği, ekran KRDTKULL.
-   - **Etki:** KRDTKULL ekranı, bildirim/e-posta servisi, müşteri iletişim izinleri (MUSTGUNC'deki e-posta izni kontrol edilmeli). Ana ekip: Yazılım Geliştirme.
-   - **Tahmin:** 4 benzer geçmiş talep (96 / 112 / 120 / 144 saat) → **medyan 116 saat** → 116 × 1.650 ₺ × 1,15 (Orta öncelik) = **220.110 ₺**, ekip takvimine göre başlangıç ve bitiş tarihi.
-3. **Köprü:**
-   > *"Bu ekranda son 30 günde 312 `AFFORDABILITY_EXCEEDED` reddi var ve bunların 58'i çağrıya dönüşmüş. Mercek'in Senaryo A'da yaptığı 'uygun tutar/vade önerisi' ekrana kalıcı olarak eklensin mi?"*
-   Ayşe "Evet" diyor → +24 saat, **265.650 ₺**, bitiş tarihi güncelleniyor.
 
-**Kanıtladığı:** M2.1 sınıflandırma, M2.4 etki analizi, M2.5 maliyet ve takvim, M2.6 köprü.
+**1. Talep girişi.** Ayşe (Kıdemli İş Analisti), Talep Yönlendirme ekranına yazıyor:
+> *"Kredi kullandırım ekranından ödeme planını müşteriye e-posta ile gönderebilelim."*
+
+**2. Mercek'in talep analizi** (ekranda kartlar halinde):
+
+**a) Talep özeti** (Mercek talebi netleştirerek yeniden yazıyor)
+> KRDTKULL'de kredi kullandırımı tamamlandığında, ödeme planının müşterinin kayıtlı e-posta adresine gönderilmesi. Gönderim yalnızca müşterinin e-posta iletişim izni varsa yapılır.
+
+**b) Sınıflandırma**
+
+| Alan | Değer |
+|---|---|
+| Talep tipi | Mevcut ekran değişikliği |
+| Ekran | `KRDTKULL` · Bireysel Kredi Kullandırım |
+| Güven | %92 |
+| Gerekçe | Talepte "kredi kullandırım ekranı" ve "ödeme planı" geçiyor; KRDTKULL zaten ödeme planı üretiyor, ama ekran dışına aktarmıyor. |
+
+**c) Mevcut akış ve önerilen değişiklik** (ekranın akış tanımından)
+
+| # | Mevcut adım | Değişiklik |
+|---|---|---|
+| 1 | Tutar ve vade seçimi | — |
+| 2 | Özet ve ödeme planı tablosu | — |
+| 3 | Sözleşme onayı | — |
+| 4 | Kullandır | — |
+| 5 | Sonuç (referans, hesaba geçen tutar, ilk taksit tarihi) | **Yeni:** "Ödeme planını e-posta ile gönder" seçeneği ve gönderilecek adres. Müşterinin e-posta izni yoksa seçenek pasif olur ve "İzin için MUSTGUNC" yönlendirmesi gösterilir. |
+
+**d) Etkilenen servisler**
+
+| Servis | Rol | Neden etkileniyor |
+|---|---|---|
+| **Kredi Kullandırım Servisi** | Ana servis | Ödeme planı dokümanının (PDF) üretilmesi, gönderim talebinin oluşturulması, sonuç ekranındaki yeni seçenek |
+| **Müşteri Yönetim Servisi** | Etkileşimli servis | Müşterinin kayıtlı e-posta adresi ve e-posta iletişim izni bu servisten okunuyor (MUSTGUNC'de güncellenen alanlar). Okuma yapılacak; servisin kendisinde değişiklik beklenmiyor. |
+
+**e) Açık sorular** (Mercek'in netleşmesini istediği noktalar)
+- Ödeme planı PDF'i şifreli mi gönderilmeli? Şifreliyse şifre müşteriye hangi kanalla iletilecek?
+- Plan, kullandırım sonrası değişirse (erken kapama, yapılandırma) yeniden gönderilecek mi?
+- E-posta gönderimini hangi altyapı yapacak? Mevcut bir gönderim servisi var mı?
+
+**f) Efor tahmini (adam-gün)**
+
+Dayandığı benzer geçmiş talepler:
+
+| Talep | Başlık | Efor | Benzerlik |
+|---|---|---|---|
+| TLP-0871 | Kredi kartı ekstresini e-posta ile gönderme | 12 a/g | %88 |
+| TLP-0915 | Vadesiz hesap sözleşmesini e-posta ile iletme (HSPTVDSZ) | 10 a/g | %84 |
+| TLP-0962 | KRDTKULL ödeme planını PDF olarak indirme | 14 a/g | %81 |
+| TLP-1004 | Fatura dekontunu e-posta ile gönderme (ODMTFATR) | 17 a/g | %77 |
+
+**Tahmin: 13 a/g** (medyan; aralık 10–17 a/g)
+
+| Servis | Pay |
+|---|---|
+| Kredi Kullandırım Servisi | 10 a/g |
+| Müşteri Yönetim Servisi (entegrasyon ve izin kontrolü) | 3 a/g |
+
+**g) Takvim**
+- Kredi Kullandırım Servisi **8 Kasım'a kadar dolu** (yıl sonu regülasyon işi). Müşteri Yönetim Servisi müsait.
+- **Plan: 9 Kasım → 25 Kasım.** Müşteri Yönetim Servisi işi ilk hafta paralel yürür.
+
+**h) Gerekçe** (Mercek'in açıklaması)
+> *"Tahmin, 4 benzer 'doküman gönderimi' talebinin gerçekleşen eforlarına dayanıyor. En yakın örnek TLP-0962; o talepte PDF üretimi zaten yapılmıştı, bu talepte e-posta gönderimi ve izin kontrolü ekleniyor. Hesap kurallarla yapıldı; ben yalnızca açıklıyorum."*
+
+**3. Köprü: ekranın sorun geçmişi** (Mercek kendiliğinden ekliyor)
+
+> **KRDTKULL · son 30 gün**
+> - 1.184 kullandırım denemesi, bunların **312'si `AFFORDABILITY_EXCEEDED`** (taksit gelirin %50'sini aşıyor) ile reddedilmiş.
+> - Bu retlerin **58'i çağrıya dönüşmüş.** Bu ekrandaki en sık çağrı nedeni bu.
+> - Bu çağrılarda temsilciler uygun tutarı ve vadeyi elle hesaplamış; ortalama çözüm süresi 25 dakika.
+>
+> **Öneri:** Taksit gelir sınırını aştığında ekranın kendisi uygun tutarı ve vadeyi önersin. Bu, Senaryo A'da Mercek'in Elif için yaptığı hesap; ekrana kalıcı olarak ekleniyor.
+> - Etkilenen servis: Kredi Kullandırım Servisi. Ödeme planı formülü zaten var, ters hesap eklenecek.
+> - Ek efor: **+3 a/g**
+> - Beklenen etki: ayda ~58 çağrı ve ~24 saat destek eforu.
+>
+> *Kapsama eklensin mi?*
+
+Ayşe **"Evet"** diyor. Tahmin kartı güncelleniyor:
+- **13 → 16 a/g** (Kredi Kullandırım 13, Müşteri Yönetim 3)
+- **Bitiş: 25 Kasım → 30 Kasım**
+- Talep kaydında "çağrı geçmişinden eklenen kapsam" olarak işaretleniyor.
+
+**Kanıtladığı:** M2.1 sınıflandırma, M2.2 akış önerisi, M2.4 servis bazlı etki analizi, M2.5 adam-gün tahmini ve takvim, M2.6 köprü.
 **Hikâyenin kapanışı:** Demonun başında Elif'in şubede yaşadığı sorun, sonunda ürünün kalıcı bir iyileştirmesine dönüşüyor. Jüri döngünün kapandığını kendi gözüyle görüyor.
-**Mevcut altyapı:** Maliyet formülü (saatlik ücret × saat × öncelik katsayısı) ve `TLP-…` talepleri Talep Yönlendirme modülünde zaten var.
+**Hesap ile AI ayrımı:**
+- **Kod:** Medyan efor, servis payları, takvim ve köprüdeki sayılar.
+- **AI:** Talep özeti, sınıflandırma gerekçesi, akış değişikliği, açık sorular ve açıklama metinleri.
 
 ---
 
@@ -178,7 +257,7 @@ Eyüp Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglard
 | Yaygın teknik sorun | Her şubeden ayrı çağrı | Tek ana kayıt, şubelere anında bilgi |
 | Bilinen sorun | L2 log arar, çözüm kişide | %93 eşleşme, kaynaklı çözüm, saniyeler |
 | Yeni hata | Kod baştan incelenir | Log + kod ilişkilendirilip satır düzeyinde öneri |
-| Talep tahmini | Anahtar kelimeyle ekip, elle saat | Benzer taleplerden saat, maliyet, takvim; ekranın sorun geçmişi kapsamda |
+| Talep tahmini | Toplantıda elle; etkilenen servisler sonradan ortaya çıkıyor | Servis bazlı etki, benzer taleplerden adam-gün ve takvim; ekranın sorun geçmişi kapsamda |
 
 ---
 
@@ -188,7 +267,7 @@ Eyüp Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglard
 |---|---|
 | Kapsam | Hedef kullanıcı: banka çalışanı ve teknoloji ekipleri. M1.1 girişi: ekran kodu çubuğundaki "Sorun yaşıyorum". Yeni değer: çağrı önleme ve mükerrer çağrı birleştirme. |
 | İş planı | Demo senaryosu (§5), karakterler (Elif, Mehmet, Zeynep, Eyüp, Ayşe), kabul kriterleri |
-| Veri planı ve üretim rehberi | Log kaynağı olarak **Faz 5 üreticisi** (kendi log üreticimize gerek kalmıyor). Senaryo kayıtları: Başkentgaz artışı, 14 Gold reddi, 312 AFFORDABILITY reddi, 58 çağrı, 4 benzer talep (saat bazlı). Ekipler ve ücretler mock-data'dan. Adam-gün yerine saat. |
+| Veri planı ve üretim rehberi | Log kaynağı olarak **Faz 5 üreticisi** (kendi log üreticimize gerek kalmıyor). Senaryo kayıtları: Başkentgaz artışı, 14 Gold reddi, 312 AFFORDABILITY reddi, 58 çağrı, 4 benzer talep (adam-gün). Servis kataloğu (Kredi Kullandırım, Müşteri Yönetim, Fatura Ödeme, Kart Başvuru…) ve servis takvimleri; ücret/maliyet yok. |
 | Uygulama rehberi ve prompt'lar | **Teknoloji:** Next.js 16 + FastAPI (uv) → React/Vite varsayımı güncellenir. Ekran kimlikleri → ekran kodları ve `data-tour` hedefleri. Mercek sohbet API'si (`/api/mercek/chat`). Joyride v3 hazır olduğu için M1.5 küçülür. **Dağıtım:** Next.js + FastAPI'nin App Service'e nasıl taşınacağına karar verilmeli. |
 | Sunum ve taslak ekranlar | Problem slaytı, demo slaytı, mockup'lar (iç uygulama ekranlarıyla yeniden) |
 | Takım anlatım cümleleri | 2. ve 3. cümle |
@@ -201,5 +280,5 @@ Eyüp Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglard
 2. **Sahne 2b'deki hata:** KRTTBASV sınır değer hatası (önerim, anlaşılması kolay) mı, HSPTVDSZ IBAN kontrol hanesi hatası mı?
 3. **Mercek'in incelediği kod:** `sample-codebase/` altındaki kopya (önerim, uygulama doğru kalır) mı, uygulamanın kendi kodu mu?
 4. **Mercek'e giriş:** Ekran kodu çubuğunda "Sorun yaşıyorum" butonu ile bağlamlı yan panel + ayrı Mercek sohbet sayfası (önerim) mi, yalnızca sohbet sayfası mı?
-5. **Maliyet modeli:** Mevcut Talep Yönlendirme formülü olan saat × saatlik ücret × öncelik katsayısı (önerim) mı, adam-gün mü?
+5. ~~Maliyet modeli~~ **Karar verildi:** Ücret hesaplanmaz; tahmin yalnızca **adam-gün** ve takvim. Teknoloji tarafı **servis** bazlı anlatılır (ana servis / etkileşimli servis).
 6. **Demo kullanıcıları:** Faz 3'teki Mehmet (müşteri), Eyüp (L2) ve Ayşe (analist) kullanılır; sahte kullanıcı listesine iki kişi eklenir: **Elif** (şube müşteri temsilcisi, Senaryo A) ve **Zeynep** (çağrı merkezi temsilcisi, Senaryo B). Uygun mu?

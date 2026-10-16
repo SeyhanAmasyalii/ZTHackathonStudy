@@ -11,13 +11,13 @@
 | Veri seti | Hacim | Kaynak | Kullanan senaryo | Mercek'in kullanımı |
 |---|---|---|---|---|
 | **İşlem logları** (ECS, Kibana uyumlu) | ~10.000 + senaryo kayıtları | Rebuild Faz 5 log üreticisi + senaryo enjeksiyonu | A, B, C, F | Tek işlemin logunu bulma, örüntü analizi, durum özeti |
-| **Ekran kataloğu** | 5 simüle + 3 yalnızca katalogda | Elle | A–E | Bağlam, sınıflandırma, ekran kodu çakışma kontrolü, bileşen yeniden kullanımı, kod dosya haritası |
-| **Servis kataloğu ve hata–servis kuralları** | 6 servis | Elle | B, C, D, E | Servis ataması, etki analizi |
+| **Ekran kataloğu** | 5 simüle + 15 yalnızca katalogda | Elle | A–E | Bağlam, sınıflandırma, ekran kodu çakışma kontrolü, bileşen yeniden kullanımı, kod dosya haritası |
+| **Servis kataloğu ve hata–servis kuralları** | 7 servis, 17 kural | Elle | B, C, D, E | Servis ataması, etki analizi |
 | **Servis takvimi** | 3 ay | Elle | D, E | Takvim ve kapasite çatışması |
 | **Müşteri ve kredi portföyü** | 40.000 müşteri, 33.000 kredi | Betik (Faker) + senaryo kısıtları | D, E | Hedef grup ve izin dağılımı; etkilenen bölge müşterileri |
 | **Çağrı kayıtları** | ~1.400 (90 gün) + demo anında oluşanlar | Betik + Foundry metinleri | B, C, D, E | Ana kayıt, eşleşme, köprü sayıları |
 | **Çözüm bilgi bankası** | ~40 | Foundry + elle | B (C'de eşleşme olmaması için) | Geçmiş çözüm eşleştirme |
-| **Kurum duyuruları arşivi** | 8 | Elle | C | Kök nedenin dış kaynağı, proaktif bulgu |
+| **Kurum duyuruları arşivi** | 20 | Elle | C | Kök nedenin dış kaynağı, proaktif bulgu |
 | **Geçmiş talepler** | ~100 | Betik + Foundry metinleri | D, E | Benzer talepler, a/g tahmini |
 | **Demo kullanıcıları** | 8 | Elle (fake auth) | Hepsi | Elif, Mehmet, Zeynep, Kerem, Fatma, Hakan, Ayşe ve mevcut kullanıcılar |
 

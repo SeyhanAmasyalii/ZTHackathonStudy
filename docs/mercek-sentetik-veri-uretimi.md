@@ -53,8 +53,8 @@ Hedef: 1. gün **13:30'a kadar 1–9 bitmiş ve 11 yeşil** olmalı.
 
 | Tablo | Alanlar | Not |
 |---|---|---|
-| `services` | service_id, name | 6 servis (§3.3) |
-| `screens` | code, name, module, type (T/R), simulated (bit), description, flow_json, components_json | 5 simüle + 3 katalog (§3.2) |
+| `services` | service_id, name, description | 7 servis (§3.3) |
+| `screens` | code, name, module, type (T/R), simulated (bit), description, flow_json, components_json | 5 simüle + 15 yalnızca katalogda (§3.2, §3.8) |
 | `screen_services` | screen_code, service_id, role (`ana` / `etkilesimli`) | |
 | `error_rules` | screen_code, error_code, error_type (`business` / `technical`), service_id, open_incident (bit), explanation_hint | Servis ataması kuralları (§3.4) |
 | `service_calendar` | service_id, date_from, date_to, allocation_pct, note | §3.5 |
@@ -187,6 +187,29 @@ Metin (`body`) 3–5 cümle, kurumsal duyuru dili; elle yazılır. İSKİ ve ASK
 
 - `config.affected_region`: rebuild Faz 5'teki 12 ilden İstanbul dışındaki **3 il** (`region_affected = 1`).
 - Arayüzde ve sunumda il adları gösterilmez; Mercek "etkilenen 3 il" der.
+
+### 3.8 Ek katalog verileri (gerçekçilik için)
+
+Katalogun tamamı `data/seed/catalog.json` ve `announcements.json` dosyalarındadır; yukarıdaki tablolar senaryoların dayandığı satırlardır. Gerçekçilik için şunlar da eklidir:
+
+| Veri | Adet | İçerik |
+|---|---|---|
+| Ek ekranlar (yalnızca katalogda) | 12 | KRTTSIFR Kart Şifre Belirleme · KRTREKST Kart Ekstre · KRDRBASV Kredi Başvuru Durumu · KRDRODPL Ödeme Planı Görüntüleme · ODMRGCMS Fatura Ödeme Geçmişi · ODMTVRGI Vergi ve Harç Ödeme · MUSRBLGI Müşteri Bilgi Sorgulama · MUSTKYCD Kimlik Doğrulama · MUSRILTS İletişim İzinleri Raporu · HSPTVDLI Vadeli Hesap · HSPTHVLE Havale ve EFT · HSPRBKYE Bakiye Sorgulama |
+| Ek servis | 1 | ODEME_SISTEMLERI (havale, EFT) |
+| Ekran–servis ilişkisi | 30 | Ek ekranlar dahil |
+| Hata–servis kuralı | 17 | Ek ekranların doğrulama, bakiye ve kurum kuralları (çoğu `open_incident = 0`) |
+| Servis takvimi | 11 satır | Tüm servisler için Ekim–Aralık dolu dönemleri. Kredi Takip 9 Kasım–20 Aralık arası boştur (D ve E bu boşluğa göre planlanır). |
+| Kapsam ekleri | 5 | SMS, proaktif SMS, gönderim raporu, rol bazlı yetki, kuralı parametreye taşıma |
+| Kurumlar | 15 | Fatura türü, kurum kodu, zaman aşımı süresi |
+| Şubeler | 5 | 0101 Kadıköy, 0102 Levent, 0601 Kızılay, 3501 Alsancak, 9999 Dijital Şube |
+| Çağrı kategorileri | 6 kategori, 30 alt kategori | Çağrı üretimi (V6) ve zenginleştirme bu listeyi kullanır |
+| Kurum duyuruları | 20 | 8 duyuruya 12 ilgisiz duyuru eklendi |
+
+**Bu eklerde korunan yasak kurallar:**
+- Mevcut bir kredinin ödeme planını değiştiren ya da erteleme başvurusu alan ekran yok. KRDRODPL yalnızca görüntüler; E'de taslak bu ekranı yeniden kullanım kaynağı olarak gösterebilir.
+- Bildirim gönderen ayrı bir servis yok; D'de gönderim Kredi Takip ve Müşteri Yönetim üzerinden kalır.
+- Kurum listesinde abone numarası uzunluğu alanı yok; C'nin kalıcı önerisi zaten bu alanın eklenmesi.
+- İSKİ ve ASKİ dışında hiçbir duyuru abone numarası veya hane sayısından söz etmez. İSKİ'nin ikinci duyurusu (DUY-0406, kesinti duyuruları) aramada DUY-0412'nin altında kalmalıdır; M1.4 kalibrasyonunda kontrol edilir.
 
 ---
 
@@ -421,7 +444,7 @@ Her prova ve gerçek demodan **hemen önce** çalıştırılır:
 
 | Senaryo | Kontrol | Beklenen |
 |---|---|---|
-| Genel | Kayıt sayıları | logs ≈ 10.400, customers 40.000, loans 33.000, incidents ≈ 1.400, requests ≈ 100, announcements 8 |
+| Genel | Kayıt sayıları | logs ≈ 10.400, customers 40.000, loans 33.000, incidents ≈ 1.400, requests ≈ 100, announcements 20 |
 | A | `users` içinde elif geliri | 38.000 |
 | A | `loanPlan` Python portu ile 400.000/3 ay ve 36 ay taksit; 36 ayda azami tutar | 144.185,92 · 22.754,17 · ≈ 334.004 |
 | B | Son 30 dk Başkentgaz `INSTITUTION_TIMEOUT` (`demo_reset` sonrası) | 46 |

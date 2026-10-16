@@ -484,7 +484,7 @@ Talep başına AI çağrısı: **3.**
 
 > 🤖 Prompt: **M2.1-a** (orta model)
 
-- Girdi: talep metni + **ekran kataloğu özeti** (8 ekran: kod, ad, tip, bileşenler) + servis listesi.
+- Girdi: talep metni + **ekran kataloğu özeti** (20 ekran: kod, ad, tip, bileşenler) + servis listesi.
 - Çıktı:
   ```
   {components: [{name, kind: "batch"|"screen_change"|"new_screen", description}],

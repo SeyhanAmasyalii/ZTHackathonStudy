@@ -1,19 +1,51 @@
 [
   {
-    "ann_id": "DUY-0412",
-    "institution": "İSKİ",
-    "published_at": "2026-09-12",
-    "effective_at": "2026-10-01",
-    "title": "Yeni abonelere 13 haneli abone numarası verilecektir",
-    "body": "Sayın paydaşlarımız, artan abone sayısı nedeniyle abone numaralandırma yapımız güncellenmektedir. 1 Ekim 2026 tarihinden itibaren yeni abonelere 13 haneli abone numarası verilecektir. Mevcut abonelerimizin numaraları değişmeyecektir. Fatura sorgulama ve ödeme hizmeti veren kurumların sistemlerini 13 haneli numaraları kabul edecek şekilde güncellemeleri gerekmektedir. Bilgilerinize sunarız."
+    "ann_id": "DUY-0371",
+    "institution": "CK Boğaziçi Elektrik",
+    "published_at": "2026-07-15",
+    "effective_at": "2026-08-01",
+    "title": "Ödeme yanıtına işlem referans numarası eklendi",
+    "body": "1 Ağustos 2026 itibarıyla ödeme yanıtlarına kurum işlem referans numarası eklenmiştir. Alan bilgi amaçlıdır; mutabakat süreçlerinde kullanılabilir. Mevcut entegrasyonlarda değişiklik gerekmemektedir."
   },
   {
-    "ann_id": "DUY-0419",
-    "institution": "ASKİ",
-    "published_at": "2026-10-05",
-    "effective_at": "2027-01-01",
-    "title": "Abone numaraları 13 haneye geçiyor",
-    "body": "Değerli iş ortaklarımız, 1 Ocak 2027 tarihinden itibaren yeni abonelerimize 13 haneli abone numarası tahsis edilecektir. Mevcut abone numaraları değişmeyecek, eski ve yeni numaralar bir arada kullanılacaktır. Tahsilat kanallarında abone numarası alanının 13 haneyi destekleyecek şekilde düzenlenmesini rica ederiz. Teknik sorularınız için kurum entegrasyon ekibimizle iletişime geçebilirsiniz."
+    "ann_id": "DUY-0376",
+    "institution": "Gediz Elektrik",
+    "published_at": "2026-07-22",
+    "effective_at": "2026-07-22",
+    "title": "Hafta sonu planlı bakım",
+    "body": "25–26 Temmuz 2026 hafta sonu sistem altyapımızda planlı bakım yapılacaktır. Bakım süresince fatura sorgulama hizmeti kesintili olabilir. Bakım sonrası hizmet olağan şekilde devam edecektir."
+  },
+  {
+    "ann_id": "DUY-0383",
+    "institution": "İzmirgaz",
+    "published_at": "2026-08-03",
+    "effective_at": "2026-08-15",
+    "title": "Kısmi ödeme kabulü",
+    "body": "15 Ağustos 2026'dan itibaren faturaların kısmi ödemesi kabul edilecektir. Kalan tutar bir sonraki faturaya aktarılır. Tahsilat kanallarının tam tutar zorunluluğunu kaldırması önerilir."
+  },
+  {
+    "ann_id": "DUY-0387",
+    "institution": "Superonline",
+    "published_at": "2026-08-10",
+    "effective_at": "2026-09-01",
+    "title": "Fatura sorgu servisi adres değişikliği",
+    "body": "1 Eylül 2026 tarihinden itibaren fatura sorgu servisimiz yeni adresten hizmet verecektir. Eski adres 30 Eylül 2026'ya kadar yönlendirme ile çalışmaya devam edecektir."
+  },
+  {
+    "ann_id": "DUY-0390",
+    "institution": "Vodafone",
+    "published_at": "2026-08-14",
+    "effective_at": "2026-08-14",
+    "title": "Fatura dönemlerinde değişiklik yok",
+    "body": "Bazı müşterilerimizden gelen sorular üzerine fatura kesim dönemlerinde bir değişiklik yapılmadığını bilgilerinize sunarız."
+  },
+  {
+    "ann_id": "DUY-0393",
+    "institution": "Turknet",
+    "published_at": "2026-08-18",
+    "effective_at": "2026-09-01",
+    "title": "Ödeme bildirim süresi kısalıyor",
+    "body": "1 Eylül 2026'dan itibaren ödeme bildirimlerinin hizmete yansıma süresi 15 dakikaya inmiştir. Entegrasyon tarafında bir değişiklik gerekmemektedir."
   },
   {
     "ann_id": "DUY-0398",
@@ -32,6 +64,14 @@
     "body": "15 Eylül 2026'dan itibaren fatura sorgu yanıtlarına dönem kodu alanı eklenecektir. Alan isteğe bağlıdır ve mevcut entegrasyonları etkilemez. Ayrıntılı teknik doküman kurum portalında yayımlanmıştır."
   },
   {
+    "ann_id": "DUY-0402",
+    "institution": "Türk Telekom Mobil",
+    "published_at": "2026-08-29",
+    "effective_at": "2026-09-15",
+    "title": "Yeni hata kodları",
+    "body": "15 Eylül 2026 itibarıyla ödeme servisimiz ayrıntılı hata kodları döndürecektir. Kodların listesi kurum portalında yayımlanmıştır. Eski genel hata kodu bir süre daha desteklenecektir."
+  },
+  {
     "ann_id": "DUY-0405",
     "institution": "İGDAŞ",
     "published_at": "2026-09-02",
@@ -40,12 +80,44 @@
     "body": "Son dönemde iletilen sorular üzerine, ödeme bildirim formatında herhangi bir değişiklik yapılmadığını bilgilerinize sunarız. Mevcut entegrasyonlar aynı şekilde çalışmaya devam edecektir."
   },
   {
+    "ann_id": "DUY-0406",
+    "institution": "İSKİ",
+    "published_at": "2026-09-03",
+    "effective_at": "2026-09-03",
+    "title": "Kesinti duyurularının yayımlanması",
+    "body": "Planlı su kesintileri artık kurum portalında ve mobil uygulamada önceden duyurulacaktır. Bu duyuru tahsilat entegrasyonlarını etkilememektedir."
+  },
+  {
     "ann_id": "DUY-0408",
     "institution": "Turkcell",
     "published_at": "2026-09-07",
     "effective_at": "2026-10-01",
     "title": "Kurumsal hatlar için ayrı fatura türü",
     "body": "1 Ekim 2026'dan itibaren kurumsal hat faturaları ayrı bir fatura türü koduyla iletilecektir. Bireysel hat faturalarında değişiklik yoktur. Tahsilat kanallarının fatura türü listesini güncellemesi önerilir."
+  },
+  {
+    "ann_id": "DUY-0410",
+    "institution": "Enerjisa Başkent",
+    "published_at": "2026-09-10",
+    "effective_at": "2026-09-10",
+    "title": "Sorgu yanıt süresi iyileştirmesi",
+    "body": "Altyapı yatırımlarımız sonucunda fatura sorgu yanıt süreleri ortalama yüzde 30 kısalmıştır. Hizmet kalitemizi artırmaya devam edeceğiz."
+  },
+  {
+    "ann_id": "DUY-0412",
+    "institution": "İSKİ",
+    "published_at": "2026-09-12",
+    "effective_at": "2026-10-01",
+    "title": "Yeni abonelere 13 haneli abone numarası verilecektir",
+    "body": "Sayın paydaşlarımız, artan abone sayısı nedeniyle abone numaralandırma yapımız güncellenmektedir. 1 Ekim 2026 tarihinden itibaren yeni abonelere 13 haneli abone numarası verilecektir. Mevcut abonelerimizin numaraları değişmeyecektir. Fatura sorgulama ve ödeme hizmeti veren kurumların sistemlerini 13 haneli numaraları kabul edecek şekilde güncellemeleri gerekmektedir. Bilgilerinize sunarız."
+  },
+  {
+    "ann_id": "DUY-0414",
+    "institution": "Gelir İdaresi",
+    "published_at": "2026-09-16",
+    "effective_at": "2026-10-01",
+    "title": "Vergi ödeme servisinde kimlik doğrulama",
+    "body": "1 Ekim 2026'dan itibaren vergi ödeme servisine yapılan isteklerde kurum kimlik doğrulaması yeni yöntemle yapılacaktır. Entegre kurumların teknik dokümana göre güncelleme yapması gerekmektedir."
   },
   {
     "ann_id": "DUY-0415",
@@ -62,5 +134,29 @@
     "effective_at": "2026-09-26",
     "title": "Sertifika yenilemesi",
     "body": "Fatura sorgulama servisimizin güvenlik sertifikası 26 Eylül 2026 tarihinde yenilenmiştir. Sertifika sabitleme kullanan kurumların yeni sertifika bilgisini güncellemesi gerekmektedir."
+  },
+  {
+    "ann_id": "DUY-0418",
+    "institution": "İGDAŞ",
+    "published_at": "2026-10-01",
+    "effective_at": "2026-10-15",
+    "title": "Fatura sorgu yanıtında son ödeme saati",
+    "body": "15 Ekim 2026 itibarıyla sorgu yanıtlarına son ödeme saati alanı eklenecektir. Alan isteğe bağlıdır; mevcut entegrasyonları etkilemez."
+  },
+  {
+    "ann_id": "DUY-0419",
+    "institution": "ASKİ",
+    "published_at": "2026-10-05",
+    "effective_at": "2027-01-01",
+    "title": "Abone numaraları 13 haneye geçiyor",
+    "body": "Değerli iş ortaklarımız, 1 Ocak 2027 tarihinden itibaren yeni abonelerimize 13 haneli abone numarası tahsis edilecektir. Mevcut abone numaraları değişmeyecek, eski ve yeni numaralar bir arada kullanılacaktır. Tahsilat kanallarında abone numarası alanının 13 haneyi destekleyecek şekilde düzenlenmesini rica ederiz. Teknik sorularınız için kurum entegrasyon ekibimizle iletişime geçebilirsiniz."
+  },
+  {
+    "ann_id": "DUY-0421",
+    "institution": "Turkcell",
+    "published_at": "2026-10-08",
+    "effective_at": "2026-10-08",
+    "title": "Kampanya dönemi yoğunluk uyarısı",
+    "body": "Kampanya dönemi nedeniyle ay sonunda ödeme trafiğinde artış beklenmektedir. Kurumların zaman aşımı ve yeniden deneme ayarlarını gözden geçirmesi önerilir."
   }
 ]

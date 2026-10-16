@@ -276,16 +276,19 @@ Kişisel veri alanı (TCKN, IBAN) yok.
 
 ### V2 — Katalog ve duyurular · 🟢 Ucuz · Edit
 
+*Katalog verisi hazırdır: bu çalışma reposundaki `data/seed/catalog.json` ve `announcements.json` takım reposuna aynı yola kopyalanır. Copilot yalnızca dosya haritasını doğrular ve testi yazar.*
+
 ```
-Görev V2: §3'teki tabloları JSON'a dönüştür. Bağlam: #file:docs/mercek-sentetik-veri-uretimi.md (§3)
-1. data/seed/catalog.json: screens (components_json dahil; her ekranın frontend/backend dosya haritası
-   gerçek repo yollarıyla), services, screen_services, error_rules, service_calendar, scope_addons,
-   affected_region (Faz 5 üreticisindeki 12 ilden İstanbul dışı 3 il; adları yalnızca burada).
-2. data/seed/announcements.json: §3.6'daki 8 duyuru; body 3–5 cümle kurumsal dil; İSKİ ve ASKİ metinlerinde
-   "13 hane", "yeni aboneler", "mevcut numaralar değişmez" geçsin.
-Değerleri AYNEN kullan, ekleme yapma. KRDTERTL katalogda OLMAMALI.
-3. tools/mercek_data/tests/test_seed.py: JSON'lar yükleniyor; 8 ekran; KRDTERTL yok; error_rules'ta
-   KRDTKULL+AFFORDABILITY_EXCEEDED open_incident=0; tüm ekran kodları ^[A-Z]{3}[TR][A-Z0-9]{4}$.
+Görev V2: Hazır katalog dosyalarını doğrula. Bağlam: #file:data/seed/catalog.json
+
+1. catalog.json içindeki simulated=true ekranların files.frontend ve files.backend yollarını repoda kontrol et.
+   Bulunmayan yol varsa gerçek dosya adıyla düzelt (yalnızca files alanını değiştir, başka değeri değiştirme).
+2. affected_region.provinces: tools/generate_banking_logs.py içindeki il listesinden İstanbul dışında
+   en yüksek ağırlıklı 3 ili seç ve yaz.
+3. tools/mercek_data/tests/test_seed.py: JSON'lar yükleniyor; 20 ekran; KRDTERTL yok; tüm kodlar
+   ^[A-Z]{3}[TR][A-Z0-9]{4}$; error_rules'ta KRDTKULL+AFFORDABILITY_EXCEEDED open_incident=false;
+   screen_services'taki her servis services'ta var; KREDI_TAKIP takviminde 2026-11-09…2026-12-20 boş;
+   announcements 20 kayıt; İSKİ/ASKİ dışında "hane" veya "abone numara" geçen duyuru yok.
 ```
 
 ### V3 — Log enjeksiyonu · 🟡 Orta · Agent

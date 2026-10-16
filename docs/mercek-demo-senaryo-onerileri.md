@@ -58,7 +58,7 @@
 | **B** · ODMTFATR | Kurum sorunu; her müşteri ayrı çağrı | Müşteriye hazır açıklama, ana kayda bağlama, %93 eşleşen çözüm | Onlarca çağrı tek kayıtta |
 | **C** · ODMTFATR | Kurum numara formatını değiştirdi, ekran eskide kaldı | Log örüntüsü + kurum duyurusu + kod; düzeltme ve kalıcı öneri | 187 müşteri bulundu, sonraki olay önlendi |
 | **D** · Talep Yönlendirme | İş birimi taksit hatırlatması istiyor (otomatik + ekrandan manuel); servis, efor ve erişim geç fark ediliyor | Bileşen ve servis analizi, a/g tahmini, çağrı ve izin verisiyle kapsam düzeltme | Gerekçeli plan: 20 a/g |
-| E · yedek | Yeni ekranlar standart dışı tanımlanıyor | Kod ve alan standardı önerisi | Standartlara uygun taslak |
+| E · yedek | Hesap kapama için yeni ekran isteniyor; kapamada bağlı ürünler gözden kaçıyor | Kurala uygun ekran kodu, mevcut bileşenlerden taslak; çağrı geçmişinden bağlı ürün kontrolü | Bağımlılıkları baştan görülmüş plan: 16 a/g |
 | F · yedek | Durum görmek Kibana bilgisi istiyor | Sohbetle günlük özet | Herkes için durum görünürlüğü |
 
 ### Senaryo A — "Hata mı, kural mı?" (KRDTKULL · iş kuralı reddi) ⭐ önerilen açılış
@@ -343,25 +343,99 @@ Ayşe öneriyi Fatma'ya iletiyor. Gecikme yapan müşterilerin önemli bir kısm
 
 ---
 
-### Senaryo E — Yeni ekran: "Kredi kartı limit artışı" (M2.3) · yedek
+### Senaryo E — Yeni ekran: "Vadesiz hesap kapama" (HSP · yeni ekran) · yedek
 
 > **Yönetici özeti**
-> - **Problem:** Yeni ekran talepleri, kurumun ekran kodu ve alan standartlarından habersiz tanımlanıyor.
-> - **Kim:** Kartlar iş birimi → iş analisti
-> - **Mercek nasıl yönlendirdi:** Birkaç soruyla kapsamı netleştirdi. Kurala uygun ekran kodu (`KRTTLMAR`) ve mevcut standartlardan türetilmiş alan listesi önerdi.
-> - **Sonuç:** Standartlara uygun ekran taslağı ilk günden hazır.
-> - **Not:** Yeni ekran (M2.3) örneği yalnızca bu senaryoda var; yedek olarak kalmalı.
+> - **Problem:** Şubelerde vadesiz hesap kapama talepleri bugün kâğıt formla operasyona gönderiliyor ve 2–3 gün sürüyor. Kapamadan sonra o hesaba bağlı ürünlerde (kredi taksit tahsilatı, fatura ödeme talimatı, banka kartı) sorunlar çıkıyor.
+> - **Kim:** Serkan (Mevduat ve Hesap Ürünleri Bölüm Başkanlığı) → Ayşe (iş analisti)
+> - **Serkan'ın talebi:** Şubeler vadesiz hesap kapama işlemini kâğıt form yerine sistem üzerinden, tek ekrandan yapabilsin.
+> - **Mercek nasıl yönlendirdi:**
+>   - Katalogda kapama ekranı olmadığını tespit edip talebi **yeni ekran** olarak sınıflandırdı; kurala uygun kod önerdi (`HSPTKAPA`).
+>   - Ekran taslağını mevcut HSPTVDSZ ekranının bileşenlerinden ve alan standartlarından türetti; netleştirilecek soruları varsayılan önerileriyle çıkardı.
+>   - Servisleri ve benzer taleplerden 12 a/g tahmini çıkardı.
+>   - Çağrı geçmişinden "hesabımı kapattım, sonra taksitim/faturam ödenmedi" sorunlarını bulup **bağlı ürün kontrolünü** kapsama önerdi; etkilenen servis sayısı 2'den 5'e çıktı.
+> - **Sonuç:** Kurum standartlarına uygun, bağımlılıkları baştan görülmüş bir ekran planı: **16 a/g, 2 Kasım – 23 Kasım.**
 
 **Ayrıntılar**
 
-1. Kartlar iş biriminden bir talep: *"Müşteriler kart limit artışını şubeden talep edebilsin."* → **Yeni ekran.**
-2. Mercek 4–5 soru soruyor: hangi kart tipleri, gelir belgesi gerekli mi, onay yetkisi, SMS bildirimi, rapor ihtiyacı.
-3. Çıktılar:
-   - **Ekran kodu önerisi:** `KRTTLMAR`. Kural `[A-Z]{3}[TR][A-Z0-9]{4}` ile doğrulanmış, mevcut kodlarla çakışmıyor.
-   - **Alanlar:** KRTTBASV'deki standartlardan (gelir, limit, kesim günü) ve aynı karar kuralından (limit ≤ gelir × 3, kart tavanı).
-   - **Joyride için önerilen `data-tour` hedefleri.**
+**1. Talep girişi.** **Serkan (Mevduat ve Hesap Ürünleri Bölüm Başkanlığı)** Talep Yönlendirme'ye yazıyor:
+> *"Şubelerimiz vadesiz hesap kapama taleplerini hâlâ kâğıt formla operasyona gönderiyor, işlem 2–3 gün sürüyor. Hesap kapama şubeden sistem üzerinden, tek ekranda yapılabilsin."*
 
-**Kanıtladığı:** Mercek kurumun kendi standartlarını (ekran kodu kuralı, alan kuralları) biliyor ve yeni talebi bunlara uygun kapsamlıyor.
+**2. Mercek'in talep analizi**
+
+**a) Sınıflandırma**
+
+| Alan | Değer |
+|---|---|
+| Talep tipi | **Yeni ekran** |
+| Gerekçe | Ekran kataloğunda hesap kapama ekranı yok. En yakın mevcut ekran `HSPTVDSZ` (Vadesiz Hesap Açılışı); aynı modülde, aynı müşteri ve hesap bileşenleri. |
+| Ekran kodu önerisi | **`HSPTKAPA`** · Vadesiz Hesap Kapama (HSP = Hesaplar, T = İşlem, KAPA = kapama). `[A-Z]{3}[TR][A-Z0-9]{4}` kuralına uygun, mevcut kodlarla çakışmıyor. |
+| Güven | %93 |
+
+**b) Ekran taslağı** (mevcut bileşen ve standartlardan)
+
+| Bölüm | İçerik | Kaynak |
+|---|---|---|
+| Müşteri özeti | Ad soyad, müşteri no, şube | HSPTVDSZ'deki müşteri özeti kartı (yeniden kullanım) |
+| Kapatılacak hesap | Müşterinin vadesiz hesapları: hesap no, IBAN, döviz, bakiye | HSPTVDSZ hesap ve döviz alanları |
+| Kalan bakiye | Başka bir hesaba aktarım (IBAN) veya şubeden nakit | IBAN alanı ve doğrulaması (mevcut standart) |
+| Kapama nedeni | Liste: taşınma, başka banka, kullanmıyorum, diğer | Yeni |
+| Onaylar | Sözleşme feshi bilgilendirmesi | HSPTVDSZ onay bileşeni |
+| Sonuç | Referans no, kapama tarihi | Ortak `ResultPanel` |
+
+Mercek ayrıca Joyride senaryoları için `data-tour` hedeflerini öneriyor: `hsp-kapa-account`, `hsp-kapa-balance`, `hsp-kapa-reason`, `hsp-kapa-submit`, `hsp-kapa-result`.
+
+**c) Netleştirilecek sorular** (Mercek'in varsayılan önerileriyle)
+
+| Soru | Mercek'in önerisi |
+|---|---|
+| Bakiyesi olan hesap kapanabilir mi? | Evet, ama kalan bakiyenin aktarımı ya da nakit ödemesi zorunlu |
+| Döviz ve altın hesapları kapsamda mı? | İlk fazda yalnızca TRY; döviz ve altın ikinci fazda |
+| Kapamayı kim onaylar? | Şube yetkilisinin ikinci onayı (dört göz) |
+| Dijital kanallardan da yapılabilsin mi? | İlk fazda yalnızca şube |
+
+**d) Etkilenen servisler (ilk analiz)**
+
+| Servis | Rol | Neden etkileniyor |
+|---|---|---|
+| **Hesap Yönetim Servisi** | Ana servis | Hesap kapama işlemi, bakiye aktarımı, kapama kaydı |
+| **Müşteri Yönetim Servisi** | Etkileşimli servis | Müşteri özeti için okuma; değişiklik yok |
+
+**e) Efor tahmini (adam-gün)**
+
+| Talep | Başlık | Efor | Benzerlik |
+|---|---|---|---|
+| TLP-0734 | Vadeli hesap kapama ekranı | 12 a/g | %86 |
+| TLP-0899 | Vadesiz hesap açılış ekranı yenileme (HSPTVDSZ) | 14 a/g | %78 |
+| TLP-0655 | Kredi kartı iptal ekranı | 11 a/g | %74 |
+
+**Tahmin: 12 a/g** (medyan; aralık 11–14). Hesap Yönetim 10, Müşteri Yönetim 2. Hesap Yönetim Servisi 2 Kasım'da müsait; **plan: 2 Kasım → 17 Kasım.**
+
+**3. Köprü: çağrı geçmişi**
+
+> **Hesap kapama ile ilgili çağrılar · son 6 ay**
+> - **64 çağrı:** "Hesabımı kapattım, sonra kredi taksitim tahsil edilmedi / fatura talimatım çalışmadı / kartım kullanılamaz oldu."
+> - Bunların **29'unda** müşteri gecikmeye düşmüş. Ortalama çözüm süresi 2 gün.
+> - Ortak neden: Kapatılan hesap, başka ürünlerin tahsilat veya bağlı hesabıymış ve bu kâğıt formda kontrol edilmemiş.
+>
+> **Öneri:** Ekrana **bağlı ürün kontrolü** eklensin. Kapatılacak hesaptan tahsil edilen kredi taksitleri, fatura ödeme talimatları ve bağlı banka kartı listelensin. Her biri için "başka hesaba taşı" veya "iptal et" kararı verilmeden kapama tamamlanamasın.
+> - Yeni etkilenen servisler: **Kredi Takip Servisi** (taksit tahsil hesabı), **Fatura Ödeme Servisi** (talimatlar), **Kart Servisi** (bağlı kart).
+> - Ek efor: **+4 a/g** (Kredi Takip 2, Fatura Ödeme 1, Kart 1)
+>
+> *Kapsama eklensin mi?*
+
+Ayşe öneriyi Serkan'a iletiyor, Serkan **"Evet"** diyor. Tahmin kartı güncelleniyor:
+- **12 → 16 a/g**
+- **Etkilenen servis: 2 → 5**
+- **Bitiş: 17 Kasım → 23 Kasım**
+
+**Kanıtladığı:**
+- M2.1 yeni ekran tespiti ve kurala uygun ekran kodu önerisi.
+- M2.3 kapsam olgunlaştırma: mevcut bileşenlerin yeniden kullanımı, alan standartları, netleştirilecek sorular.
+- M2.4 etki analizi: köprüyle 2'den 5 servise genişliyor.
+- M2.5 adam-gün tahmini ve takvim; M2.6 çağrı verisinden kapsam.
+
+**Neden gerçekçi:** Hesap kapama bankalarda sık yapılan, çoğu yerde hâlâ form ve operasyon onayıyla yürüyen bir işlem. "Kapatılan hesaba bağlı ürünlerin unutulması" da bilinen, can sıkıcı bir sonuç. Jüri bunu kolayca tanır.
 
 ---
 

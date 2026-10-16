@@ -61,15 +61,76 @@
 | E · yedek | Afet sonrası acil taksit erteleme kararı; ekran yok, süre iki hafta | Yeni ekran ve kodu, etkilenen müşteri sayısı, riskli sorular, kapasite çatışması seçenekleri, proaktif SMS | Aynı gün karar verilebilir plan: 17 a/g |
 | F · yedek | Durum görmek Kibana bilgisi istiyor | Sohbetle günlük özet | Herkes için durum görünürlüğü |
 
-### Senaryo A — "Hata mı, kural mı?" (KRDTKULL · iş kuralı reddi) ⭐ önerilen açılış
+### 2.1 Yönetici özetleri
 
-> **Yönetici özeti**
+#### Senaryo A — "Hata mı, kural mı?" (KRDTKULL · iş kuralı reddi) ⭐ önerilen açılış
+
 > - **Problem:** Şube temsilcisi müşteriye kredi kullandıramıyor. Ekrandaki uyarının sistem hatası mı yoksa iş kuralı mı olduğunu ayırt edemiyor ve çağrı açmaya yöneliyor.
 > - **Kim:** Elif (şube müşteri temsilcisi)
 > - **Mercek nasıl yönlendirdi:** Ekran kodu ve son işlem üzerinden logu buldu. Durumun hata değil iş kuralı olduğunu açıkladı (taksit gelirin %50'sini aşıyor). Kullandırılabilecek en yüksek tutarı hesapladı (36 ay, ~334.000 TL) ve "Bana göster" ile ekranı doğru değerlerle doldurdu.
 > - **Sonuç:** İşlem şubede tamamlandı, **çağrı hiç açılmadı.**
 
-**Ayrıntılar**
+#### Senaryo B — "Yaygın teknik sorun, bilinen çözüm" (ODMTFATR · kurum zaman aşımı · çağrı merkezi) ⭐
+
+> - **Problem:** Bir kurumun (Başkentgaz) entegrasyonu yavaşladı, müşteriler fatura ödeyemiyor ve çağrı merkezini arıyor. Her aramada ayrı çağrı açılıyor, temsilci müşteriye ne söyleyeceğini bilmiyor.
+> - **Kim:** Mehmet (müşteri) → Zeynep (çağrı merkezi) → Eyüp (L2)
+> - **Mercek nasıl yönlendirdi:**
+>   - Temsilcinin serbest metninden ekranı, kurumu ve abone no'yu çıkardı; loglarda müşterinin başarısız işlemini ve yaygın kurum sorununu buldu.
+>   - Temsilciye müşteriye söylenecek hazır açıklamayı verdi.
+>   - Yeni çağrı açmak yerine vakayı mevcut ana kayda bağladı.
+>   - L2'ye %93 eşleşen geçmiş çözümü getirdi.
+> - **Sonuç:** Müşteri doğru bilgilendirildi, onlarca arama **tek kayıtta toplandı**, L2 bilinen çözümü dakikalar içinde uyguladı.
+
+#### Senaryo C — "Dış dünya değişti, ekran değişmedi" (ODMTFATR · İSKİ abone numarası formatı) ⭐
+
+> - **Problem:** İSKİ yeni abonelere 13 haneli numara vermeye başladı, ama ekranımız 6–12 hane kabul ediyor. Müşteriler su faturasını ödeyemiyor ve kimse nedenini bilmiyor.
+> - **Kim:** Elif (şube) → Eyüp (L2)
+> - **Mercek nasıl yönlendirdi:**
+>   - Log örüntüsünü buldu: hatalar yalnızca İSKİ'de, yalnızca 13 haneli numaralarda ve 1 Ekim'den beri görülüyor.
+>   - Kurum duyuruları arşivinde İSKİ'nin geçiş duyurusunu buldu.
+>   - Kuralın kodda iki yerde sabit yazıldığını gösterdi; düzeltmeyi ve kalıcı öneriyi (kurum bazlı parametre) sundu.
+>   - ASKİ'nin Ocak'taki benzer geçişini önceden haber verdi.
+> - **Sonuç:** Kök neden dakikalar içinde bulundu, **187 etkilenen müşteri** belirlendi, bir sonraki benzer olay önlendi.
+
+#### Senaryo D — "Talepten plana, sorundan kapsama" (Talep Yönlendirme · taksit hatırlatma) ⭐ önerilen kapanış
+
+> - **Problem:** İş birimlerinin talepleri teknolojiye düz metin olarak geliyor. Etkilenen servisler, efor tahmini ve talebin hedefine gerçekten ulaşıp ulaşmayacağı geç fark ediliyor.
+> - **Kim:** Fatma (Kredi Tahsilatları Bölüm Başkanlığı) → Ayşe (iş analisti)
+> - **Fatma'nın talebi:** Taksit gecikmelerini azaltmak için iki şey istiyor:
+>   1. Daha önce gecikme yapmış müşterilere, taksit ödeme tarihinden birkaç gün önce **otomatik hatırlatma e-postası** gönderilsin.
+>   2. Temsilciler, ilgili ekrandan seçtikleri bir müşteriye o taksit için **anında hatırlatma e-postası** gönderebilsin.
+> - **Mercek nasıl yönlendirdi:**
+>   - Talebi iki bileşene ayırdı: günlük çalışan bir **batch işi** ve mevcut Kredi Taksit Sorgulama ekranına (`KRDRTKSR`) eklenecek bir **"Hatırlatma gönder" butonu**.
+>   - Ana ve etkileşimli servisleri belirledi; benzer taleplerden 18 a/g ve takvim çıkardı.
+>   - Çağrı verisiyle talebin değerini gösterdi (71 "hatırlatma almadım" çağrısı).
+>   - Hedef grubun %42'sine e-postayla ulaşılamayacağını fark edip SMS'i kapsama önerdi.
+> - **Sonuç:** Talep dakikalar içinde gerekçesi kanıtlanmış, kapsamı veriyle düzeltilmiş bir plana dönüştü: **20 a/g, 9 Kasım – 4 Aralık.**
+
+#### Senaryo E — Acil yeni ekran: "Afet bölgesi taksit erteleme başvurusu" (KRD · yeni ekran) · yedek
+
+> - **Problem:** Bir doğal afetin ardından banka yönetimi, etkilenen illerdeki müşterilerin bireysel kredi taksitlerini 3 ay ertelemeye karar veriyor ve uygulamanın **iki hafta içinde** devreye girmesini istiyor. Erteleme başvurusu alıp yeni ödeme planı üreten bir ekran yok.
+> - **Kim:** Hakan (Bireysel Krediler Bölüm Başkanlığı) → Ayşe (iş analisti)
+> - **Hakan'ın talebi:** Etkilenen illerdeki müşteriler şubeden ve çağrı merkezinden taksit erteleme başvurusu yapabilsin; erteleme sonrası yeni ödeme planı müşteriye gösterilsin.
+> - **Mercek nasıl yönlendirdi:**
+>   - Talebi **yeni ekran** olarak sınıflandırdı, kurala uygun kod önerdi (`KRDTERTL`); ödeme planı hesabını KRDTKULL'den yeniden kullanan bir taslak çıkardı.
+>   - Etkilenen müşteri sayısını hemen hesapladı: **4.870 müşteri, 6.215 kredi.**
+>   - Kimsenin sormadığı kritik soruları getirdi: uygunlukta afet tarihinden sonra değiştirilen adresler, ve Senaryo D'de planlanan hatırlatma işinin ertelenen taksitler için mesaj göndermemesi.
+>   - **Kapasite çatışmasını yakaladı:** Ana servis 8 Kasım'a kadar regülasyon işiyle dolu; "iki hafta" hedefi ancak öncelik kararıyla tutuyor. İki seçeneği sonuçlarıyla birlikte sundu.
+>   - Çağrı verisinden etkilenen illerdeki çağrı artışını görüp müşterilere **proaktif SMS bilgilendirmesi** önerdi.
+> - **Sonuç:** Acil bir yönetim kararı, aynı gün içinde etkisi, riski ve takvim seçenekleri ortaya konmuş bir plana dönüştü: **17 a/g**; öncelik verilirse **19 Ekim – 2 Kasım.**
+
+#### Senaryo F — Günlük durum özeti (Mercek sohbet) · yedek
+
+> - **Problem:** Ekranların günlük durumunu görmek için Kibana'da panel taramak gerekiyor; bu herkesin yapabileceği bir iş değil.
+> - **Kim:** Eyüp (platform yöneticisi)
+> - **Mercek nasıl yönlendirdi:** "Bugün en çok sorun yaşanan ekran hangisi?" sorusuna loglardan özet çıkardı: ekran, sorun, etkilenen şube ve işlem sayısı, açık ana kayıt.
+> - **Sonuç:** Kibana bilgisi gerektirmeden, sohbetle durum özeti.
+
+---
+
+### 2.2 Senaryo detayları
+
+#### Senaryo A — "Hata mı, kural mı?" (KRDTKULL · iş kuralı reddi) ⭐ önerilen açılış
 
 **Problem:** Şube personeli ekranda "işlem yapılamıyor" gördüğünde bunun sistem hatası mı yoksa iş kuralı reddi mi olduğunu çoğu zaman ayırt edemiyor ve çağrı açıyor. Oysa log üreticisinin dağılımına göre iş kuralı retleri teknik hatalardan çok daha sık.
 
@@ -87,19 +148,7 @@
 
 ---
 
-### Senaryo B — "Yaygın teknik sorun, bilinen çözüm" (ODMTFATR · kurum zaman aşımı · çağrı merkezi) ⭐
-
-> **Yönetici özeti**
-> - **Problem:** Bir kurumun (Başkentgaz) entegrasyonu yavaşladı, müşteriler fatura ödeyemiyor ve çağrı merkezini arıyor. Her aramada ayrı çağrı açılıyor, temsilci müşteriye ne söyleyeceğini bilmiyor.
-> - **Kim:** Mehmet (müşteri) → Zeynep (çağrı merkezi) → Eyüp (L2)
-> - **Mercek nasıl yönlendirdi:**
->   - Temsilcinin serbest metninden ekranı, kurumu ve abone no'yu çıkardı; loglarda müşterinin başarısız işlemini ve yaygın kurum sorununu buldu.
->   - Temsilciye müşteriye söylenecek hazır açıklamayı verdi.
->   - Yeni çağrı açmak yerine vakayı mevcut ana kayda bağladı.
->   - L2'ye %93 eşleşen geçmiş çözümü getirdi.
-> - **Sonuç:** Müşteri doğru bilgilendirildi, onlarca arama **tek kayıtta toplandı**, L2 bilinen çözümü dakikalar içinde uyguladı.
-
-**Ayrıntılar**
+#### Senaryo B — "Yaygın teknik sorun, bilinen çözüm" (ODMTFATR · kurum zaman aşımı · çağrı merkezi) ⭐
 
 **Problem:** Bir kurum entegrasyonu yavaşladığında çok sayıda müşteri aynı anda çağrı merkezini arıyor. Her temsilci ayrı çağrı açıyor ve aynı sorun için onlarca kayıt oluşuyor. Temsilci müşteriye ne söyleyeceğini bilmiyor, L2 de kayıtlara tek tek bakıyor.
 
@@ -130,19 +179,7 @@
 
 ---
 
-### Senaryo C — "Dış dünya değişti, ekran değişmedi" (ODMTFATR · İSKİ abone numarası formatı) ⭐
-
-> **Yönetici özeti**
-> - **Problem:** İSKİ yeni abonelere 13 haneli numara vermeye başladı, ama ekranımız 6–12 hane kabul ediyor. Müşteriler su faturasını ödeyemiyor ve kimse nedenini bilmiyor.
-> - **Kim:** Elif (şube) → Eyüp (L2)
-> - **Mercek nasıl yönlendirdi:**
->   - Log örüntüsünü buldu: hatalar yalnızca İSKİ'de, yalnızca 13 haneli numaralarda ve 1 Ekim'den beri görülüyor.
->   - Kurum duyuruları arşivinde İSKİ'nin geçiş duyurusunu buldu.
->   - Kuralın kodda iki yerde sabit yazıldığını gösterdi; düzeltmeyi ve kalıcı öneriyi (kurum bazlı parametre) sundu.
->   - ASKİ'nin Ocak'taki benzer geçişini önceden haber verdi.
-> - **Sonuç:** Kök neden dakikalar içinde bulundu, **187 etkilenen müşteri** belirlendi, bir sonraki benzer olay önlendi.
-
-**Ayrıntılar**
+#### Senaryo C — "Dış dünya değişti, ekran değişmedi" (ODMTFATR · İSKİ abone numarası formatı) ⭐
 
 **Olay sırası (basitçe):**
 1. İSKİ, 12 Eylül'de kurumlara bir duyuru gönderiyor: *"1 Ekim 2026 itibarıyla yeni abonelere 13 haneli abone numarası verilecektir."*
@@ -198,22 +235,7 @@ Etiket: **"Öneridir, uygulanmadı."**
 
 ---
 
-### Senaryo D — "Talepten plana, sorundan kapsama" (Talep Yönlendirme · taksit hatırlatma) ⭐ önerilen kapanış
-
-> **Yönetici özeti**
-> - **Problem:** İş birimlerinin talepleri teknolojiye düz metin olarak geliyor. Etkilenen servisler, efor tahmini ve talebin hedefine gerçekten ulaşıp ulaşmayacağı geç fark ediliyor.
-> - **Kim:** Fatma (Kredi Tahsilatları Bölüm Başkanlığı) → Ayşe (iş analisti)
-> - **Fatma'nın talebi:** Taksit gecikmelerini azaltmak için iki şey istiyor:
->   1. Daha önce gecikme yapmış müşterilere, taksit ödeme tarihinden birkaç gün önce **otomatik hatırlatma e-postası** gönderilsin.
->   2. Temsilciler, ilgili ekrandan seçtikleri bir müşteriye o taksit için **anında hatırlatma e-postası** gönderebilsin.
-> - **Mercek nasıl yönlendirdi:**
->   - Talebi iki bileşene ayırdı: günlük çalışan bir **batch işi** ve mevcut Kredi Taksit Sorgulama ekranına (`KRDRTKSR`) eklenecek bir **"Hatırlatma gönder" butonu**.
->   - Ana ve etkileşimli servisleri belirledi; benzer taleplerden 18 a/g ve takvim çıkardı.
->   - Çağrı verisiyle talebin değerini gösterdi (71 "hatırlatma almadım" çağrısı).
->   - Hedef grubun %42'sine e-postayla ulaşılamayacağını fark edip SMS'i kapsama önerdi.
-> - **Sonuç:** Talep dakikalar içinde gerekçesi kanıtlanmış, kapsamı veriyle düzeltilmiş bir plana dönüştü: **20 a/g, 9 Kasım – 4 Aralık.**
-
-**Ayrıntılar**
+#### Senaryo D — "Talepten plana, sorundan kapsama" (Talep Yönlendirme · taksit hatırlatma) ⭐ önerilen kapanış
 
 **Problem:** İş birimlerinin talepleri teknolojiye düz metin olarak geliyor. Hangi servislerin etkileneceği, hangi verinin hazır olduğu ve talebin hedeflenen müşteriye gerçekten ulaşıp ulaşmayacağı genellikle geliştirme başladıktan sonra fark ediliyor. Tahmin toplantılarda elle yapılıyor.
 
@@ -343,21 +365,7 @@ Ayşe öneriyi Fatma'ya iletiyor. Gecikme yapan müşterilerin önemli bir kısm
 
 ---
 
-### Senaryo E — Acil yeni ekran: "Afet bölgesi taksit erteleme başvurusu" (KRD · yeni ekran) · yedek
-
-> **Yönetici özeti**
-> - **Problem:** Bir doğal afetin ardından banka yönetimi, etkilenen illerdeki müşterilerin bireysel kredi taksitlerini 3 ay ertelemeye karar veriyor ve uygulamanın **iki hafta içinde** devreye girmesini istiyor. Erteleme başvurusu alıp yeni ödeme planı üreten bir ekran yok.
-> - **Kim:** Hakan (Bireysel Krediler Bölüm Başkanlığı) → Ayşe (iş analisti)
-> - **Hakan'ın talebi:** Etkilenen illerdeki müşteriler şubeden ve çağrı merkezinden taksit erteleme başvurusu yapabilsin; erteleme sonrası yeni ödeme planı müşteriye gösterilsin.
-> - **Mercek nasıl yönlendirdi:**
->   - Talebi **yeni ekran** olarak sınıflandırdı, kurala uygun kod önerdi (`KRDTERTL`); ödeme planı hesabını KRDTKULL'den yeniden kullanan bir taslak çıkardı.
->   - Etkilenen müşteri sayısını hemen hesapladı: **4.870 müşteri, 6.215 kredi.**
->   - Kimsenin sormadığı kritik soruları getirdi: uygunlukta afet tarihinden sonra değiştirilen adresler, ve Senaryo D'de planlanan hatırlatma işinin ertelenen taksitler için mesaj göndermemesi.
->   - **Kapasite çatışmasını yakaladı:** Ana servis 8 Kasım'a kadar regülasyon işiyle dolu; "iki hafta" hedefi ancak öncelik kararıyla tutuyor. İki seçeneği sonuçlarıyla birlikte sundu.
->   - Çağrı verisinden etkilenen illerdeki çağrı artışını görüp müşterilere **proaktif SMS bilgilendirmesi** önerdi.
-> - **Sonuç:** Acil bir yönetim kararı, aynı gün içinde etkisi, riski ve takvim seçenekleri ortaya konmuş bir plana dönüştü: **17 a/g**; öncelik verilirse **19 Ekim – 2 Kasım.**
-
-**Ayrıntılar**
+#### Senaryo E — Acil yeni ekran: "Afet bölgesi taksit erteleme başvurusu" (KRD · yeni ekran) · yedek
 
 **1. Talep girişi.** **Hakan (Bireysel Krediler Bölüm Başkanlığı)** Talep Yönlendirme'ye yazıyor:
 > *"Yönetim, doğal afetten etkilenen 3 ildeki müşterilerimizin bireysel kredi taksitlerinin 3 ay ertelenmesine karar verdi. Erteleme başvurusu şubelerden ve çağrı merkezinden alınabilsin, müşteriye ertelemeden sonraki yeni ödeme planı gösterilsin. Uygulamanın iki hafta içinde devreye girmesi gerekiyor."*
@@ -458,15 +466,7 @@ Hakan **"Evet"** diyor. Tahmin kartı güncelleniyor:
 
 ---
 
-### Senaryo F — Günlük durum özeti (Mercek sohbet) · yedek
-
-> **Yönetici özeti**
-> - **Problem:** Ekranların günlük durumunu görmek için Kibana'da panel taramak gerekiyor; bu herkesin yapabileceği bir iş değil.
-> - **Kim:** Eyüp (platform yöneticisi)
-> - **Mercek nasıl yönlendirdi:** "Bugün en çok sorun yaşanan ekran hangisi?" sorusuna loglardan özet çıkardı: ekran, sorun, etkilenen şube ve işlem sayısı, açık ana kayıt.
-> - **Sonuç:** Kibana bilgisi gerektirmeden, sohbetle durum özeti.
-
-**Ayrıntılar**
+#### Senaryo F — Günlük durum özeti (Mercek sohbet) · yedek
 
 Eyüp Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglardan cevap: ODMTFATR, Başkentgaz zaman aşımı artışı, etkilenen şube ve işlem sayısı, açık ana kayıt. Kibana'ya girmeden sohbetle durum özeti alınıyor.
 

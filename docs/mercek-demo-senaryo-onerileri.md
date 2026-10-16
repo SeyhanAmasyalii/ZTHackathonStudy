@@ -30,7 +30,7 @@
 - **Sahte kullanıcılar (Faz 3)** demonun karakterleri olabilir:
   - **Mehmet Yılmaz:** Faz 3'te Müşteri Temsilcisi; bu demoda **banka müşterisi** olarak kullanılır (işlem ekranları giriş yapan kullanıcının bilgileriyle dolduğu için doğal).
   - **Eyüp Dalan:** Platform Yöneticisi.
-  - **Ayşe Kaya:** Kıdemli İş Analisti.
+  - **Ayşe Kaya:** Kıdemli İş Analisti (teknoloji tarafı; iş biriminden gelen talepleri analiz eder).
 - **Sentetik log üretici (Faz 5):** Her log kaydında ekran kodu, müşteri, `trace.id` ve hata kodu var. İş reddi kodları: `INSUFFICIENT_INCOME`, `AFFORDABILITY_EXCEEDED`, `INSTITUTION_TIMEOUT` vb. Teknik hata kodları: `CORE_BANKING_TIMEOUT`, `SERVICE_UNAVAILABLE`, `DB_CONNECTION_ERROR`. Mercek'in okuyacağı log kaynağı hazır.
 - **Joyride senaryoları (Faz 7):** `krd-gelir-orani`, `odm-dogalgaz`, `krt-gold-onay` gibi senaryolar hazır. Mercek'in "Bana göster" çözümleri bunların üzerine kurulabilir.
 - **Talep Yönlendirme (Faz 2):** Talep listesi ve `TLP-…` talepleri mevcut. Şu anki anahtar kelimeyle ekip önerme ve ücret hesabı yerine Mercek'in **servis bazlı etki analizi ve adam-gün tahmini** gelecek. Teknoloji tarafında ekip yerine **servis** dili kullanılır: Kredi Kullandırım Servisi, Kredi Takip Servisi, Müşteri Yönetim Servisi vb.
@@ -43,7 +43,8 @@
 | **Mehmet** (banka müşterisi) | İnternet şubesi (ODMTFATR) | Mercek'i kullanmaz; sorun yaşayınca çağrı merkezini arar. |
 | **Zeynep** (çağrı merkezi temsilcisi) | Mercek sohbet | Müşterinin anlattığını serbest metinle yazar; Mercek logları, ana kaydı ve müşteriye söylenecekleri getirir. |
 | **Eyüp** (Platform Yöneticisi / L2 destek) | Mercek sayfası | Sohbet + çağrı listesi: zenginleştirilmiş kayıtlar, loglar, eşleşmeler, kod analizi |
-| **Ayşe** (Kıdemli İş Analisti) | Talep Yönlendirme | Talep metni → sınıflandırma, servis etki analizi, adam-gün tahmini, takvim, köprü |
+| **Fatma** (Kredi Tahsilatları Bölüm Başkanlığı, iş birimi) | Talep Yönlendirme | İhtiyacını kendi cümleleriyle yazar; Mercek'in analizini görür, kapsam önerisini onaylar. |
+| **Ayşe** (Kıdemli İş Analisti, teknoloji) | Talep Yönlendirme | Mercek'in analizini gözden geçirir, açık soruları iş birimiyle netleştirir, köprü önerisini iş birimine sunar. |
 
 ---
 
@@ -119,14 +120,16 @@
 
 ### Senaryo D — "Talepten plana, sorundan kapsama" (Talep Yönlendirme · KRDTKULL) ⭐ önerilen kapanış
 
-**Senaryo tek cümleyle:** Bir iş analisti yeni bir özellik istiyor. Mercek talebi hangi ekranı ve hangi servisleri etkilediğine göre çözümlüyor, benzer geçmiş taleplerden adam-gün tahmini ve takvim çıkarıyor. Sonra aynı ekranın sorun geçmişine bakıp *"bu ekranda zaten şöyle bir sorun var, bunu da çözelim mi?"* diye kapsamı büyütmeyi öneriyor.
+**Senaryo tek cümleyle:** Bankanın bir iş birimi yeni bir özellik istiyor. Mercek talebi hangi ekranı ve hangi servisleri etkilediğine göre çözümlüyor, benzer geçmiş taleplerden adam-gün tahmini ve takvim çıkarıyor. Sonra aynı ekranın sorun geçmişine bakıp *"bu ekranda zaten şöyle bir sorun var, bunu da çözelim mi?"* diye kapsamı büyütmeyi öneriyor.
 
 **Problem:** Bugün yeni geliştirme talepleri, aynı ekranda yaşanan sorunlardan habersiz kapsamlanıyor ve tahminleniyor. Talep sahibi neyin etkileneceğini bilmiyor, tahmin toplantılarda elle yapılıyor. Ekranın çağrı geçmişi kapsam konuşmasına hiç girmiyor.
 
 **Akış**
 
-**1. Talep girişi.** Ayşe (Kıdemli İş Analisti), Talep Yönlendirme ekranına yazıyor:
-> *"Kredi kullandırım ekranından ödeme planını müşteriye e-posta ile gönderebilelim."*
+**1. Talep girişi.** **Fatma (Kredi Tahsilatları Bölüm Başkanlığı)** Talep Yönlendirme ekranına kendi cümleleriyle yazıyor:
+> *"Müşteriler ödeme planlarını tam bilmedikleri için ilk taksitlerde gecikmeler yaşıyoruz. Kredi kullandırıldığında ödeme planı müşteriye e-posta ile gönderilebilsin."*
+
+Talep, teknoloji tarafında analizi yürüten **Ayşe (Kıdemli İş Analisti)**'nin listesine düşüyor. Mercek'in analizi hem Fatma'nın hem Ayşe'nin ekranında görünüyor.
 
 **2. Mercek'in talep analizi** (ekranda kartlar halinde):
 
@@ -203,10 +206,10 @@ Dayandığı benzer geçmiş talepler:
 >
 > *Kapsama eklensin mi?*
 
-Ayşe **"Evet"** diyor. Tahmin kartı güncelleniyor:
+Ayşe öneriyi Fatma'ya iletiyor. Uygun tutar önerisi tahsilat tarafının da işine yarıyor, çünkü taksit gücünü aşan kredi kullandırılmadığı sürece gecikme riski azalıyor. Fatma **"Evet"** diyor ve tahmin kartı güncelleniyor:
 - **13 → 16 a/g** (Kredi Kullandırım 13, Müşteri Yönetim 3)
 - **Bitiş: 25 Kasım → 30 Kasım**
-- Talep kaydında "çağrı geçmişinden eklenen kapsam" olarak işaretleniyor.
+- Talep kaydında "çağrı geçmişinden eklenen kapsam" olarak işaretleniyor; onaylayan: Fatma, analiz: Ayşe.
 
 **Kanıtladığı:** M2.1 sınıflandırma, M2.2 akış önerisi, M2.4 servis bazlı etki analizi, M2.5 adam-gün tahmini ve takvim, M2.6 köprü.
 **Hikâyenin kapanışı:** Demonun başında Elif'in şubede yaşadığı sorun, sonunda ürünün kalıcı bir iyileştirmesine dönüşüyor. Jüri döngünün kapandığını kendi gözüyle görüyor.
@@ -218,7 +221,7 @@ Ayşe **"Evet"** diyor. Tahmin kartı güncelleniyor:
 
 ### Senaryo E — Yeni ekran: "Kredi kartı limit artışı" (M2.3) · yedek
 
-1. Ayşe: *"Müşteriler kart limit artışını şubeden talep edebilsin."* → **Yeni ekran.**
+1. Kartlar iş biriminden bir talep: *"Müşteriler kart limit artışını şubeden talep edebilsin."* → **Yeni ekran.**
 2. Mercek 4–5 soru soruyor: hangi kart tipleri, gelir belgesi gerekli mi, onay yetkisi, SMS bildirimi, rapor ihtiyacı.
 3. Çıktılar:
    - **Ekran kodu önerisi:** `KRTTLMAR`. Kural `[A-Z]{3}[TR][A-Z0-9]{4}` ile doğrulanmış, mevcut kodlarla çakışmıyor.
@@ -242,7 +245,7 @@ Eyüp Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglard
 | 1 | **A** — Hata mı, kural mı? (KRDTKULL) | Elif | ~45 sn | Probleme uygunluk, Kullanıcı deneyimi, İş değeri (çağrı önleme) |
 | 2a | **B** — Yaygın sorun, bilinen çözüm (ODMTFATR) | Mehmet (müşteri) → Zeynep (çağrı merkezi) → Eyüp | ~50 sn | Ürün çalışırlığı, İş değeri (mükerrer çağrı) |
 | 2b | **C** — AI kodu okur (KRTTBASV) | Eyüp | ~30 sn | Yenilikçilik |
-| 3 | **D** — Talepten plana + köprü (KRDTKULL) | Ayşe | ~45 sn | İş değeri, Yenilikçilik |
+| 3 | **D** — Talepten plana + köprü (KRDTKULL) | Fatma (iş birimi) → Ayşe (analist) | ~45 sn | İş değeri, Yenilikçilik |
 | Yedek | E, F | — | video / S-C | — |
 
 **Hikâye ipi:** KRDTKULL'deki sorun Sahne 1'de açılır, Sahne 3'te ürün iyileştirmesine dönüşür. Ekran kodları her sahnede görünür ve Mercek'in "ekran bağlamını" bildiğini sürekli hatırlatır.
@@ -266,7 +269,7 @@ Eyüp Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglard
 | Doküman | Değişecek |
 |---|---|
 | Kapsam | Hedef kullanıcı: banka çalışanı ve teknoloji ekipleri. M1.1 girişi: ekran kodu çubuğundaki "Sorun yaşıyorum". Yeni değer: çağrı önleme ve mükerrer çağrı birleştirme. |
-| İş planı | Demo senaryosu (§5), karakterler (Elif, Mehmet, Zeynep, Eyüp, Ayşe), kabul kriterleri |
+| İş planı | Demo senaryosu (§5), karakterler (Elif, Mehmet, Zeynep, Eyüp, Fatma, Ayşe), kabul kriterleri |
 | Veri planı ve üretim rehberi | Log kaynağı olarak **Faz 5 üreticisi** (kendi log üreticimize gerek kalmıyor). Senaryo kayıtları: Başkentgaz artışı, 14 Gold reddi, 312 AFFORDABILITY reddi, 58 çağrı, 4 benzer talep (adam-gün). Servis kataloğu (Kredi Kullandırım, Müşteri Yönetim, Fatura Ödeme, Kart Başvuru…) ve servis takvimleri; ücret/maliyet yok. |
 | Uygulama rehberi ve prompt'lar | **Teknoloji:** Next.js 16 + FastAPI (uv) → React/Vite varsayımı güncellenir. Ekran kimlikleri → ekran kodları ve `data-tour` hedefleri. Mercek sohbet API'si (`/api/mercek/chat`). Joyride v3 hazır olduğu için M1.5 küçülür. **Dağıtım:** Next.js + FastAPI'nin App Service'e nasıl taşınacağına karar verilmeli. |
 | Sunum ve taslak ekranlar | Problem slaytı, demo slaytı, mockup'lar (iç uygulama ekranlarıyla yeniden) |
@@ -281,4 +284,4 @@ Eyüp Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglard
 3. **Mercek'in incelediği kod:** `sample-codebase/` altındaki kopya (önerim, uygulama doğru kalır) mı, uygulamanın kendi kodu mu?
 4. **Mercek'e giriş:** Ekran kodu çubuğunda "Sorun yaşıyorum" butonu ile bağlamlı yan panel + ayrı Mercek sohbet sayfası (önerim) mi, yalnızca sohbet sayfası mı?
 5. ~~Maliyet modeli~~ **Karar verildi:** Ücret hesaplanmaz; tahmin yalnızca **adam-gün** ve takvim. Teknoloji tarafı **servis** bazlı anlatılır (ana servis / etkileşimli servis).
-6. **Demo kullanıcıları:** Faz 3'teki Mehmet (müşteri), Eyüp (L2) ve Ayşe (analist) kullanılır; sahte kullanıcı listesine iki kişi eklenir: **Elif** (şube müşteri temsilcisi, Senaryo A) ve **Zeynep** (çağrı merkezi temsilcisi, Senaryo B). Uygun mu?
+6. **Demo kullanıcıları:** Faz 3'teki Mehmet (müşteri), Eyüp (L2) ve Ayşe (analist) kullanılır; sahte kullanıcı listesine üç kişi eklenir: **Elif** (şube müşteri temsilcisi, Senaryo A), **Zeynep** (çağrı merkezi temsilcisi, Senaryo B) ve **Fatma** (Kredi Tahsilatları Bölüm Başkanlığı, Senaryo D). Uygun mu?

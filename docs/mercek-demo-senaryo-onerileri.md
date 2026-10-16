@@ -99,22 +99,60 @@
 
 ---
 
-### Senaryo C — "AI kodu okur" (KRTTBASV · sınır değer hatası) ⭐
+### Senaryo C — "AI kodu okur" (HSPTVDSZ · IBAN kontrol hanesi hatası) ⭐
 
-**Problem:** Geçmişte örneği olmayan yeni bir hata. L2 kodu baştan incelemek zorunda kalıyor.
+**Senaryo tek cümleyle:** Geçmişte örneği olmayan bir hata geliyor. Mercek önce kuralla IBAN'ın bozuk olduğunu ve bunun banka kaynaklı olduğunu kanıtlıyor. Sonra loglardan sorunun kaç hesabı etkilediğini buluyor, son olarak kodu okuyup hatanın satırını ve düzeltmesini gösteriyor.
+
+**Problem:** Geçmişte örneği olmayan bir hata çağrısında L2 nereden başlayacağını bilmiyor: kullanıcı hatası mı, karşı banka mı, bizim kodumuz mu? Kod baştan inceleniyor; aynı hatadan kaç müşterinin etkilendiği ise çoğu zaman hiç bilinmiyor.
 
 **Akış**
-1. Başka bir şubeden çağrı geliyor: *"Geliri tam 20.000 TL olan müşteriye Gold kart verilemiyor, gelir yetersiz diyor."*
-2. Eyüp çağrıyı açıyor. Geçmiş çözümlerle eşleşme **%38**, eşiğin (%75) altında. Mercek kod analizine geçiyor.
-3. Mercek logları ve kodu birleştiriyor:
-   > *"Son 30 günde geliri tam 20.000 TL olan 14 Gold başvurusu `INSUFFICIENT_INCOME` ile reddedilmiş. Ürün kuralı gelir ≥ 20.000 diyor, ama `KartBasvuruKarar` içinde koşul `gelir > 20000` yazılmış."*
-   Satırı ve düzeltme önerisini (`>` → `>=`) diff olarak, test önerisiyle birlikte gösteriyor. Etiket: "Öneridir, uygulanmadı".
 
-**Kanıtladığı:** M1.4 eşleşme yoksa kod analizi, logla kodu ilişkilendirme ve dürüst eşik (uydurma eşleşme yok).
-**Neden bu hata:** Kural ekranda görünür (Gold kartında "gelir ≥ 20.000" yazıyor). Jüri çelişkiyi bir saniyede anlar.
-**Önemli:** Hatalı kod **uygulamanın kendisinde değil**, `sample-codebase/` altındaki "kart karar servisi" kopyasında durur. Böylece hem uygulama doğru çalışır, hem kod kalitesi puanı zarar görmez. Loglara bu hatayı destekleyen 14 kayıt eklenir.
+**1. Çağrı.** Bir müşteri şubeye geliyor: yeni açtığı vadesiz hesaba başka bir bankadan para gönderilemiyor, karşı banka "IBAN hatalı" diyor. **Elif (şube temsilcisi)** Mercek'e yazıyor:
+> *"Müşterinin geçen hafta HSPTVDSZ'den açılan hesabına başka bankadan para gelmiyor, IBAN hatalı diyorlar. IBAN: TR30 0999 0711 4710 4974 6507 5"*
 
-**Alternatif hata (seçenek):** HSPTVDSZ'de IBAN kontrol hanesi 10'dan küçük çıktığında başına sıfır eklenmiyor (`padStart(2,"0")` eksik), bu yüzden IBAN'ların yaklaşık %8'i diğer bankalarda geçersiz sayılıyor. Teknik olarak daha etkileyici, ama jürinin anlaması biraz daha uzun sürer.
+**2. Mercek'in ilk kontrolü** (kural, AI değil):
+> *"Bu IBAN geçersiz ve hata bankamız kaynaklı. Türkiye IBAN'ı 26 karakter olmalı, bu 25 karakter. Hesap numarası doğru, ama kontrol hanesinin başındaki 0 eksik: kontrol hanesi '03' olmalıyken '3' yazılmış. 4'lü gruplamada bu, IBAN'ı 'TR30…' gibi normal gösterip hatayı gizliyor. Doğru IBAN: **TR03 0099 9071 1471 0497 4650 75**. Müşteriye bu IBAN'ı verebilirsiniz; para bu IBAN'a gelir."*
+
+Elif müşteriyi doğru IBAN ile hemen gönderiyor. Mercek çağrıyı açıp **Hesap Açılış Servisi**'ne atıyor (kural: HSPTVDSZ + IBAN üretimi).
+
+**3. Eyüp (L2) çağrıyı açıyor.** Geçmiş çözümlerle eşleşme **%38**, eşiğin (%75) altında. Mercek uydurma bir çözüm önermiyor, analize geçiyor.
+
+**4. Loglarla etki analizi:**
+> *"Son 30 günde HSPTVDSZ ile **1.432** hesap açılmış. Bunların **117'sinin** (%8,2) IBAN'ı 25 karakter. Hepsinde kontrol hanesi 02 ile 09 arasında. Kontrol hanesi 2–98 arasında 97 farklı değer alabildiği için tek haneli 8 değer beklenen oran olan %8,2'yi veriyor. Yani hata rastgele değil, sistematik."*
+
+Etkilenen 117 hesabın listesi (hesap no, şube, açılış tarihi) çağrıya ekleniyor.
+
+**5. Kod analizi:** Mercek Hesap Açılış Servisi'nin IBAN üretim kodunu okuyor:
+
+```diff
+   const check = 98 - mod97(bban + "292700");
+-  return `TR${check}${bban}`;
++  return `TR${String(check).padStart(2, "0")}${bban}`;
+```
+
+> *"Kök neden: Kontrol hanesi 10'dan küçük çıktığında başına 0 eklenmiyor. Bu yüzden IBAN 25 karakter oluyor ve diğer bankaların doğrulamasından geçmiyor.*
+> *Test önerisi: 1.000 rastgele IBAN üret; hepsinin 26 karakter olduğunu ve ISO 13616 mod-97 doğrulamasından geçtiğini kontrol et.*
+> *Ek öneri: Etkilenen 117 hesabın doğru IBAN'ı, aynı hesap numarasından yeniden hesaplanabilir. Müşterilere bilgilendirme gönderilmeli."*
+
+Etiket: **"Öneridir, uygulanmadı."**
+
+**Kanıtladığı:**
+- **Kural ile AI'ın birlikte çalışması:** IBAN doğrulaması ve doğru IBAN'ın hesabı kodla yapılıyor (deterministik, kesin). Yorum ve kök neden AI'dan geliyor.
+- **M1.4 eşleşme yoksa kod analizi** ve dürüst eşik: uydurma eşleşme yok.
+- **Log + kod ilişkilendirme:** Tek bir çağrıdan, sessizce etkilenen 117 müşteriye ulaşılıyor. Bu müşteriler henüz çağrı açmamış; Mercek sorunu onlar fark etmeden buluyor.
+- **Anında müşteri çözümü:** Elif, kod düzeltilmeden önce müşteriye doğru IBAN'ı veriyor.
+
+**Jüriye nasıl görünür:** Önce ekranda görünen hali, sonra boşluksuz hali gösterilir.
+- Ekranda (4'lü grup): **TR30 0999 0711 4710 4974 6507 5** — normal bir IBAN gibi görünüyor.
+- Boşluksuz, hatalı: `TR3` + `0099907114710497465075` → 25 karakter
+- Boşluksuz, doğru: `TR03` + `0099907114710497465075` → 26 karakter
+
+Tek bir eksik "0" görsel olarak hemen anlaşılır; gruplamanın hatayı nasıl gizlediği de neden kimsenin fark etmediğini açıklar. Ardından "%8,2 = 97 değerden 8'i" açıklaması, hatanın rastgele değil sistematik olduğunu gösterir.
+
+**Önemli:** Hatalı kod **uygulamanın kendisinde değil**, `sample-codebase/` altındaki "Hesap Açılış Servisi" kopyasında durur. Uygulamadaki `generateIban()` doğru kalır (rebuild rehberinin "1.000 IBAN'ın tamamı geçerli" kabul kriteri bozulmaz) ve kod kalitesi puanı zarar görmez.
+**Veride hazır olacaklar:** HSPTVDSZ için 30 günde 1.432 hesap açılış logu; bunların 117'sinde 25 karakterli IBAN (kontrol hanesi 2–9). Örnek müşterinin hesabı ve IBAN'ı sabit.
+
+**Alternatif hata (yedek):** KRTTBASV'de Gold kart gelir şartı `gelir >= 20000` yerine `gelir > 20000` yazılmış; geliri tam 20.000 TL olan müşteriler reddediliyor. Anlaşılması daha kolay, ama "sessizce etkilenen müşterileri bulma" etkisi daha zayıf.
 
 ---
 
@@ -267,7 +305,7 @@ Eyüp Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglard
 |---|---|---|---|---|
 | 1 | **A** — Hata mı, kural mı? (KRDTKULL) | Elif | ~45 sn | Probleme uygunluk, Kullanıcı deneyimi, İş değeri (çağrı önleme) |
 | 2a | **B** — Yaygın sorun, bilinen çözüm (ODMTFATR) | Mehmet (müşteri) → Zeynep (çağrı merkezi) → Eyüp | ~50 sn | Ürün çalışırlığı, İş değeri (mükerrer çağrı) |
-| 2b | **C** — AI kodu okur (KRTTBASV) | Eyüp | ~30 sn | Yenilikçilik |
+| 2b | **C** — AI kodu okur (HSPTVDSZ) | Elif → Eyüp | ~40 sn | Yenilikçilik, İş değeri (sessizce etkilenen 117 müşteri) |
 | 3 | **D** — Talepten plana + köprü (taksit hatırlatma) | Fatma (iş birimi) → Ayşe (analist) | ~45 sn | İş değeri, Yenilikçilik |
 | Yedek | E, F | — | video / S-C | — |
 
@@ -293,7 +331,7 @@ Eyüp Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglard
 |---|---|
 | Kapsam | Hedef kullanıcı: banka çalışanı ve teknoloji ekipleri. M1.1 girişi: ekran kodu çubuğundaki "Sorun yaşıyorum". Yeni değer: çağrı önleme ve mükerrer çağrı birleştirme. |
 | İş planı | Demo senaryosu (§5), karakterler (Elif, Mehmet, Zeynep, Eyüp, Fatma, Ayşe), kabul kriterleri |
-| Veri planı ve üretim rehberi | Log kaynağı olarak **Faz 5 üreticisi** (kendi log üreticimize gerek kalmıyor). Senaryo kayıtları: Başkentgaz artışı, 14 Gold reddi, gecikme konulu 186 çağrı (71'i hatırlatma), 2.340 müşterilik hedef grup ve iletişim izin dağılımı (%58 e-posta, %81 SMS), 5 benzer talep (adam-gün). Servis kataloğu (Kredi Kullandırım, Kredi Takip, Müşteri Yönetim, Fatura Ödeme, Kart Başvuru…) ve servis takvimleri; ücret/maliyet yok. |
+| Veri planı ve üretim rehberi | Log kaynağı olarak **Faz 5 üreticisi** (kendi log üreticimize gerek kalmıyor). Senaryo kayıtları: Başkentgaz artışı, HSPTVDSZ'de 117 hatalı IBAN'lı hesap (1.432 açılış içinde), gecikme konulu 186 çağrı (71'i hatırlatma), 2.340 müşterilik hedef grup ve iletişim izin dağılımı (%58 e-posta, %81 SMS), 5 benzer talep (adam-gün). Servis kataloğu (Kredi Kullandırım, Kredi Takip, Müşteri Yönetim, Fatura Ödeme, Kart Başvuru…) ve servis takvimleri; ücret/maliyet yok. |
 | Uygulama rehberi ve prompt'lar | **Teknoloji:** Next.js 16 + FastAPI (uv) → React/Vite varsayımı güncellenir. Ekran kimlikleri → ekran kodları ve `data-tour` hedefleri. Mercek sohbet API'si (`/api/mercek/chat`). Joyride v3 hazır olduğu için M1.5 küçülür. **Dağıtım:** Next.js + FastAPI'nin App Service'e nasıl taşınacağına karar verilmeli. |
 | Sunum ve taslak ekranlar | Problem slaytı, demo slaytı, mockup'lar (iç uygulama ekranlarıyla yeniden) |
 | Takım anlatım cümleleri | 2. ve 3. cümle |
@@ -303,7 +341,7 @@ Eyüp Mercek'e soruyor: *"Bugün en çok sorun yaşanan ekran hangisi?"* Loglard
 ## 5. Onay gereken kararlar
 
 1. **Senaryo seti:** Önerim A + B + C + D canlı, E ve F yedek. Değişiklik var mı?
-2. **Sahne 2b'deki hata:** KRTTBASV sınır değer hatası (önerim, anlaşılması kolay) mı, HSPTVDSZ IBAN kontrol hanesi hatası mı?
+2. ~~Sahne 2b'deki hata~~ **Karar verildi:** HSPTVDSZ IBAN kontrol hanesi hatası. KRTTBASV sınır değer hatası yedek.
 3. **Mercek'in incelediği kod:** `sample-codebase/` altındaki kopya (önerim, uygulama doğru kalır) mı, uygulamanın kendi kodu mu?
 4. **Mercek'e giriş:** Ekran kodu çubuğunda "Sorun yaşıyorum" butonu ile bağlamlı yan panel + ayrı Mercek sohbet sayfası (önerim) mi, yalnızca sohbet sayfası mı?
 5. ~~Maliyet modeli~~ **Karar verildi:** Ücret hesaplanmaz; tahmin yalnızca **adam-gün** ve takvim. Teknoloji tarafı **servis** bazlı anlatılır (ana servis / etkileşimli servis).

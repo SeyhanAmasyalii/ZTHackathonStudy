@@ -1085,7 +1085,11 @@
     "description": "Senaryo E: etkilenen bölge. İl adları arayüzde ve sunumda gösterilmez.",
     "count": 3,
     "provinces_source": "Faz 5 log üreticisindeki 12 ilden İstanbul dışında 3 il; generate_portfolio.py ilk çalıştırmada seçer ve buraya yazar.",
-    "provinces": []
+    "provinces": [
+      "Bursa",
+      "Antalya",
+      "Adana"
+    ]
   },
   "institutions": [
     {

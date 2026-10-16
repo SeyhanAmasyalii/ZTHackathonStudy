@@ -323,18 +323,19 @@ Görev V4: Foundry ile gerçek metinleri üret. Bağlam: #file:tools/mercek_data
 Foundry hazır değilse hazır şablon çıktısıyla V5–V6'ya devam et.
 ```
 
-### V5 — Portföy · 🟡 Orta · Agent
+### V5 — Portföy · 🟢 Ucuz · Edit
+
+*Betik hazırdır: `tools/mercek_data/generate_portfolio.py` ve `tools/mercek_data/tests/test_portfolio.py` takım reposuna kopyalanır. Açıklama: `docs/mercek-sentetik-veri-kaynaklari.md` §2.4.*
 
 ```
-Görev V5: tools/mercek_data/generate_portfolio.py. Bağlam: docs/mercek-sentetik-veri-uretimi.md §5, #file:data/seed/catalog.json
-- Faker('tr_TR'), seed 42; 40.000 müşteri (10000101–10040100), 26.000 aktif kredili, 33.000 kredi.
-- Kesin değerler: D hedef grubu 2.340 ve izin kesişimi (1.169 / 188 / 726 / 257);
-  E bölgesi 4.870 müşteri, 6.215 kredi, 612 gecikmede, 37 müşteride address_changed_at > 2026-10-10.
-- Önce senaryo kümelerini oluştur, sonra kalan müşterileri bu kümelere düşmeyecek şekilde dağılımla üret
-  (örneğin hedef grup dışındakilerde delinquent_12m = 0 olabilir ama aktif kredi + delinquent_12m kombinasyonu
-  2.340'ı aşmamalı).
-- E-posta @ornek.test, telefon +90 5xx 000 xx xx.
-- Çıktı data/out/customers.csv, loans.csv. Test: tüm kesin değerler.
+Görev V5: Portföyü üret ve doğrula. Bağlam: #file:tools/README.md
+1. V3 çıktısı (tools/output/mercek-logs.ndjson) yoksa önce V3 komutlarını çalıştır.
+2. python3 tools/mercek_data/generate_portfolio.py — çıktı özeti: 40000 · 26000 · 33000 · D 2340
+   (1169/188/726/257) · E 4870/6215/612/37 olmalı.
+3. catalog.json'daki affected_region.provinces alanının dolduğunu kontrol et; il adlarını arayüze veya
+   README'ye yazma.
+4. python3 -m pytest tools/mercek_data/tests -q yeşil olmalı. data/out/ git'e girmez.
+Betiğin mantığını değiştirme.
 ```
 
 ### V6 — Çağrılar, çözümler, talepler · 🟡 Orta · Agent

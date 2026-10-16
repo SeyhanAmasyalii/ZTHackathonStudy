@@ -254,6 +254,8 @@ Demo sırasında uygulama aşağıdaki olayları `POST /api/logs` ile aynı ECS 
 
 ## 5. Müşteri ve kredi portföyü (`generate_portfolio.py`)
 
+> Betik hazır: `tools/mercek_data/generate_portfolio.py`. Etkilenen iller: Bursa, Antalya, Adana (yalnızca katalogda; arayüzde gösterilmez). Ayrıntı: `mercek-sentetik-veri-kaynaklari.md` §2.4.
+
 **Hacim:** 40.000 müşteri (`10000101` – `10040100`), bunların 26.000'i aktif bireysel ihtiyaç kredili, toplam 33.000 kredi.
 
 **Dağılımlar:** Segment ve il ağırlıkları Faz 5 üreticisiyle aynı. Kredi tutarı 10.000–500.000 (log-normal), vade 3–36 ay, oranlar KRDTKULL ile aynı.

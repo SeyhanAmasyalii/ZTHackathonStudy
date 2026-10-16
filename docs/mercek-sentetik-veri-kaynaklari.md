@@ -20,7 +20,7 @@ Değerlerin ayrıntısı: `mercek-sentetik-veri-uretimi.md`. Neden bu veri: `mer
 | 6 | İşlem logları (~10.000) | Betik | `tools/generate_banking_logs.py` | ✅ | V3 |
 | 7 | Senaryo log kayıtları (+415) | Betik | `tools/mercek_data/inject_log_scenarios.py` | ✅ | V3 |
 | 8 | Doğal dil metinleri (~620) | Betik + Foundry | `tools/mercek_data/generate_texts.py`, `prompts/gen-*.md` | ✅ betik · şablon çıktısı hazır; Foundry çıktısı 🔧 | V4 |
-| 9 | Müşteri ve kredi portföyü (40.000 / 33.000) | Betik | `tools/mercek_data/generate_portfolio.py` | 🔧 | V5 |
+| 9 | Müşteri ve kredi portföyü (40.000 / 33.000) | Betik | `tools/mercek_data/generate_portfolio.py` | ✅ | V5 |
 | 10 | Çağrılar ve çözümler (~1.400 / ~40) | Betik | `tools/mercek_data/generate_incidents.py` | 🔧 | V6 |
 | 11 | Geçmiş talepler (~100) | Betik | `tools/mercek_data/generate_requests.py` | 🔧 | V6 |
 | 12 | Yükleme (SQL + AI Search) | Betik | `tools/mercek_data/load_all.py` | 🔧 | V7 |
@@ -161,11 +161,35 @@ python3 tools/mercek_data/generate_texts.py --force            # Foundry ile ger
 
 **Testler:** 7 test (hacimler, elle yazılmış notların korunması, yasak konu ve kişisel veri yokluğu, belirlenimcilik, filtre, sahte Foundry istemcisiyle parti/filtre/devam etme akışı, prompt yükleyici).
 
-### 2.4 Hackathonda yazılacak betikler 🔧
+### 2.4 `tools/mercek_data/generate_portfolio.py` ✅ (V5)
+
+**Ne yapar:** 40.000 müşteri ve 33.000 krediden oluşan sentetik portföyü üretir. D ve E'nin büyüklük rakamları (hedef grup, izinler, etkilenen bölge) buradan sorgulanır.
+
+**Nasıl çalışır:** Önce senaryo kümeleri tam sayıda kurulur, kalan veri dağılımla üretilir.
+1. **Log müşterileri:** V3 çıktısındaki müşteriler (seed 42'de 784 kişi) aynı numara, ad, il ve segmentle portföye alınır; logda geliri görünüyorsa o gelir kullanılır. Böylece bir log satırından portföye gidildiğinde bilgiler tutarlıdır.
+2. **Diğer müşteriler:** 10000101–10040100 aralığının geri kalanı, üreticiyle aynı ad, il, segment ve gelir dağılımıyla üretilir. E-posta `ad.soyad.NNNN@ornek.test`, telefon `+90 5xx 000 xx xx`.
+3. **E · etkilenen bölge:** İstanbul, Ankara ve İzmir dışındaki en büyük üç il (Bursa, Antalya, Adana) `region_affected = 1` olur ve `catalog.json → affected_region.provinces` alanına yazılır. **İl adları arayüzde ve sunumda gösterilmez.** Bölgede tam **4.870** müşteriye kredi verilir, bu müşterilere toplam **6.215** kredi dağıtılır (müşteri başına en çok 3), bunların tam **612**'si şu an gecikmededir. Bölgedeki kredili müşterilerden **37**'sinin adres değişiklik tarihi 11–16 Ekim'dir; başka hiçbir müşterinin adresi afet tarihinden sonra değişmemiştir.
+4. **Toplam:** Bölge dışında 21.130 kredili müşteri ve 26.785 kredi; böylece toplam **26.000** kredili müşteri ve **33.000** kredi. Bölge dışında yaklaşık 950 kredi şu an gecikmededir.
+5. **D · hedef grup:** Şu an gecikmede kredisi olan herkes ve kalan kredili müşterilerden rastgele seçilenlerle tam **2.340** müşteri "son 12 ayda gecikme yaptı" olarak işaretlenir.
+6. **D · izinler:** Hedef grupta e-posta ve SMS izinleri birebir dağıtılır: 1.169 ikisi de · 188 yalnız e-posta · 726 yalnız SMS · 257 hiçbiri (e-posta %58, SMS %81, en az biri %89). Diğer müşterilerde e-posta yaklaşık %64, SMS %82.
+7. **Kredi kuralları KRDTKULL ile aynı:** tutar 5.000–500.000 TL, vade 3–36 ay, faiz vadeye göre %3,09 / %3,29 / %3,49, taksit tek başına gelirin yarısını aşmaz. Kalan anapara ödenen taksit sayısına göre hesaplanır; gecikmedeki kredilerin sıradaki taksit tarihi geçmiştedir. Tahsilat hesabı simülasyon IBAN'ıdır.
+8. Tüm kesin değerleri kontrol eder; biri tutmazsa dosya yazmadan durur.
+
+**Girdi:** `tools/output/mercek-logs.ndjson` (V3), `data/seed/catalog.json`. **Çıktı:** `data/out/customers.csv` (40.000), `data/out/loans.csv` (33.000); katalogda etkilenen iller.
+
+**Komut:**
+```bash
+python3 tools/mercek_data/generate_portfolio.py
+```
+
+**Ölçülen sonuç:** 40.000 müşteri · 26.000 kredili · 33.000 kredi · D 2.340 (1.169 / 188 / 726 / 257) · E 4.870 / 6.215 / 612 / 37 · log müşterilerinin hepsi portföyde. Süre yaklaşık 3 saniye.
+
+**Testler:** 6 test (senaryo rakamları, log müşterileriyle tutarlılık, bölge ve adres değişikliği, kredi kuralları, kişisel veri yokluğu, belirlenimcilik).
+
+### 2.5 Hackathonda yazılacak betikler 🔧
 
 | Betik | Ne yapar | Girdi → çıktı | Prompt |
 |---|---|---|---|
-| `generate_portfolio.py` | 40.000 müşteri, 33.000 kredi; D'nin hedef grubu (2.340, izin kesişimi) ve E'nin bölgesi (4.870 / 6.215 / 612 / 37) kesin; etkilenen 3 ili seçip katalogda işaretler | `catalog.json` → `customers.csv`, `loans.csv` | V5 |
 | `generate_incidents.py` | ~1.400 çağrı (son 90 gün, CAG-0001…CAG-2050) ve ~40 çözüm; B, C, D, E çağrıları kesin | `catalog.json`, `texts.json` → `incidents.csv`, `solutions.csv` | V6 |
 | `generate_requests.py` | ~100 geçmiş talep; D ve E'nin benzer talepleri kesin; `--eval` ile 30 vakalık değerlendirme seti | `catalog.json`, `texts.json` → `requests.csv`, `eval_cases.json` | V6 |
 | `load_all.py` | Şemayı uygular, tüm veriyi Azure SQL'e ve 3 AI Search indeksine yükler; embedding'leri üretir | `data/seed`, `data/out`, `tools/output` → SQL, Search | V7 |
@@ -222,7 +246,7 @@ V2  data/seed/*.json                    ✅ hazır; takım reposuna kopyala, V2 
 V3  generate_banking_logs.py            ✅
     inject_log_scenarios.py             ✅  → tools/output/mercek-logs.ndjson
 V4  generate_texts.py                   ✅  şablon çıktısı hazır; Foundry hazır olunca --force ile gerçek metinler
-V5  generate_portfolio.py               🔧
+V5  generate_portfolio.py               ✅  → data/out/customers.csv, loans.csv
 V6  generate_incidents.py               🔧
     generate_requests.py [--eval]       🔧
 V7  load_all.py --sql --search          🔧

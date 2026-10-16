@@ -15,11 +15,11 @@ Değerlerin ayrıntısı: `mercek-sentetik-veri-uretimi.md`. Neden bu veri: `mer
 | 1 | Katalog: ekranlar, servisler, kurallar, takvim, kapsam ekleri, kurumlar, şubeler, çağrı kategorileri | Elle | `data/seed/catalog.json` | ✅ | V2 |
 | 2 | Kurum duyuruları (20) | Elle | `data/seed/announcements.json` | ✅ | V2 |
 | 3 | Demo kullanıcıları | Elle | `catalog.json` → `users.ts` | ✅ (veri) · 🔧 (`users.ts`) | V2, A6 |
-| 4 | Kesin senaryo kayıtları (SOL-031, D'nin 5 ve E'nin 3 benzer talebi) | Elle tanımlı, betik yazar | Üretim rehberi §7–8 | 🔧 | V6 |
+| 4 | Kesin senaryo metinleri (SOL-031, D'nin 5 ve E'nin 3 benzer talebi, C'nin 5 çağrı notu) | Elle | `data/seed/fixed_texts.json` | ✅ | V4, V6 |
 | 5 | Değerlendirme seti (30 vaka) | Betik taslağı + elle gözden geçirme | `data/seed/eval_cases.json` | 🔧 | V6 |
 | 6 | İşlem logları (~10.000) | Betik | `tools/generate_banking_logs.py` | ✅ | V3 |
 | 7 | Senaryo log kayıtları (+415) | Betik | `tools/mercek_data/inject_log_scenarios.py` | ✅ | V3 |
-| 8 | Doğal dil metinleri (~600) | Betik + Foundry | `tools/mercek_data/generate_texts.py` | 🔧 | V4 |
+| 8 | Doğal dil metinleri (~620) | Betik + Foundry | `tools/mercek_data/generate_texts.py`, `prompts/gen-*.md` | ✅ betik · şablon çıktısı hazır; Foundry çıktısı 🔧 | V4 |
 | 9 | Müşteri ve kredi portföyü (40.000 / 33.000) | Betik | `tools/mercek_data/generate_portfolio.py` | 🔧 | V5 |
 | 10 | Çağrılar ve çözümler (~1.400 / ~40) | Betik | `tools/mercek_data/generate_incidents.py` | 🔧 | V6 |
 | 11 | Geçmiş talepler (~100) | Betik | `tools/mercek_data/generate_requests.py` | 🔧 | V6 |
@@ -61,9 +61,10 @@ Elle yazılan veri, demodaki cevapların doğrudan dayandığı kesin bilgidir. 
 
 Veri `catalog.json → demo_users`'ta hazır. Uygulamaya eklenmesi A6-ek prompt'uyla `frontend/src/lib/auth/users.ts` içine yapılır. Ayşe (u-2) ve Mehmet (u-3) rebuild rehberinden gelir.
 
-### 1.4 Kesin senaryo kayıtları 🔧
+### 1.4 Kesin senaryo metinleri (`data/seed/fixed_texts.json`) ✅
 
-Değerleri üretim rehberinde elle tanımlıdır, betikler (V6) bunları aynen yazar:
+Senaryonun kesin parçaları modele bırakılmaz; metinleri elle yazılmıştır. Betikler (V4 ve V6) bunları aynen kullanır:
+- **C'nin 5 çağrı notu** ("abone numarası kabul edilmiyor"): V4 bunları şablonla 15'e çoğaltır
 - **SOL-031** (kurum entegrasyonu zaman aşımı çözümü, B'nin %93 eşleştiği kayıt): §7
 - **D'nin 5 benzer talebi** (TLP-0871, 0915, 0962, 1004, 1019) servis payları ve kararlarıyla: §8
 - **E'nin 3 benzer talebi** (TLP-0588, 0712, 0846): §8
@@ -132,11 +133,38 @@ python3 tools/mercek_data/inject_log_scenarios.py --demo-window-now 2026-10-17T1
 
 **Testler:** `python3 -m pytest tools/mercek_data/tests -q` (9 test: belirlenimcilik, hacim ve sıra, seviye dağılımı, iş kuralı tutarlılığı, IBAN, Türkçe tutar biçimi, C rakamları, enjeksiyon dışı abone hatası olmaması, Mehmet, demo penceresi).
 
-### 2.3 Hackathonda yazılacak betikler 🔧
+### 2.3 `tools/mercek_data/generate_texts.py` ✅ (V4)
+
+**Ne yapar:** Çağrı notları, çözüm kayıtları ve geçmiş talep metinlerini üretir; değerlendirme seti için taslak çıkarır. Arama (AI Search) bu metinlerle çalıştığı için çeşitli olmaları gerekir.
+
+**İki mod:**
+- **Foundry (varsayılan):** `prompts/gen-cagri-notu.md`, `gen-cozum.md`, `gen-talep.md` prompt'larıyla Foundry'deki `chat` modeline 20'şerli partilerle istek atar (sıcaklık 0,8, JSON çıktı). Yalnızca standart kütüphane kullanır. Anahtar `AZURE_OPENAI_API_KEY`'den, yoksa `azure-identity` ile Entra token'ından gelir. 429 ve 5xx hatalarında 3 kez tekrar dener.
+- **Şablon (`--template`):** İnternet ve Azure gerektirmez; ifade bankalarından deterministik metin üretir. Foundry hazır değilken V5–V6'nın beklememesi ve testler için. Gerçek metinler Foundry hazır olunca `--force` ile üzerine yazılır.
+
+**Nasıl çalışır:**
+1. Plan: katalogdaki 30 çağrı alt kategorisi (her birine 15 not; D'nin üç ve E'nin bir alt kategorisine 30), 9 hata kodu (toplam 36 çözüm; SOL-031 elle) ve 87 talep (modül × ekran × tip dağılımıyla).
+2. Her partiyi filtreler: yasak konular (çözümlerde abone numarası ve hane; taleplerde hatırlatma ve erteleme), kişisel veri desenleri (10+ haneli rakam, `@`, `+90`, IBAN), tekrar ve %80'den fazla kelime örtüşmesi. Atılan oran %20'yi geçerse partiyi bir kez daha ister.
+3. C'nin "abone numarası kabul edilmiyor" notları `fixed_texts.json`'daki 5 elle yazılmış nottan başlar; kalan 10'u şablonla tamamlanır (modele bırakılmaz).
+4. Sonucu `data/seed/texts.json`'a yazar (commit'lenir). Tekrar çalıştırmada hazır olan konuları atlar; aynı metinler için tekrar ödeme yapılmaz.
+
+**Girdi:** `catalog.json`, `fixed_texts.json`, `prompts/gen-*.md`. **Çıktı:** `data/seed/texts.json`.
+
+**Komut:**
+```bash
+python3 tools/mercek_data/generate_texts.py --dry-run          # plan ve mevcut durum
+python3 tools/mercek_data/generate_texts.py --template --force # çevrimdışı (hazır çıktı bu modda)
+export AZURE_OPENAI_ENDPOINT=<…> AZURE_OPENAI_API_KEY=<…> CHAT_DEPLOYMENT=chat
+python3 tools/mercek_data/generate_texts.py --force            # Foundry ile gerçek metinler
+```
+
+**Ölçülen sonuç (şablon modu):** 465 çağrı notu · 36 çözüm (+ SOL-031) · 87 talep (+ 8 elle) · 30 değerlendirme taslağı; yasak konu ve kişisel veri 0.
+
+**Testler:** 7 test (hacimler, elle yazılmış notların korunması, yasak konu ve kişisel veri yokluğu, belirlenimcilik, filtre, sahte Foundry istemcisiyle parti/filtre/devam etme akışı, prompt yükleyici).
+
+### 2.4 Hackathonda yazılacak betikler 🔧
 
 | Betik | Ne yapar | Girdi → çıktı | Prompt |
 |---|---|---|---|
-| `generate_texts.py` | Foundry `chat` modeline 20'şerli partilerle çağrı notu, çözüm ve talep metni ürettirir; yasak kelime ve kişisel veri desenlerini eler | `catalog.json` → `data/seed/texts.json` | V4 |
 | `generate_portfolio.py` | 40.000 müşteri, 33.000 kredi; D'nin hedef grubu (2.340, izin kesişimi) ve E'nin bölgesi (4.870 / 6.215 / 612 / 37) kesin; etkilenen 3 ili seçip katalogda işaretler | `catalog.json` → `customers.csv`, `loans.csv` | V5 |
 | `generate_incidents.py` | ~1.400 çağrı (son 90 gün, CAG-0001…CAG-2050) ve ~40 çözüm; B, C, D, E çağrıları kesin | `catalog.json`, `texts.json` → `incidents.csv`, `solutions.csv` | V6 |
 | `generate_requests.py` | ~100 geçmiş talep; D ve E'nin benzer talepleri kesin; `--eval` ile 30 vakalık değerlendirme seti | `catalog.json`, `texts.json` → `requests.csv`, `eval_cases.json` | V6 |
@@ -193,7 +221,7 @@ Bu veriler demo sırasında uygulama çalışırken oluşur. Böylece "anlık lo
 V2  data/seed/*.json                    ✅ hazır; takım reposuna kopyala, V2 prompt'uyla dosya yollarını doğrula
 V3  generate_banking_logs.py            ✅
     inject_log_scenarios.py             ✅  → tools/output/mercek-logs.ndjson
-V4  generate_texts.py                   🔧  (Foundry deploy'u hazır olunca)
+V4  generate_texts.py                   ✅  şablon çıktısı hazır; Foundry hazır olunca --force ile gerçek metinler
 V5  generate_portfolio.py               🔧
 V6  generate_incidents.py               🔧
     generate_requests.py [--eval]       🔧

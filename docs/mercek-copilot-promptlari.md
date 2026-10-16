@@ -309,17 +309,18 @@ Betiklerin mantığını değiştirme.
 
 ### V4 — Foundry metinleri · 🟢 Ucuz · Edit
 
-```
-Görev V4: tools/mercek_data/generate_texts.py. Bağlam: #file:backend/app/clients/llm.py
-Prompt metinleri: docs/mercek-sentetik-veri-uretimi.md §9 — önce §9.1–9.3'ü prompts/gen-cagri-notu.md,
-gen-cozum.md, gen-talep.md olarak kaydet.
+*Betik ve prompt'lar hazırdır: `tools/mercek_data/generate_texts.py`, `prompts/gen-cagri-notu.md`, `gen-cozum.md`, `gen-talep.md`, `data/seed/fixed_texts.json` ve şablon modunda üretilmiş `data/seed/texts.json` takım reposuna kopyalanır. Açıklama: `docs/mercek-sentetik-veri-kaynaklari.md` §2.3.*
 
-- LLMClient.chat_json kullan; temperature 0.8 (bu betik için parametre), 20'şerli partiler, JSON şemalı çıktı.
-- Çağırma planı §9.1'deki gibi; kategori/alt kategori listesi catalog.json ve §6'dan.
-- Kontroller: yasak kelimeler (hatırlatma, erteleme, abone numarası uzunluğu — ilgili prompt'lara göre),
-  10+ haneli rakam dizisi, @, +90, tekrar. Atılan > %20 ise parti yeniden üretilir.
-- Sonuç data/seed/texts.json (tekrar çalıştırmada hazır olanları atla).
-- Anahtar/endpoint koda yazılmaz.
+```
+Görev V4: Foundry ile gerçek metinleri üret. Bağlam: #file:tools/mercek_data/generate_texts.py
+1. python3 tools/mercek_data/generate_texts.py --dry-run ile planı kontrol et.
+2. Ortam değişkenleri (AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY veya Managed Identity, CHAT_DEPLOYMENT=chat)
+   tanımlıyken --force ile çalıştır. Anahtarı dosyaya veya koda yazma.
+3. Çıktı özetini kontrol et (çağrı notu ≥ 450, çözüm 36, talep 87, taslak 30) ve rastgele 10 metni oku.
+   Yasak konu veya kişisel veri görürsen ilgili prompt'a kural ekleyip yalnızca o konuyu yeniden üret
+   (texts.json'dan o anahtarı silip --force olmadan çalıştırmak yeterli).
+4. python3 -m pytest tools/mercek_data/tests -q yeşil olmalı. texts.json'u commit'le.
+Foundry hazır değilse hazır şablon çıktısıyla V5–V6'ya devam et.
 ```
 
 ### V5 — Portföy · 🟡 Orta · Agent

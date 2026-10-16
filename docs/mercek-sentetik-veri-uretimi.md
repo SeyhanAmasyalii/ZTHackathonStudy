@@ -375,6 +375,8 @@ Mercek model eğitmez (hazır model + arama + kurallar), bu yüzden klasik eğit
 
 ## 9. Foundry ile doğal dil metinleri (`generate_texts.py`)
 
+> Betik ve prompt dosyaları hazır: `tools/mercek_data/generate_texts.py`, `prompts/gen-*.md`; elle yazılan kesin metinler `data/seed/fixed_texts.json`. Ayrıntı: `mercek-sentetik-veri-kaynaklari.md` §2.3. Aşağıdaki prompt metinleri dosyalardakinin özetidir.
+
 **Ayarlar:**
 - Foundry'deki `chat` deploy'u, temperature 0.8, JSON şemalı çıktı, 20'şerli partiler.
 - Sonuç `data/seed/texts.json`'a yazılır ve commit'lenir; tekrar üretilmez.
